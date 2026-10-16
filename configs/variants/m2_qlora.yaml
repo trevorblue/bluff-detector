@@ -1,0 +1,6 @@
+inherits: ../base.yaml
+variant:
+  id: m2_qlora
+  description: M2 - base model + QLoRA adapter trained on the disjoint Kenyan fine-tuning corpus
+model:
+  adapter: artefacts/adapters/m2_qlora

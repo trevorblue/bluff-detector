@@ -1,0 +1,26 @@
+# CT (continuous training): retrain on demand, register only what passes the gates.
+# Real variants need a GPU, so this targets a self-hosted runner labelled `gpu`.
+# Manual trigger only until that runner exists; add a `schedule:` block after.
+name: train-and-validate
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "config under configs/variants/"
+        default: m0_base
+jobs:
+  train:
+    runs-on: [self-hosted, gpu]
+    env:
+      CONFIG: configs/variants/${{ inputs.variant }}.yaml
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --require-hashes -r requirements.lock && pip install -e ".[llm,data,track]"
+      - run: dvc pull || echo "no DVC remote configured yet"
+      - run: bluff validate --config "$CONFIG"
+      - run: pytest -q tests/data
+      - run: bluff all --config "$CONFIG"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ inputs.variant }}
+          path: reports/${{ inputs.variant }}

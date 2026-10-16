@@ -1,0 +1,27 @@
+# `docker compose up --build` serves the API.
+# `docker compose --profile tracking up` also starts an MLflow tracking server on :5000.
+services:
+  api:
+    build: .
+    image: bluff-detector:local
+    ports: ["8000:8000"]
+    environment:
+      BLUFF_CONFIG: ${BLUFF_CONFIG:-configs/variants/dev_fake.yaml}
+    read_only: true
+    tmpfs: [/tmp]
+    deploy:
+      resources:
+        limits: { cpus: "2", memory: 2g }
+
+  mlflow:
+    profiles: [tracking]
+    image: ghcr.io/mlflow/mlflow:v2.14.1
+    command: >
+      mlflow server --host 0.0.0.0 --port 5000
+      --backend-store-uri sqlite:///mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+    ports: ["5000:5000"]
+    volumes: [mlflow:/mlflow]
+
+volumes:
+  mlflow: {}

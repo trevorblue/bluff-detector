@@ -1,0 +1,4 @@
+inherits: ../base.yaml
+variant:
+  id: m0_base
+  description: M0 - the base model as shipped

@@ -1,0 +1,16 @@
+# Runs the whole pipeline on synthetic data with a fake LLM. No GPU, no downloads.
+# Used by CI, the tests and the Docker smoke test. Numbers from this run mean nothing.
+inherits: ../base.yaml
+variant:
+  id: dev_fake
+  description: test double - synthetic questions, fake backend
+data:
+  source: synthetic
+model:
+  backend: fake
+  name: fake-llm
+  layers: [-2, -1]
+detectors:
+  probe_layer: -1
+evaluation:
+  bootstrap: 200

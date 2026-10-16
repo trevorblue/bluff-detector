@@ -1,0 +1,12 @@
+.git
+.venv
+.github
+data
+reports
+tests
+**/__pycache__
+**/*.pyc
+.env
+artefacts/registry
+artefacts/adapters
+mlruns

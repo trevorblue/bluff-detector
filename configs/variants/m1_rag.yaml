@@ -1,0 +1,7 @@
+inherits: ../base.yaml
+variant:
+  id: m1_rag
+  description: M1 - base model + BM25 retrieval over the Kenyan corpus
+retrieval:
+  enabled: true
+  top_k: 3

@@ -1,0 +1,85 @@
+# Base configuration. Variants inherit from this file and override only what changes.
+# A run is a function of five inputs: code (git SHA), data (sha256), this config,
+# the environment (requirements.lock) and the seed. All five are recorded per run.
+
+project: bluff-detector
+seed: 42
+
+paths:
+  data_dir: data
+  artefacts_dir: artefacts
+  reports_dir: reports
+
+data:
+  # synthetic = generated test data (CI, smoke tests) | hf = TriviaQA + TruthfulQA from the Hub
+  source: hf
+  kenya_questions: data/kenya/questions.jsonl
+  trivia_sample: 5000
+  truthfulqa: true
+  synthetic_trivia: 400
+  synthetic_kenya: 120
+  synthetic_unanswerable: 40
+  # Kenya and unanswerable pools are test-only (out of distribution).
+  split: { train: 0.7, val: 0.15, test: 0.15 }
+  retrieval_corpus: data/corpus/retrieval_chunks.jsonl
+  finetune_corpus: data/corpus/finetune_docs.jsonl
+
+model:
+  backend: hf # hf | fake
+  name: Qwen/Qwen2.5-1.5B-Instruct
+  adapter: null # path to a PEFT/QLoRA adapter (variants M2, M3)
+  dtype: bfloat16
+  device: auto
+  max_new_tokens: 32
+  # Layers to save hidden states from (negative = counted from the top). Pre-register these.
+  layers: [-8, -4]
+  # Token positions to save: last answer token and the mean over answer tokens.
+  positions: [last_answer, mean_answer]
+  # Fake backend only (test double): see bluff/backends.py
+  fake_hidden_dim: 64
+  fake_abstain_scale: 1.0
+
+generation:
+  conditions: [open, offered]
+  offered_templates: 3
+  limit: null # cap the number of questions for quick runs
+
+retrieval:
+  enabled: false
+  top_k: 3
+
+labelling:
+  judge: none # none | llm (not implemented yet; see bluff/pipeline/label.py)
+  review_sample: 50 # rows written for manual adjudication
+
+detectors:
+  train: [logreg, xgboost, probe_linear, probe_mlp]
+  serve: probe_linear
+  probe_layer: -8 # must be one of model.layers
+  probe_position: last_answer # must be one of model.positions
+
+decision:
+  # Abstain when P(wrong) > c_abstain / (c_abstain + c_wrong). Requires calibrated scores.
+  cost_confident_wrong: 3.0
+  cost_needless_abstain: 1.0
+
+evaluation:
+  bootstrap: 2000 # 10000 for the final report
+  probe_flag_fpr: 0.10 # "probe says uncertain" threshold, fixed on val at this false-flag rate
+  coverages: [0.7, 0.8, 0.9]
+
+gates:
+  # A challenger is registered only if it clears every gate against the champion.
+  min_auroc_gain: 0.0
+  max_ece_increase: 0.0
+  max_gap_between_pools: 0.25
+
+tracking:
+  mlflow: false # true once `pip install .[track]` and an MLflow server are running
+  tracking_uri: http://localhost:5000
+  experiment: bluff-detector
+  registered_model: bluff-detector
+
+variant:
+  id: base
+  description: base config (do not run directly)

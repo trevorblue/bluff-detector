@@ -1,0 +1,36 @@
+Metadata-Version: 2.4
+Name: bluff-detector
+Version: 0.1.0
+Summary: Do language models know they don't know Kenya? Hallucination detection, abstention and the verbalisation gap, served as a system.
+Author: Trevor Anjeyo Vuhyah
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.26
+Requires-Dist: pandas>=2.1
+Requires-Dist: pyarrow>=15
+Requires-Dist: scipy>=1.11
+Requires-Dist: scikit-learn>=1.4
+Requires-Dist: xgboost-cpu>=2.1
+Requires-Dist: joblib>=1.3
+Requires-Dist: pyyaml>=6
+Requires-Dist: pydantic>=2.6
+Requires-Dist: rank-bm25>=0.2.2
+Requires-Dist: fastapi>=0.110
+Requires-Dist: uvicorn>=0.29
+Provides-Extra: llm
+Requires-Dist: torch>=2.2; extra == "llm"
+Requires-Dist: transformers>=4.44; extra == "llm"
+Requires-Dist: accelerate>=0.33; extra == "llm"
+Provides-Extra: qlora
+Requires-Dist: peft>=0.12; extra == "qlora"
+Requires-Dist: bitsandbytes>=0.43; extra == "qlora"
+Requires-Dist: datasets>=2.20; extra == "qlora"
+Provides-Extra: data
+Requires-Dist: datasets>=2.20; extra == "data"
+Provides-Extra: track
+Requires-Dist: mlflow>=2.14; extra == "track"
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+Requires-Dist: httpx>=0.27; extra == "dev"
+Requires-Dist: ruff>=0.5; extra == "dev"

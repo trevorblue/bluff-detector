@@ -1,0 +1,34 @@
+# CI: runs on every pull request and push to main. This is the merge gate.
+name: ci
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install (locked, hashed)
+        run: |
+          pip install --require-hashes -r requirements.lock
+          pip install --no-deps -e .
+          pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check .
+      - name: Data contract on the Kenya question set
+        run: bluff validate --config configs/variants/m0_base.yaml
+      - name: Unit, data, integration and API tests
+        run: pytest -q
+      - name: Train the CI detector (fake backend, synthetic data)
+        run: bluff all --config configs/variants/dev_fake.yaml
+      - name: Build image
+        run: docker build -t bluff-detector:ci .
+      - name: Smoke test the container
+        run: ./scripts/smoke.sh bluff-detector:ci

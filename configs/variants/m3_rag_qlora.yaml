@@ -1,0 +1,9 @@
+inherits: ../base.yaml
+variant:
+  id: m3_rag_qlora
+  description: M3 - QLoRA adapter + retrieval
+model:
+  adapter: artefacts/adapters/m2_qlora
+retrieval:
+  enabled: true
+  top_k: 3

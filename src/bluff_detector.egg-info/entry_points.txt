@@ -1,0 +1,2 @@
+[console_scripts]
+bluff = bluff.cli:main

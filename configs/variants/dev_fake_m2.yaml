@@ -1,0 +1,7 @@
+# Simulates "fine-tuning reduced abstention" so the compare stage has something to show.
+inherits: dev_fake.yaml
+variant:
+  id: dev_fake_m2
+  description: test double - fake backend with abstention suppressed
+model:
+  fake_abstain_scale: 0.3

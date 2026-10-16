@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bluff-detector"
+version = "0.1.0"
+description = "Do language models know they don't know Kenya? Hallucination detection, abstention and the verbalisation gap, served as a system."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Trevor Anjeyo Vuhyah" }]
+license = { text = "MIT" }
+# Core = everything the pipeline (fake backend) and the API need. Kept light so CI is fast.
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.1",
+  "pyarrow>=15",
+  "scipy>=1.11",
+  "scikit-learn>=1.4",
+  "xgboost-cpu>=2.1",
+  "joblib>=1.3",
+  "pyyaml>=6",
+  "pydantic>=2.6",
+  "rank-bm25>=0.2.2",
+  "fastapi>=0.110",
+  "uvicorn>=0.29",
+]
+
+[project.optional-dependencies]
+# A real open LLM (hidden states need open weights).
+llm = ["torch>=2.2", "transformers>=4.44", "accelerate>=0.33"]
+# QLoRA fine-tuning for variant M2 (needs a CUDA GPU).
+qlora = ["peft>=0.12", "bitsandbytes>=0.43", "datasets>=2.20"]
+# Downloading TriviaQA / TruthfulQA from the Hugging Face Hub.
+data = ["datasets>=2.20"]
+# Experiment tracking and the model registry.
+track = ["mlflow>=2.14"]
+dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.5"]
+
+[project.scripts]
+bluff = "bluff.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["data", "artefacts", "reports"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = ["integration: end-to-end pipeline tests (slower)"]

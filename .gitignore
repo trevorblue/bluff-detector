@@ -1,0 +1,19 @@
+# environments
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+.ruff_cache/
+
+# generated data and models (tracked with DVC, not git)
+data/raw/*
+data/interim/*
+data/processed/*
+!data/**/.gitkeep
+artefacts/*
+!artefacts/.gitkeep
+reports/*
+!reports/.gitkeep
+mlruns/
+mlflow.db
