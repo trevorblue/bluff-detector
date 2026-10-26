@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "Bluff Detector: Do Language Models Know They Don't Know Kenya?"
+abstract: >-
+  Hidden-state probes that detect when a small open language model is bluffing,
+  measure the gap between what it internally registers and what it says
+  (the verbalisation gap), and test whether fine-tuning breaks saying or knowing,
+  on a natively authored Kenyan question set. Served as an answer-or-abstain
+  FastAPI system with tracking, a model registry and CI/CD.
+type: software
+authors:
+  - given-names: Trevor Anjeyo
+    family-names: Vuhyah
+version: 0.1.0
+date-released: 2026-10-26
+license: MIT
+repository-code: "https://github.com/trevorblue/bluff-detector"
+keywords:
+  - hallucination detection
+  - uncertainty quantification
+  - probing
+  - abstention
+  - selective prediction
+  - QLoRA
+  - retrieval-augmented generation
+  - MLOps
+  - Kenya

@@ -6,6 +6,7 @@ Required by the DSA 8401 capstone brief. Edit this as the project evolves.
 |---|---|---|---|
 | Oct 2026 | Claude (Anthropic) | Brainstorming project ideas; literature search on hallucination probes and abstention; drafting the proposal | Chose the project and its framing; rewrote the proposal in my own words |
 | Oct 2026 | Claude (Anthropic) | Generating the initial repository scaffold: pipeline stages, detectors, metrics, API, Docker, CI and tests | Reviewed, ran and modified the code; I am responsible for every decision it encodes |
+| Oct 2026 | Claude (Anthropic) | Publishing the repository: README rewrite, banner and diagram SVGs, LICENSE, CITATION.cff; pinning the Trivy action in CD by commit SHA | Asked for the repository to be published; I am responsible for its content |
 
 Not AI-generated:
 

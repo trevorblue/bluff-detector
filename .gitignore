@@ -17,3 +17,10 @@ reports/*
 !reports/.gitkeep
 mlruns/
 mlflow.db
+
+# packaging and OS noise
+*.egg-info/
+build/
+dist/
+.DS_Store
+Thumbs.db

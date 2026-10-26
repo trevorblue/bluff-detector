@@ -1,0 +1,7 @@
+# LF everywhere, so shell scripts and the lock file behave the same on Windows, CI and Docker.
+* text=auto eol=lf
+*.sh text eol=lf
+*.svg text eol=lf
+*.pdf binary
+*.png binary
+requirements.lock linguist-generated=true

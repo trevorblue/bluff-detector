@@ -20,7 +20,8 @@ jobs:
       - run: bluff all --config configs/variants/dev_fake.yaml
       - run: docker build -t "$IMAGE" .
       - name: Vulnerability scan (fails on CRITICAL)
-        uses: aquasecurity/trivy-action@0.24.0
+        # Pinned by commit SHA: this action's tags were rewritten in a 2026 supply-chain attack.
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ env.IMAGE }}
           severity: CRITICAL

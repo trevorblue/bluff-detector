@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" width="1000" height="640" role="img" aria-labelledby="t d">
+  <title id="t">Knowing versus saying: the four cells</title>
+  <desc id="d">Each answer is placed by two signals: whether the hidden-state probe flags it as uncertain, and whether the model takes the offered "I don't know" option. Probe uncertain and abstains: honest uncertainty. Probe uncertain but answers: silent knowing, the bluff. Probe confident but abstains: abstention inflation. Probe confident and answers: earned confidence. The verbalisation gap is internal detection minus expressed detection.</desc>
+  <defs>
+    <style>
+      .sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    </style>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#FFFFFF" fill-opacity="0.045"/>
+    </pattern>
+    <radialGradient id="glowRed" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#F85149" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#F85149" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="frame"><rect width="1000" height="640" rx="18"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="1000" height="640" fill="#0A0E14"/>
+    <rect width="1000" height="640" fill="url(#dots)"/>
+    <ellipse cx="788" cy="274" rx="260" ry="150" fill="url(#glowRed)"/>
+
+    <!-- header -->
+    <text x="56" y="62" class="mono" font-size="12" letter-spacing="2.2" fill="#8B98A8">KNOWING × SAYING</text>
+    <text x="56" y="98" class="sans" font-size="27" font-weight="700" letter-spacing="-0.5" fill="#E6EDF3">Every answer lands in one of four cells</text>
+    <text x="56" y="126" class="sans" font-size="15" fill="#8B98A8">Cross what the probe reads in the hidden states with what the model does when it is offered “I don’t know”.</text>
+
+    <!-- axis labels -->
+    <text x="56" y="160" class="mono" font-size="11" letter-spacing="1.8" fill="#5B6878">WHAT IT KNOWS ↓</text>
+    <text x="292" y="160" class="mono" font-size="11" letter-spacing="1.8" fill="#5B6878">WHAT IT SAYS →</text>
+    <text x="452" y="183" text-anchor="middle" class="sans" font-size="15" font-weight="600" fill="#C9D1D9">Takes the “I don’t know” option</text>
+    <text x="788" y="183" text-anchor="middle" class="sans" font-size="15" font-weight="600" fill="#C9D1D9">Answers anyway</text>
+
+    <text x="56" y="266" class="sans" font-size="17" font-weight="600" fill="#E6EDF3">Probe flags</text>
+    <text x="56" y="289" class="sans" font-size="17" font-weight="600" fill="#E6EDF3">uncertain</text>
+    <text x="56" y="313" class="mono" font-size="12" fill="#5B6878">score &gt; τ</text>
+
+    <text x="56" y="434" class="sans" font-size="17" font-weight="600" fill="#E6EDF3">Probe reads</text>
+    <text x="56" y="457" class="sans" font-size="17" font-weight="600" fill="#E6EDF3">confident</text>
+    <text x="56" y="481" class="mono" font-size="12" fill="#5B6878">score ≤ τ</text>
+
+    <!-- honest uncertainty -->
+    <rect x="292" y="196" width="320" height="156" rx="12" fill="#3FB950" fill-opacity="0.07" stroke="#3FB950" stroke-opacity="0.35"/>
+    <text x="316" y="230" class="mono" font-size="11.5" fill="#3FB950">honest_uncertainty</text>
+    <text x="316" y="261" class="sans" font-size="21" font-weight="700" fill="#E6EDF3">Honest uncertainty</text>
+    <text x="316" y="292" class="sans" font-size="14.5" fill="#8B98A8">Doubts inside, and says so.</text>
+    <text x="316" y="316" class="sans" font-size="14.5" fill="#8B98A8">What we want on hard questions.</text>
+
+    <!-- silent knowing: the bluff -->
+    <rect x="628" y="196" width="320" height="156" rx="12" fill="#F85149" fill-opacity="0.13" stroke="#F85149" stroke-width="1.5"/>
+    <rect x="832" y="214" width="96" height="24" rx="12" fill="#F85149" fill-opacity="0.18" stroke="#F85149" stroke-opacity="0.7"/>
+    <text x="880" y="230" text-anchor="middle" class="mono" font-size="10.5" font-weight="700" letter-spacing="1.4" fill="#F85149">THE BLUFF</text>
+    <text x="652" y="230" class="mono" font-size="11.5" fill="#F85149">silent_knowing</text>
+    <text x="652" y="261" class="sans" font-size="21" font-weight="700" fill="#E6EDF3">Silent knowing</text>
+    <text x="652" y="292" class="sans" font-size="14.5" fill="#C9D1D9">Doubts inside, yet answers fluently.</text>
+    <text x="652" y="316" class="sans" font-size="14.5" fill="#C9D1D9">H1: common. H3: fine-tuning grows it.</text>
+
+    <!-- abstention inflation -->
+    <rect x="292" y="364" width="320" height="156" rx="12" fill="#E3B341" fill-opacity="0.06" stroke="#E3B341" stroke-opacity="0.32"/>
+    <text x="316" y="398" class="mono" font-size="11.5" fill="#E3B341">abstention_inflation</text>
+    <text x="316" y="429" class="sans" font-size="21" font-weight="700" fill="#E6EDF3">Abstention inflation</text>
+    <text x="316" y="460" class="sans" font-size="14.5" fill="#8B98A8">Confident inside, refuses anyway.</text>
+    <text x="316" y="484" class="sans" font-size="14.5" fill="#8B98A8">Often could have answered correctly.</text>
+
+    <!-- earned confidence -->
+    <rect x="628" y="364" width="320" height="156" rx="12" fill="#79C0FF" fill-opacity="0.06" stroke="#79C0FF" stroke-opacity="0.32"/>
+    <text x="652" y="398" class="mono" font-size="11.5" fill="#79C0FF">earned_confidence</text>
+    <text x="652" y="429" class="sans" font-size="21" font-weight="700" fill="#E6EDF3">Earned confidence</text>
+    <text x="652" y="460" class="sans" font-size="14.5" fill="#8B98A8">Confident inside, and answers.</text>
+    <text x="652" y="484" class="sans" font-size="14.5" fill="#8B98A8">Right, or a blind spot shared by both.</text>
+
+    <!-- the headline metric -->
+    <line x1="56" x2="948" y1="550" y2="550" stroke="#1F2935"/>
+    <text x="56" y="584" class="mono" font-size="16">
+      <tspan fill="#E6EDF3" font-weight="700">verbalisation gap</tspan><tspan fill="#5B6878">  =  </tspan><tspan fill="#79C0FF">internal detection</tspan><tspan fill="#5B6878">  −  </tspan><tspan fill="#E3B341">expressed detection</tspan>
+    </text>
+    <text x="56" y="610" class="sans" font-size="14.5" fill="#8B98A8">Both are AUROCs for predicting a wrong answer. Above zero, the model knows more than it says.</text>
+  </g>
+</svg>
