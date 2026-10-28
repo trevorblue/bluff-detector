@@ -1,3 +1,7 @@
+"""Shared test setup. fake_config() points a dev_fake config at a temporary folder; the
+`trained` fixture runs the whole fake pipeline once, for the integration and API tests.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -1,4 +1,9 @@
-"""Config loading with single inheritance, plus the paths every stage reads and writes."""
+"""Config loading with single inheritance, plus the paths every stage reads and writes.
+
+CRISP-DM: shared by every phase.
+Used by: every pipeline stage, the API and the tests. paths() is the one place that decides
+where each stage's files live.
+"""
 
 from __future__ import annotations
 

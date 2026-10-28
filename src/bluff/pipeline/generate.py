@@ -2,6 +2,12 @@
 
 open    : 1 generation per question; hidden states saved (these feed the probes)
 offered : `offered_templates` generations per question; only the answer text is needed
+
+CRISP-DM: data preparation. The detectors' training data does not exist until the model
+runs; this stage creates it. The only stage that needs a GPU for a real model.
+In the pipeline: audit -> [generate] -> label
+Reads:  data/processed/questions.jsonl (+ the retrieval corpus for M1 and M3)
+Writes: data/interim/<variant>/generations.jsonl, data/interim/<variant>/hidden.npz
 """
 
 from __future__ import annotations

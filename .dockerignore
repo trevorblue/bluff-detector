@@ -1,3 +1,5 @@
+# Kept out of the Docker image: git history, environments, data, tests and caches.
+# Only the code, the configs and the trained detector go in.
 .git
 .venv
 .github

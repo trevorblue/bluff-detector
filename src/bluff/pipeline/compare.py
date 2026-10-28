@@ -3,6 +3,12 @@
 H3 (fine-tuning breaks saying, not knowing) predicts, from base (A) to fine-tuned (B):
     expressed detection falls, internal detection holds, so the verbalisation gap grows.
 Paired bootstrap on the same question rows; exact McNemar for the change in abstention.
+
+CRISP-DM: evaluation.
+Not part of `bluff all`: run `bluff compare --config A.yaml --other B.yaml` once both
+variants have been evaluated.
+Reads:  reports/<A>/scores.parquet, reports/<B>/scores.parquet
+Writes: reports/compare/<A>__vs__<B>.json
 """
 
 from __future__ import annotations

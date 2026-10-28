@@ -2,6 +2,9 @@
 
 If the fine-tuning corpus or the retrieval index contains the evaluation questions, every
 result is invalid. This check runs as a data contract.
+
+CRISP-DM: data preparation (a quality check).
+Used by: pipeline/audit.py.
 """
 
 from __future__ import annotations

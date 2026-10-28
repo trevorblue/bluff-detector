@@ -22,6 +22,9 @@
   <a href="#the-pipeline">Pipeline</a> ·
   <a href="#built-as-a-system">Engineering</a> ·
   <a href="#roadmap">Roadmap</a>
+  <br>
+  <b><a href="docs/architecture.md">Architecture guide</a></b> ·
+  <b><a href="docs/plan.md">Three-week plan</a></b>
 </p>
 
 <p align="center"><sub>DSA 8401 Applied Machine Learning · capstone · Trevor Anjeyo Vuhyah</sub></p>
@@ -120,8 +123,8 @@ audit format. That is what makes the comparison fair, and it makes the MLOps par
 |---|---|---|
 | Logistic regression | summary uncertainty features | ✅ |
 | XGBoost | same, tabular | ✅ |
-| **Linear probe** | hidden state at a pre-registered layer | ✅ served |
-| MLP probe | same, non-linear | ✅ |
+| **Linear probe** (logistic regression) | hidden state at a pre-registered layer | ✅ served |
+| MLP probe (small neural net) | same, non-linear | ✅ |
 | LSTM | per-token entropy sequence | planned |
 | Semantic entropy | 5–10 samples clustered by meaning | offline reference |
 
@@ -129,9 +132,30 @@ audit format. That is what makes the comparison fair, and it makes the MLOps par
 </tr>
 </table>
 
+The detectors are **standard supervised ML models** (scikit-learn and XGBoost) trained on signals
+recorded from the language model. The language model itself is what they study, not what they
+train.
+
 The four data pools (evaluation QA, unanswerable Kenya items, retrieval corpus, fine-tuning corpus)
 are **strictly separated**, held apart by document rather than by chunk. `bluff audit` checks n-gram
 overlap between them and fails the run on any leak. See [data/README.md](data/README.md).
+
+### Method: CRISP-DM
+
+The project follows the six CRISP-DM phases. Every pipeline stage and every file belongs to one,
+and each file names its phase in its opening lines.
+
+| Phase | In this project | Where |
+|---|---|---|
+| Business understanding | The question, five hypotheses, the cost matrix, the promotion gates | [proposal](docs/proposal.md), `configs/base.yaml` |
+| Data understanding | Data rules, trial questions, label-noise checks | `validate`, `data/README.md` |
+| Data preparation | Splits, leakage audit, running the model to create the dataset, labels, features | `ingest` → `audit` → `generate` → `label` → `featurize` |
+| Modeling | Logistic regression, XGBoost, linear and MLP probes; the RAG and QLoRA variants | `train`, `detectors.py` |
+| Evaluation | AUROC, calibration, the four cells, the verbalisation gap, paired tests | `evaluate`, `compare`, `metrics.py` |
+| Deployment | Registry, the gated API, Docker, CI/CD | `register`, `app/`, `.github/workflows/` |
+
+New to the code? The [architecture guide](docs/architecture.md) follows one question through every
+stage and explains what each file does.
 
 ## Quick start
 
@@ -320,6 +344,8 @@ dvc.yaml            the pipeline as DVC stages, for content-hashed data versioni
 
 ## Roadmap
 
+Dates, owners and scope cuts are in the [three-week plan](docs/plan.md).
+
 - [x] Scaffold: pipeline, detectors, metrics, API, Docker, CI, tests
 - [ ] Novelty check against recent work on probes and abstention
 - [ ] Kenya question set: 300–500 verified items + ~100 unanswerable, second-person review
@@ -344,6 +370,8 @@ dvc.yaml            the pipeline as DVC stages, for content-hashed data versioni
 
 ## Further reading
 
+- [Architecture guide](docs/architecture.md): how the system works, one question at a time, and what every file is
+- [Three-week plan](docs/plan.md): the build schedule by CRISP-DM phase, with who does what
 - [Research proposal](docs/proposal.md): the full design, including prior work, serving and phasing
 - [Data contract](data/README.md): the four pools, the question schema and the authoring rules
 - [AI use disclosure](AI_USE.md)

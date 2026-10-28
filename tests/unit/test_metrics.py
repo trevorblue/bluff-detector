@@ -1,3 +1,7 @@
+"""Unit tests for bluff/metrics.py: AUROC, ECE, risk-coverage, the four cells, the
+verbalisation gap, bootstrap intervals, the paired difference, McNemar and Holm.
+"""
+
 import math
 
 import numpy as np

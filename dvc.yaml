@@ -12,22 +12,22 @@ stages:
   generate:
     cmd: bluff generate --config ${config}
     deps: [src/bluff/pipeline/generate.py, src/bluff/backends.py, data/processed/questions.jsonl]
-    outs: [data/interim/${vid}/generations.jsonl, data/interim/${vid}/hidden.npz]
+    outs: ["data/interim/${vid}/generations.jsonl", "data/interim/${vid}/hidden.npz"]
   label:
     cmd: bluff label --config ${config}
-    deps: [src/bluff/pipeline/label.py, src/bluff/matching.py, data/interim/${vid}/generations.jsonl]
-    outs: [data/interim/${vid}/labels.jsonl]
+    deps: [src/bluff/pipeline/label.py, src/bluff/matching.py, "data/interim/${vid}/generations.jsonl"]
+    outs: ["data/interim/${vid}/labels.jsonl"]
   featurize:
     cmd: bluff featurize --config ${config}
-    deps: [src/bluff/signals.py, data/interim/${vid}/labels.jsonl, data/interim/${vid}/hidden.npz]
-    outs: [data/processed/${vid}]
+    deps: [src/bluff/signals.py, "data/interim/${vid}/labels.jsonl", "data/interim/${vid}/hidden.npz"]
+    outs: ["data/processed/${vid}"]
   train:
     cmd: bluff train --config ${config}
-    deps: [src/bluff/detectors.py, src/bluff/pipeline/train.py, data/processed/${vid}]
-    outs: [artefacts/${vid}]
+    deps: [src/bluff/detectors.py, src/bluff/pipeline/train.py, "data/processed/${vid}"]
+    outs: ["artefacts/${vid}"]
   evaluate:
     cmd: bluff evaluate --config ${config}
-    deps: [src/bluff/metrics.py, src/bluff/pipeline/evaluate.py, artefacts/${vid}]
+    deps: [src/bluff/metrics.py, src/bluff/pipeline/evaluate.py, "artefacts/${vid}"]
     metrics:
       - reports/${vid}/metrics.json:
           cache: false

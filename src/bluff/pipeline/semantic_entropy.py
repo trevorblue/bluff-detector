@@ -16,6 +16,8 @@ Recipe:
 
 Extension (from SEPs): train probes to predict SE from single-generation hidden states,
 and compare against probes trained on correctness labels.
+
+CRISP-DM: modeling (a reference detector). Not part of `bluff all`.
 """
 
 from __future__ import annotations

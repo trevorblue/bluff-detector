@@ -1,0 +1,2 @@
+# Pipeline output, not tracked by git: reports/<variant>/ (metrics.json, scores.parquet,
+# summary.md) and reports/compare/ (variant-vs-variant results).

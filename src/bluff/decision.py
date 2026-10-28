@@ -1,4 +1,9 @@
-"""Thresholds: when the gate abstains, and when the probe 'says uncertain'."""
+"""Thresholds: when the gate abstains, and when the probe 'says uncertain'.
+
+CRISP-DM: business understanding (the cost of a wrong answer vs a needless refusal),
+applied at deployment.
+Used by: pipeline/train.py (sets both thresholds) and app/main.py (verdict).
+"""
 
 from __future__ import annotations
 

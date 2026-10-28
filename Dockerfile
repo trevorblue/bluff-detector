@@ -1,3 +1,7 @@
+# The API's container image: the bluff package, app/, configs/ and a trained detector,
+# served by uvicorn on port 8000. Built by `make docker` and by the CI and CD workflows.
+# CRISP-DM: deployment.
+#
 # Multi-stage build: compilers and pip caches stay in the builder; only the venv ships.
 # Default image = CPU serving with whatever backend the config names (dev_fake in CI).
 # For a real LLM, build with: docker build --build-arg EXTRAS=llm -t bluff-detector:llm .

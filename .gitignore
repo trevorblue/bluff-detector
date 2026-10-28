@@ -1,3 +1,5 @@
+# Files git never tracks: environments, caches, and everything the pipeline generates
+# (data, artefacts and reports are rebuilt by `bluff all` or versioned with DVC).
 # environments
 .venv/
 __pycache__/

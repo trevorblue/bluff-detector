@@ -1,3 +1,5 @@
+# M3: the M2 adapter + M1's retrieval, to see whether the two help or interfere.
+# Needs both the adapter and data/corpus/retrieval_chunks.jsonl.
 inherits: ../base.yaml
 variant:
   id: m3_rag_qlora

@@ -1,3 +1,7 @@
+"""Unit tests: config inheritance and checks, BM25 retrieval, the leakage audit and the
+registry's aliases and rollback.
+"""
+
 import pytest
 
 from bluff.config import deep_merge, load_config

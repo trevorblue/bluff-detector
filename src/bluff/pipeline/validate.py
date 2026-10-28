@@ -1,4 +1,10 @@
-"""Stage 0 - validate the hand-built Kenya question set against the data contract."""
+"""Stage 0 - validate the hand-built Kenya question set against the data contract.
+
+CRISP-DM: data understanding.
+In the pipeline: the first stage, then ingest.
+Reads:  data/kenya/questions.jsonl
+Writes: nothing; stops the run with a list of every rule broken.
+"""
 
 from __future__ import annotations
 

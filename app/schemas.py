@@ -1,5 +1,9 @@
 """The API contract. The response is an audit record: every field answers a question a
-user, an engineer or an auditor may ask about this call."""
+user, an engineer or an auditor may ask about this call.
+
+CRISP-DM: deployment.
+Used by: app/main.py. FastAPI turns these classes into input checks and the /docs page.
+"""
 
 from __future__ import annotations
 

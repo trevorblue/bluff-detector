@@ -1,3 +1,5 @@
+# M0: the base model exactly as downloaded. The reference every other variant is compared with.
+# Changes nothing from base.yaml except the variant id. Needs nothing extra.
 inherits: ../base.yaml
 variant:
   id: m0_base

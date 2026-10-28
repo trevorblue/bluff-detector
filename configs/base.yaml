@@ -1,6 +1,10 @@
 # Base configuration. Variants inherit from this file and override only what changes.
 # A run is a function of five inputs: code (git SHA), data (sha256), this config,
 # the environment (requirements.lock) and the seed. All five are recorded per run.
+#
+# CRISP-DM: `decision` and `gates` encode business understanding (costs, success criteria);
+# `data` is data preparation; `model` and `detectors` are modeling; `evaluation` is
+# evaluation; `tracking` supports deployment.
 
 project: bluff-detector
 seed: 42

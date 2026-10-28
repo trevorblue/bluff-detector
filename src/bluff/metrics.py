@@ -5,6 +5,10 @@ Conventions used everywhere in this project:
     score   : a detector's P(wrong), higher = more likely a bluff
     flag    : score > tau, i.e. "the probe says uncertain"
     a       : 1 if the model took the offered "I don't know" option, else 0
+
+CRISP-DM: evaluation.
+Used by: pipeline/train.py (validation scores), pipeline/evaluate.py and
+pipeline/compare.py.
 """
 
 from __future__ import annotations

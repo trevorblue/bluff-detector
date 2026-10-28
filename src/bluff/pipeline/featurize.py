@@ -1,5 +1,11 @@
 """Stage 4 - one row per question: labels + summary features, and the aligned hidden
-states. Feature extraction is bluff.signals, the same code the API runs."""
+states. Feature extraction is bluff.signals, the same code the API runs.
+
+CRISP-DM: data preparation (feature engineering).
+In the pipeline: label -> [featurize] -> train
+Reads:  data/interim/<variant>/labels.jsonl, generations.jsonl, hidden.npz
+Writes: data/processed/<variant>/features.parquet, data/processed/<variant>/hidden.npy
+"""
 
 from __future__ import annotations
 

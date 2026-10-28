@@ -1,5 +1,12 @@
 """Leakage audit - evaluation questions must not appear in the retrieval or fine-tuning
-corpora. Skipped (with a warning) for corpora that do not exist yet."""
+corpora. Skipped (with a warning) for corpora that do not exist yet.
+
+CRISP-DM: data preparation (a quality check).
+In the pipeline: ingest -> [audit] -> generate
+Reads:  data/processed/questions.jsonl, data/corpus/retrieval_chunks.jsonl and
+        data/corpus/finetune_docs.jsonl
+Writes: data/processed/leakage_audit.json; stops the run on any overlap.
+"""
 
 from __future__ import annotations
 

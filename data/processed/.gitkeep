@@ -1,0 +1,2 @@
+# Pipeline output, not tracked by git: questions.jsonl and manifest.json (shared by all
+# variants), leakage_audit.json, and data/processed/<variant>/ (features.parquet, hidden.npy).

@@ -1,0 +1,2 @@
+# Reserved for raw downloads. Not tracked by git. ingest currently reads the
+# Hugging Face cache directly, so this folder usually stays empty.

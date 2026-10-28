@@ -1,6 +1,10 @@
 """Command line: `bluff <stage> --config configs/variants/<variant>.yaml`.
 
 Stages run in order with `bluff all`. Each one can also be rerun alone.
+
+Entry point of the pipeline: pyproject.toml maps the `bluff` command to main() here, and
+each stage lives in bluff/pipeline/<stage>.py. CRISP-DM: runs the phases in order, from
+data understanding (validate) to deployment (register).
 """
 
 from __future__ import annotations

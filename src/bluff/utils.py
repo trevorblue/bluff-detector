@@ -1,4 +1,8 @@
-"""Small shared helpers: seeding, hashing, JSON/JSONL I/O."""
+"""Small shared helpers: seeding, hashing, JSON/JSONL I/O.
+
+CRISP-DM: shared by every phase.
+Used by: almost every module.
+"""
 
 from __future__ import annotations
 

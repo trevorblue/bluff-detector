@@ -1,0 +1,2 @@
+# Pipeline output, not tracked by git: artefacts/<variant>/<detector>/ (trained detectors),
+# artefacts/<variant>/serving/ (what the API loads), artefacts/registry/, artefacts/adapters/.

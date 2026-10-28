@@ -1,0 +1,2 @@
+# Pipeline output, not tracked by git: data/interim/<variant>/ holds what generate and
+# label write (generations.jsonl, hidden.npz, labels.jsonl, review_sample.jsonl).

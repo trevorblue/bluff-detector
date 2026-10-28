@@ -1,3 +1,7 @@
+"""Unit tests: answer matching, abstention detection, feature extraction, both thresholds,
+the answer-or-abstain verdict and the prompt templates.
+"""
+
 import numpy as np
 import pytest
 

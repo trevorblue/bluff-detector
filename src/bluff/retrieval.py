@@ -2,6 +2,10 @@
 
 Start simple: BM25 is a strong lexical baseline. A dense multilingual retriever and a
 reranker are later upgrades (see the build guide), not day-one requirements.
+
+CRISP-DM: modeling (the retrieval half of the M1 and M3 generator variants).
+Used by: pipeline/generate.py and app/main.py, only when `retrieval.enabled` is true.
+Reads:  data/corpus/retrieval_chunks.jsonl
 """
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# M1: the base model + retrieval. Three passages from the Kenyan document collection are added
+# to every prompt. Needs data/corpus/retrieval_chunks.jsonl.
 inherits: ../base.yaml
 variant:
   id: m1_rag

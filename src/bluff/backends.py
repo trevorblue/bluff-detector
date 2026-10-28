@@ -4,6 +4,10 @@ HFBackend  - a real open-weights model via Hugging Face Transformers. Hidden sta
              open weights, which is why hosted APIs cannot be probed.
 FakeBackend - a deterministic test double so the whole pipeline, the API and CI run on a
              laptop without a GPU or downloads. Its numbers mean nothing scientifically.
+
+CRISP-DM: data preparation. The language model is not the model being trained: it is the
+system under study, and its answers and internals become the detectors' dataset.
+Used by: pipeline/generate.py (offline) and app/main.py (live). `model.backend` picks one.
 """
 
 from __future__ import annotations

@@ -3,6 +3,10 @@
 Implemented now: logreg and xgboost on summary features; linear and MLP probes on hidden
 states. Planned (stretch): an LSTM over the per-token entropy sequence, and semantic
 entropy as the offline reference (see bluff/pipeline/semantic_entropy.py).
+
+CRISP-DM: modeling. These are the standard ML models the project trains.
+Used by: pipeline/train.py (fit and save), pipeline/evaluate.py and app/main.py (load and
+score). On disk, a detector is one folder: detector.joblib + metadata.json.
 """
 
 from __future__ import annotations

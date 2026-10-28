@@ -4,6 +4,11 @@ A new version always gets registered. It becomes @challenger only if it clears e
 gate against the current @champion; the first ever version becomes @champion directly.
 Promoting a challenger to champion is a deliberate, separate step (`bluff promote`), the
 human sign-off point.
+
+CRISP-DM: deployment.
+In the pipeline: evaluate -> [register], the last stage.
+Reads:  reports/<variant>/metrics.json, artefacts/<variant>/serving/
+Writes: artefacts/registry/ (registry.json + one folder per version)
 """
 
 from __future__ import annotations

@@ -1,5 +1,8 @@
 # Data
 
+CRISP-DM: data understanding and data preparation. Everything the pipeline reads lives
+here; see [docs/architecture.md](../docs/architecture.md) for how it flows.
+
 Four pools, strictly separated. Any overlap invalidates every number, so `bluff audit` checks it.
 
 | Pool | File | Used for | Never used for |
@@ -50,3 +53,13 @@ Authoring tips:
 
 `retrieval_chunks.jsonl`: 300–800 tokens per chunk, legal text split by section.
 `finetune_docs.jsonl`: whole documents, from a different set of `doc_id`s than the retrieval corpus.
+
+## Folders
+
+| Folder | What goes in it | In git? |
+|---|---|---|
+| `kenya/` | `questions.jsonl`, the hand-built question set (format above). A JSONL file cannot hold comments, so it is described here. | yes |
+| `corpus/` | `retrieval_chunks.jsonl` and `finetune_docs.jsonl`, the two document collections | yes |
+| `raw/` | Reserved for raw downloads; `ingest` currently reads the Hugging Face cache directly | no |
+| `interim/<variant>/` | What `generate` and `label` write: `generations.jsonl`, `hidden.npz`, `labels.jsonl`, `review_sample.jsonl` | no |
+| `processed/` | `questions.jsonl` and `manifest.json` (shared by all variants), `leakage_audit.json`, and `<variant>/` with `features.parquet` and `hidden.npy` | no |

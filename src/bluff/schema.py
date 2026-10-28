@@ -1,4 +1,9 @@
-"""Typed records that flow between pipeline stages, and the question-set data contract."""
+"""Typed records that flow between pipeline stages, and the question-set data contract.
+
+CRISP-DM: data understanding (the rules every question must pass) and data preparation
+(the record formats each stage writes).
+Used by: validate, ingest, generate, label, train, evaluate, matching and tests/data.
+"""
 
 from __future__ import annotations
 

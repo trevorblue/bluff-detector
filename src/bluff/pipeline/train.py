@@ -2,6 +2,12 @@
 and package each one as an artefact (weights + input spec + thresholds + metadata).
 
 Only trivia-style pools are used for training. Kenya never enters this stage.
+
+CRISP-DM: modeling. Trains the standard ML detectors named in `detectors.train` (logistic
+regression, XGBoost, linear and MLP probes), logging to MLflow when it is enabled.
+In the pipeline: featurize -> [train] -> evaluate
+Reads:  data/processed/<variant>/features.parquet, hidden.npy
+Writes: artefacts/<variant>/<detector>/, artefacts/<variant>/serving/ (what the API loads)
 """
 
 from __future__ import annotations

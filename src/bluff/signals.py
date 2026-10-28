@@ -2,6 +2,9 @@
 
 This module is the single implementation of feature extraction, used by both the training
 pipeline (featurize) and the API. One implementation means no training-serving skew.
+
+CRISP-DM: data preparation (feature engineering).
+Used by: pipeline/featurize.py, detectors.py and app/main.py.
 """
 
 from __future__ import annotations

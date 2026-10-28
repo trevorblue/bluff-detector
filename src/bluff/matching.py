@@ -2,6 +2,9 @@
 
 Automated marking is noisy. Its disagreement with the LLM judge (when wired in) and with
 manual review is reported as the label-noise floor, not hidden.
+
+CRISP-DM: data preparation (labelling).
+Used by: pipeline/label.py.
 """
 
 from __future__ import annotations

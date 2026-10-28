@@ -5,6 +5,12 @@ before the first run, and run a tiny pilot (a few hundred steps) before the full
 
 Data rule: train ONLY on data/corpus/finetune_docs.jsonl, which must be disjoint by
 document from the evaluation questions and the retrieval index. Run `bluff audit` first.
+
+CRISP-DM: modeling (builds the M2 generator variant).
+Not part of `bluff all`: run it once, before M2, with
+`bluff finetune_qlora --config configs/variants/m2_qlora.yaml`.
+Reads:  data/corpus/finetune_docs.jsonl
+Writes: artefacts/adapters/m2_qlora/ (the adapter M2 and M3 load)
 """
 
 from __future__ import annotations

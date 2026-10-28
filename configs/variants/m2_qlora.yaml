@@ -1,3 +1,5 @@
+# M2: the base model + a QLoRA adapter fine-tuned on Kenyan documents (the H3 test).
+# Needs the adapter that `bluff finetune_qlora` writes to artefacts/adapters/m2_qlora/.
 inherits: ../base.yaml
 variant:
   id: m2_qlora

@@ -3,6 +3,10 @@
 Works offline as a JSON file plus versioned artefact folders, so CI and the API need no
 server. When tracking.mlflow is true, every registration is mirrored to the MLflow Model
 Registry with the same aliases. Promotion and rollback are one pointer move.
+
+CRISP-DM: deployment.
+Used by: pipeline/register.py (`bluff register`, `bluff promote`). Lives in
+artefacts/registry/.
 """
 
 from __future__ import annotations

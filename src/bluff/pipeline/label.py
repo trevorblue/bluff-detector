@@ -4,6 +4,12 @@ correct   : the open-condition answer, checked against gold aliases
 abstained : majority vote over the offered-"I don't know" templates
 Also writes a random sample for manual adjudication; the disagreement rate between
 automated and manual marking is reported as the label-noise floor.
+
+CRISP-DM: data preparation (labelling). review_sample.jsonl is for data understanding: a
+person checks it to measure how noisy the automatic labels are.
+In the pipeline: generate -> [label] -> featurize
+Reads:  data/processed/questions.jsonl, data/interim/<variant>/generations.jsonl
+Writes: data/interim/<variant>/labels.jsonl, data/interim/<variant>/review_sample.jsonl
 """
 
 from __future__ import annotations

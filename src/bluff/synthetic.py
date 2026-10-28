@@ -1,4 +1,8 @@
-"""Synthetic question sets for the fake backend: CI, smoke tests and local dry runs."""
+"""Synthetic question sets for the fake backend: CI, smoke tests and local dry runs.
+
+CRISP-DM: data preparation (test data only).
+Used by: pipeline/ingest.py when `data.source: synthetic` (the dev_fake configs).
+"""
 
 from __future__ import annotations
 

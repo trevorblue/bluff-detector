@@ -1,3 +1,8 @@
+# The package definition: what `pip install -e .` installs.
+#   [project] dependencies          what the pipeline (fake model) and the API need, kept light
+#   [project.optional-dependencies] extras: a real LLM, QLoRA, dataset downloads, MLflow, dev tools
+#   [project.scripts]               creates the `bluff` command (bluff.cli:main)
+#   [tool.*]                        lint (ruff) and test (pytest) settings
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"

@@ -4,6 +4,9 @@ open    -> the model answers freely. Gives correctness and the internal signals.
 offered -> an explicit "I don't know" option, in several paraphrases, so abstention is
            measured structurally (did it take the option?) rather than by judging tone.
            Several templates control for prompt artifacts ("abstention inflation").
+
+CRISP-DM: data preparation.
+Used by: pipeline/generate.py (both conditions) and app/main.py (the open condition only).
 """
 
 from __future__ import annotations

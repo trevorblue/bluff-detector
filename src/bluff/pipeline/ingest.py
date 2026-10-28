@@ -3,6 +3,12 @@
 Trivia-style pools are split into train/val/test. Kenya pools are test-only: detectors
 never see a Kenyan question during training, which is what makes it an OOD test.
 The output is shared by every variant, so all variants are scored on the same questions.
+
+CRISP-DM: data preparation.
+In the pipeline: validate -> [ingest] -> audit
+Reads:  TriviaQA + TruthfulQA (Hugging Face) or synthetic questions,
+        data/kenya/questions.jsonl
+Writes: data/processed/questions.jsonl, data/processed/manifest.json
 """
 
 from __future__ import annotations

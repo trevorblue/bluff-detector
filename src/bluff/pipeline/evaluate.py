@@ -7,6 +7,10 @@ Test sets
 
 Outputs reports/<variant>/metrics.json, scores.parquet (per-row scores, used by the
 compare stage) and summary.md.
+
+CRISP-DM: evaluation.
+In the pipeline: train -> [evaluate] -> register
+Reads:  data/processed/<variant>/ (features), artefacts/<variant>/<detector>/
 """
 
 from __future__ import annotations

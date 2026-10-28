@@ -9,6 +9,9 @@
 Environment
     BLUFF_CONFIG        variant config (default configs/variants/dev_fake.yaml)
     BLUFF_ARTEFACT_DIR  detector artefact folder (default: the variant's serving folder)
+
+CRISP-DM: deployment. Uses what the pipeline built: the detector in
+artefacts/<variant>/serving/. Start it with `make serve`; interactive docs at /docs.
 """
 
 from __future__ import annotations
