@@ -3,12 +3,13 @@
 CRISP-DM: data understanding and data preparation. Everything the pipeline reads lives
 here; see [docs/architecture.md](../docs/architecture.md) for how it flows.
 
-Four pools, strictly separated. Any overlap invalidates every number, so `bluff audit` checks it.
+Four pools, strictly separated, plus UK twins of Kenya questions. Any overlap invalidates every number, so `bluff audit` checks it.
 
 | Pool | File | Used for | Never used for |
 |---|---|---|---|
 | Evaluation QA | `kenya/questions.jsonl` + TriviaQA/TruthfulQA (downloaded by `ingest`) | generating, labelling, training and testing detectors | fine-tuning, retrieval |
 | Unanswerable Kenya | same file, `"pool": "kenya_unanswerable"` | abstention ground truth | anything else |
+| UK twins | same file, `"pool": "western"`, `"twin_of"` = the id of the Kenya question it mirrors | the paired Kenya-vs-UK comparison (H2) | training, anything else |
 | Retrieval corpus | `corpus/retrieval_chunks.jsonl` | the M1/M3 index | fine-tuning |
 | Fine-tuning corpus | `corpus/finetune_docs.jsonl` | QLoRA (M2/M3) | evaluation, retrieval |
 
@@ -36,7 +37,9 @@ Rules enforced by `bluff validate` and `tests/data`:
 - Answerable items need `gold`; unanswerable items need `"gold": null`, `"answerable": false` and
   `"pool": "kenya_unanswerable"`.
 - A verified item needs a source and a reviewer who is not the author.
-- Kenya pools are test-only; `ingest` assigns `"split": "test"` itself.
+- Kenya and twin pools are test-only; `ingest` assigns `"split": "test"` itself.
+- A twin (`"pool": "western"`) must set `twin_of` to the id of a real Kenya question; no other
+  item may set `twin_of`. A twin asks the same question about the UK, with the same kind of answer.
 
 Authoring tips:
 

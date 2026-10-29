@@ -88,6 +88,8 @@ def run(cfg: dict[str, Any]) -> dict[str, Any]:
     if d["source"] == "synthetic":
         items += synthetic.make_trivia(d["synthetic_trivia"], seed)
         items += synthetic.make_kenya(d["synthetic_kenya"], d["synthetic_unanswerable"], seed + 1)
+        n_twins = min(d.get("synthetic_western", 0), d["synthetic_kenya"])
+        items += synthetic.make_western(n_twins, seed + 2)
     elif d["source"] == "hf":
         items += load_triviaqa(d["trivia_sample"], seed)
         if d.get("truthfulqa"):

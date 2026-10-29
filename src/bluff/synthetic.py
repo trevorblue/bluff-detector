@@ -63,3 +63,27 @@ def make_kenya(n: int, n_unanswerable: int, seed: int = 43) -> list[QuestionItem
             )
         )
     return out
+
+
+def make_western(n: int, seed: int = 44) -> list[QuestionItem]:
+    """UK twins of the first n synthetic Kenya questions (call make_kenya with at least n).
+
+    The wording avoids the fake backend's Kenya keywords, so it treats twins as general
+    knowledge, as the hypothesis expects a real model to.
+    """
+    rng = np.random.default_rng(seed)
+    out = []
+    for i in range(n):
+        gold = _code(rng)
+        out.append(
+            QuestionItem(
+                id=f"syn-uk-{i:04d}",
+                pool="western",
+                question=f"Synthetic UK question {i}: which borough code is filed under {i}?",
+                gold=gold,
+                aliases=[gold],
+                language="en",
+                twin_of=f"syn-ke-{i:04d}",
+            )
+        )
+    return out

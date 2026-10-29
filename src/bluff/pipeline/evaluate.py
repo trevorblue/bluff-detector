@@ -4,6 +4,7 @@ Test sets
     trivia_test         in-distribution held-out questions
     kenya               out-of-distribution: the hand-built Kenya set
     kenya_unanswerable  questions about things that do not exist (abstention ground truth)
+    western             UK twins of Kenya questions; also compared pair by pair ("twins")
 
 Outputs reports/<variant>/metrics.json, scores.parquet (per-row scores, used by the
 compare stage) and summary.md.
@@ -33,6 +34,8 @@ from bluff.metrics import (
     four_cells,
     hallucination_rate,
     inflation_rate,
+    mcnemar,
+    paired_bootstrap_diff,
     percentiles,
     pr_auc,
     reliability_curve,
@@ -42,7 +45,7 @@ from bluff.metrics import (
 )
 from bluff.pipeline.featurize import load_features
 from bluff.schema import TRAIN_POOLS
-from bluff.utils import read_json, write_json
+from bluff.utils import read_json, read_jsonl, write_json
 
 log = logging.getLogger(__name__)
 
@@ -53,8 +56,47 @@ def test_sets(df: pd.DataFrame) -> dict[str, np.ndarray]:
         "trivia_test": (in_dist & (df["split"] == "test")).to_numpy(),
         "kenya": (df["pool"] == "kenya").to_numpy(),
         "kenya_unanswerable": (df["pool"] == "kenya_unanswerable").to_numpy(),
+        "western": (df["pool"] == "western").to_numpy(),
     }
     return {k: v for k, v in sets.items() if v.any()}
+
+
+def twin_pairs(
+    cfg: dict[str, Any], df: pd.DataFrame, score: np.ndarray
+) -> dict[str, Any] | None:
+    """Each Kenya question against its UK twin: same shape, other country (H2, controlled).
+
+    Paired on the same question structure, so a difference comes from the country rather
+    than from how the questions were written. Differences are Kenya minus UK.
+    """
+    twin_of = {r["id"]: r["twin_of"] for r in read_jsonl(paths(cfg).questions)
+               if r.get("twin_of")}
+    row = {qid: i for i, qid in enumerate(df["qid"])}
+    pairs = [(row[k], row[w]) for w, k in twin_of.items() if w in row and k in row]
+    if not pairs:
+        return None
+    ke, uk = (np.asarray(ix) for ix in zip(*pairs, strict=True))
+    y = df["y_wrong"].to_numpy()
+    a = df["abstained"].to_numpy()
+    n_boot, seed = cfg["evaluation"]["bootstrap"], cfg["seed"]
+
+    def rate(x: np.ndarray) -> float:
+        return float(np.mean(x))
+
+    def paired_test(x: np.ndarray) -> dict[str, float]:
+        t = mcnemar(x[uk], x[ke])
+        return {"uk_only": t["before_only"], "kenya_only": t["after_only"],
+                "p_value": t["p_value"]}
+
+    return {
+        "n_pairs": len(pairs),
+        "wrong_rate": {"kenya": rate(y[ke]), "uk": rate(y[uk])},
+        "wrong_diff": paired_bootstrap_diff(rate, (y[uk],), (y[ke],), n_boot, seed=seed),
+        "mcnemar_wrong": paired_test(y),
+        "abstain_rate": {"kenya": rate(a[ke]), "uk": rate(a[uk])},
+        "mcnemar_abstain": paired_test(a),
+        "mean_bluff_score": {"kenya": rate(score[ke]), "uk": rate(score[uk])},
+    }
 
 
 def run(cfg: dict[str, Any]) -> dict[str, Any]:
@@ -138,6 +180,7 @@ def run(cfg: dict[str, Any]) -> dict[str, Any]:
         "t_abstain": meta_by_det[served]["t_abstain"],
         "detectors": detectors_out,
         "abstention": abstention,
+        "twins": twin_pairs(cfg, df, s_served),
         "generation_latency_ms": percentiles(df["latency_ms"].to_numpy()),
     }
     report = _clean(report)
@@ -189,6 +232,15 @@ def render_summary(r: dict[str, Any]) -> str:
             f" | {_ci(a['internal_detection'])} | {_ci(a['expressed_detection'])}"
             f" | {_ci(a['verbalisation_gap'])} |"
         )
+    t = r.get("twins")
+    if t:
+        lines += ["", f"## Kenya vs UK twins (paired, {t['n_pairs']} pairs)", "",
+                  "| | Kenya | UK twin |", "|---|---|---|"]
+        for label, key in (("Wrong rate", "wrong_rate"), ("Abstain rate", "abstain_rate"),
+                           ("Mean bluff score", "mean_bluff_score")):
+            lines.append(f"| {label} | {_f(t[key]['kenya'])} | {_f(t[key]['uk'])} |")
+        lines += ["", f"Wrong-rate difference, Kenya minus UK: {_ci(t['wrong_diff'])} · "
+                  f"McNemar p {_f(t['mcnemar_wrong']['p_value'])}"]
     lat = r["generation_latency_ms"]
     lines += ["", f"Generation latency ms: p50 {_f(lat['p50'], 1)}, p95 {_f(lat['p95'], 1)}, "
               f"p99 {_f(lat['p99'], 1)}", ""]

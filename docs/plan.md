@@ -10,7 +10,7 @@ the Kenya questions), *Claude* (AI assistant, disclosed in [AI_USE.md](../AI_USE
 
 | | Contents |
 |---|---|
-| **Must ship** | Kenya set (300 real + 80 fake questions, verified) · variants M0, M1 and M2 · the four standard ML detectors (logistic regression, XGBoost, linear probe, MLP probe) · the full metric suite and the H3 test · API, Docker and CI (already working) · MLflow tracking switched on |
+| **Must ship** | Kenya set (300 real + 80 fake questions, verified) and 60 UK twins · variants M0, M1 and M2 · the four standard ML detectors (logistic regression, XGBoost, linear probe, MLP probe) · the full metric suite and the H3 test · API, Docker and CI (already working) · MLflow tracking switched on |
 | **Only if ahead** | Probe transfer (the M0 probe applied unchanged to M1 and M2) · MLP layer sweep · semantic entropy on the Kenya set |
 | **Dropped, and said so in the report** | M3 and H4 · the LSTM detector · the LLM judge (hand-checked samples instead) · the LoRA-vs-QLoRA cost footnote · retraining on a self-hosted GPU runner |
 
@@ -52,7 +52,7 @@ both document collections built.
 | Wed 4 | QLoRA fine-tuning on the fine-tuning collection (one GPU session, about an hour); adapter saved to the shared drive | Claude runs it; Trevor starts it if on Colab | Modeling |
 | Wed 4 – Thu 5 | M2 trivia run (T4s, same settings as M0); label, featurize, train, evaluate | Claude + GPUs | Preparation → modeling |
 | Thu 5 – Sat 7 | M1 trivia run with retrieval; label, featurize, train, evaluate | Claude + GPUs | Preparation → modeling |
-| Fri 6 | Students finish writing: 75 real + 20 fake questions each | Students | Data preparation |
+| Fri 6 | Students finish writing: 75 real + 20 fake questions and 15 UK twins each | Students | Data preparation |
 | Sat 7 – Mon 9 | Cross-review (A→B→C→D→A) and the blind fake-question test | Students | Data understanding |
 | Mon 9 – Tue 10 | Settle disagreements; `bluff validate` and `bluff audit` pass; freeze the Kenya set | Trevor | Data understanding |
 | Tue 10 | Kenya runs for M0, M1 and M2 (resume runs only the new questions: 30–45 min each) | Claude + GPUs | Data preparation |
@@ -81,11 +81,12 @@ time), then the MLP layer sweep, then semantic entropy on the Kenya set.
 |---|---|---|---|---|
 | **Domains** | civics_law | geography_society, language | institutions_services, money_livelihoods | western_default_traps |
 | **Questions** | 75 real + 20 fake | 75 + 20 | 75 + 20 | 75 + 20 |
-| **Reviews** | B's 95 | C's 95 | D's 95 | A's 95 |
+| **UK twins** | 15 | 15 | 15 | 15 |
+| **Reviews** | B's 110 | C's 110 | D's 110 | A's 110 |
 | **Documents** | 40–60 URLs | 40–60 | 40–60 | 40–60 |
 | **Label checks** | ~40 rows | ~40 | ~40 | ~40 |
 
-About 12–15 hours each over the three weeks. The rules, in short:
+About 15–17 hours each over the three weeks. The rules, in short:
 
 - **Write each question in your own words**; never copy a sentence from the source. The leakage
   check rejects any question whose wording appears in the document collections.
@@ -96,6 +97,8 @@ About 12–15 hours each over the three weeks. The rules, in short:
 - Fake questions must look real: a plausible county, Act or agency that does not exist.
 - Reviewers answer from the source *before* looking at the author's answer. A question is
   verified only if both agree.
+- A UK twin asks one of your real questions about the United Kingdom, with the same shape and
+  the same kind of answer, so Kenya and UK can be compared pair by pair.
 
 Full rules and the question format: [data/README.md](../data/README.md).
 

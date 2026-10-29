@@ -69,7 +69,7 @@ Take a Kenya question whose true answer is **47**: *"How many counties does Keny
 | 5 | `label`<br><sub>data preparation</sub> | Is "52" right? Compared with the accepted answers ("47", "forty-seven"): **wrong**. Did it take the "I don't know" option? Majority vote over the 3 offered answers: **no**. | `labels.jsonl`, `review_sample.jsonl` |
 | 6 | `featurize`<br><sub>data preparation</sub> | Turns the question into one table row: `y_wrong = 1`, `abstained = 0`, 8 summary numbers about word confidence, and the hidden-state vector (1,536 numbers for Qwen2.5-1.5B). | `data/processed/<variant>/features.parquet`, `hidden.npy` |
 | 7 | `train`<br><sub>modeling</sub> | Trains 4 detectors **on trivia training rows only**. Each learns *signals → P(wrong)*. Sets the thresholds on the validation rows. Saves each detector as a folder, and copies the one the API will use to `serving/`. | `artefacts/<variant>/<detector>/` |
-| 8 | `evaluate`<br><sub>evaluation</sub> | Scores the test sets (trivia test, Kenya, Kenya unanswerable). Our question gets P(wrong) = 0.81, so the probe flags it *uncertain*, yet the model answered anyway: it lands in the **silent knowing** cell. Computes every metric with confidence intervals. | `reports/<variant>/metrics.json`, `scores.parquet`, `summary.md` |
+| 8 | `evaluate`<br><sub>evaluation</sub> | Scores the test sets (trivia test, Kenya, Kenya unanswerable, UK twins) and compares each Kenya question with its UK twin, pair by pair. Our question gets P(wrong) = 0.81, so the probe flags it *uncertain*, yet the model answered anyway: it lands in the **silent knowing** cell. Computes every metric with confidence intervals. | `reports/<variant>/metrics.json`, `scores.parquet`, `summary.md` |
 | 9 | `register`<br><sub>deployment</sub> | Saves this detector as a new version in the registry. The first version becomes `@champion`; later ones become `@challenger` only if they pass the quality gates. | `artefacts/registry/` |
 
 Only stage 4 needs a GPU, and it is almost all of the compute. Every other stage runs on a laptop
@@ -195,7 +195,7 @@ flowchart TB
 
 | Piece | What it does | Where |
 |---|---|---|
-| Tests | 42 tests at four levels: unit, data rules, API, full pipeline on the fake model | `tests/` |
+| Tests | 44 tests at four levels: unit, data rules, API, full pipeline on the fake model | `tests/` |
 | CI | On every push: lint, data checks, tests, the fake pipeline, Docker build, smoke test | `.github/workflows/ci.yml` |
 | CD | On `main`: build the Docker image, scan it, publish it to GitHub Packages | `.github/workflows/cd.yml` |
 | CT | Manual retraining on a GPU machine (unused until one is registered) | `.github/workflows/ct.yml` |

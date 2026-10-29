@@ -22,6 +22,7 @@ import pandas as pd
 
 from bluff.config import paths
 from bluff.metrics import auroc, holm, mcnemar, paired_bootstrap_diff
+from bluff.schema import TRAIN_POOLS
 from bluff.utils import write_json
 
 log = logging.getLogger(__name__)
@@ -53,8 +54,9 @@ def run(cfg_a: dict[str, Any], cfg_b: dict[str, Any]) -> dict[str, Any]:
         "sets": {},
     }
     for set_name, mask in {
-        "trivia_test": (m["split"] == "test") & ~m["pool"].str.startswith("kenya"),
+        "trivia_test": (m["split"] == "test") & m["pool"].isin(TRAIN_POOLS),
         "kenya": m["pool"] == "kenya",
+        "western": m["pool"] == "western",
     }.items():
         sub = m[mask.to_numpy()]
         if sub.empty:

@@ -71,7 +71,7 @@ registers inside, and crossing the two places every answer in one of the four ce
 | | Hypothesis | Tested by |
 |---|---|---|
 | **H1** | **Silent knowing is common.** Many confidently delivered wrong answers carry an internal uncertainty signal the model does not voice. | Silent-knowing rate, with bootstrap CIs |
-| **H2** | **Kenya widens the gap.** Silent knowing is more frequent on Kenyan questions than on general knowledge. | Same metrics, Kenya vs TriviaQA, on one ruler |
+| **H2** | **Kenya widens the gap.** Silent knowing is more frequent on Kenyan questions than on general knowledge. | Same metrics, Kenya vs TriviaQA, on one ruler; plus 60 matched UK twins of Kenya questions, compared pair by pair |
 | **H3** | **Fine-tuning breaks saying, not knowing.** QLoRA reduces expressed abstention more than it reduces the information in hidden states. | `bluff compare` M0 vs M2: paired bootstrap on AUROC, exact McNemar on abstention, Holm correction |
 | **H4** | **Retrieval can manufacture confidence.** An irrelevant passage lowers internal uncertainty on answers that are still wrong. | M1 with deliberately irrelevant retrieval |
 | **H5** | **Detectors degrade out of distribution.** A detector trained on trivia loses accuracy on Kenya. | Train on trivia only; the *OOD drop* column of every report |
@@ -166,7 +166,7 @@ nothing scientifically.**
 ```bash
 python -m venv .venv && source .venv/bin/activate
 make setup                                          # locked, hashed install + dev tools
-make test                                           # 42 unit, data, integration and API tests
+make test                                           # 44 unit, data, integration and API tests
 bluff all --config configs/variants/dev_fake.yaml   # every pipeline stage
 cat reports/dev_fake/summary.md                     # results table
 make serve                                          # API on http://localhost:8000/docs

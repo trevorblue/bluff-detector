@@ -11,12 +11,13 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-Pool = Literal["trivia", "truthfulqa", "kenya", "kenya_unanswerable", "synthetic"]
+Pool = Literal["trivia", "truthfulqa", "kenya", "kenya_unanswerable", "western", "synthetic"]
 Split = Literal["train", "val", "test"]
 Condition = Literal["open", "offered"]
 
 TRAIN_POOLS = ("trivia", "truthfulqa", "synthetic")  # detectors are trained on these only
-OOD_POOLS = ("kenya", "kenya_unanswerable")  # test-only
+# Test-only. "western" holds UK twins of Kenya questions: same shape, other country (H2).
+OOD_POOLS = ("kenya", "kenya_unanswerable", "western")
 
 
 class QuestionItem(BaseModel):
@@ -38,6 +39,7 @@ class QuestionItem(BaseModel):
     author: str | None = None
     reviewer: str | None = None
     verified: bool = False
+    twin_of: str | None = None  # western pool only: id of the Kenya question this mirrors
 
 
 class Generation(BaseModel):
@@ -91,11 +93,17 @@ def validate_questions(items: list[QuestionItem]) -> list[str]:
                 errors.append(f"{it.id}: unanswerable items belong in pool kenya_unanswerable")
         if it.verified and it.pool in OOD_POOLS:
             if not (it.source_url or it.source_note):
-                errors.append(f"{it.id}: verified Kenya item needs a source")
+                errors.append(f"{it.id}: verified hand-built item needs a source")
             if not it.reviewer:
-                errors.append(f"{it.id}: verified Kenya item needs a second-person reviewer")
+                errors.append(f"{it.id}: verified hand-built item needs a second-person reviewer")
             if it.reviewer and it.reviewer == it.author:
                 errors.append(f"{it.id}: reviewer must differ from author")
         if it.split is not None and it.pool in OOD_POOLS and it.split != "test":
-            errors.append(f"{it.id}: Kenya pools are test-only")
+            errors.append(f"{it.id}: Kenya and twin pools are test-only")
+    kenya_ids = {it.id for it in items if it.pool == "kenya"}
+    for it in items:
+        if it.pool == "western" and it.twin_of not in kenya_ids:
+            errors.append(f"{it.id}: a twin needs twin_of = the id of a real Kenya question")
+        if it.pool != "western" and it.twin_of is not None:
+            errors.append(f"{it.id}: only western-pool twins may set twin_of")
     return errors
