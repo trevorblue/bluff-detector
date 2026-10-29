@@ -248,6 +248,6 @@ Every file also opens with a short note on what it is and where it fits.
 | `app/` | The FastAPI service and its request/response formats |
 | `tests/` | Unit, data, API and end-to-end tests |
 | `scripts/smoke.sh` | Starts the container, asks it one question, checks the reply |
-| `docs/` | This guide, the three-week plan, the research proposal, and the README images |
+| `docs/` | This guide, the concepts guide, the build plan, the GPU setup guide, the research proposal, and the README images |
 | `artefacts/` | Trained detectors and the registry (outputs, not in git) |
 | `reports/` | Results per variant and comparisons (outputs, not in git) |

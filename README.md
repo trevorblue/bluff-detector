@@ -24,7 +24,9 @@
   <a href="#roadmap">Roadmap</a>
   <br>
   <b><a href="docs/architecture.md">Architecture guide</a></b> ·
-  <b><a href="docs/plan.md">Three-week plan</a></b>
+  <b><a href="docs/concepts.md">Concepts</a></b> ·
+  <b><a href="docs/plan.md">Build plan</a></b> ·
+  <b><a href="docs/gpu-setup.md">GPU setup</a></b>
 </p>
 
 <p align="center"><sub>DSA 8401 Applied Machine Learning · capstone · Trevor Anjeyo Vuhyah</sub></p>
@@ -89,7 +91,7 @@ flowchart LR
     A --> R[(Audit record)]
     X --> R
     subgraph MLOps
-      T[MLflow + DVC] --- Reg["Registry<br/>@champion / @challenger"] --- CI[CI · CT · CD] --- M[Drift monitor]
+      T[MLflow + DVC] --- Reg["Registry<br/>@champion / @challenger"] --- CI[CI · CT · CD] --- M["Drift monitor (planned)"]
     end
     classDef ok fill:#1a7f37,stroke:#1a7f37,color:#ffffff
     classDef stop fill:#cf222e,stroke:#cf222e,color:#ffffff
@@ -344,7 +346,7 @@ dvc.yaml            the pipeline as DVC stages, for content-hashed data versioni
 
 ## Roadmap
 
-Dates, owners and scope cuts are in the [three-week plan](docs/plan.md).
+Dates, owners and scope cuts are in the [build plan](docs/plan.md).
 
 - [x] Scaffold: pipeline, detectors, metrics, API, Docker, CI, tests
 - [ ] Novelty check against recent work on probes and abstention
@@ -371,7 +373,9 @@ Dates, owners and scope cuts are in the [three-week plan](docs/plan.md).
 ## Further reading
 
 - [Architecture guide](docs/architecture.md): how the system works, one question at a time, and what every file is
-- [Three-week plan](docs/plan.md): the build schedule by CRISP-DM phase, with who does what
+- [Concepts](docs/concepts.md): every idea explained, from the models and metrics to Docker, CI/CD and monitoring
+- [Build plan](docs/plan.md): the build steps, the day-by-day schedule and the plug-in-day checklist
+- [GPU setup](docs/gpu-setup.md): free T4 GPUs on Colab and Kaggle, driven from VS Code
 - [Research proposal](docs/proposal.md): the full design, including prior work, serving and phasing
 - [Data contract](data/README.md): the four pools, the question schema and the authoring rules
 - [AI use disclosure](AI_USE.md)
