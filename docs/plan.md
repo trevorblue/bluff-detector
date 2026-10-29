@@ -27,7 +27,7 @@ checklist has already run for M0, M1 and M2.** Plug-in day repeats commands that
 | | Contents |
 |---|---|
 | **Must ship** | Kenya set (300 real + 80 fake, verified) and 60 UK twins · variants M0, M1 and M2 · the four standard ML detectors (logistic regression, XGBoost, linear probe, MLP probe) · the full metric suite, the H3 test and the twin comparison · split GPU runs · monitoring · API, Docker, CI and CD · MLflow tracking switched on |
-| **Only if ahead** | Probe transfer (M0's probe applied unchanged to M1 and M2) · MLP layer sweep · semantic entropy on the Kenya set |
+| **Only if ahead** | Probe transfer (M0's probe applied unchanged to M1 and M2) · MLP layer sweep · semantic entropy on the Kenya set · a llamafile live demo of the raw model bluffing |
 | **Dropped, and said so in the report** | M3 and H4 · the LSTM detector · the LLM judge (hand-checked samples instead) · the LoRA-vs-QLoRA cost footnote · retraining on a self-hosted GPU runner |
 
 ## 3. The plan by CRISP-DM phase
@@ -94,7 +94,7 @@ collections built and audited.
 |---|---|---|---|
 | **Wed 11** | Look at the first Kenya results | Label checks (~40 rows each) | Laptop stages for M0, M1, M2 with Kenya |
 | **Thu 12** | Interpret the results | Finish label checks | Label-noise rate; final evaluation (10,000 bootstrap resamples); compare M0 vs M2 (H3) and M0 vs M1; twin results (H2) |
-| **Fri 13** | Start the report | — | Register the champion; serve it; latency, skew check, monitoring demo; real-model Docker image; B12 if ahead |
+| **Fri 13** | Start the report | — | Register the champion; serve it; latency, skew check, monitoring demo; real-model Docker image; B12 if ahead; llamafile demo setup if wanted (~10 min) |
 | **Sat 14 – Tue 17** | Write the report | — | Real results into the README (Sun 15) |
 | **Sun 15** | Update AI_USE.md; make the repo public | — | — |
 | **Wed 18** | **Submit** | — | — |
@@ -169,3 +169,16 @@ western, plus the Kenya-vs-UK twins table.
 | **Label checks** | ~40 rows | ~40 | ~40 | ~40 |
 
 About 15–17 hours each. The full rules, examples and dates are in the student brief.
+
+## 10. Notes for the report
+
+Points to cover in the report, in Trevor's own words (the report's technique justifications are
+not AI-written; see [AI_USE.md](../AI_USE.md)):
+
+- **Deployment alternatives considered.** llamafile and Ollama serve quantised models fast on a
+  CPU. They were not used for the served system: they don't expose hidden states at chosen layers,
+  so the probe can't run, and their quantised weights differ from the model the detectors were
+  trained on (training–serving skew). The trade-off: speed against being able to see inside the
+  model. llamafile is used, at most, for a live demo of the raw model bluffing. Background:
+  [concepts.md](concepts.md), section 8.
+- **Deliberate omissions**, with reasons: everything in the "Dropped" row of section 2.

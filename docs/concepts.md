@@ -293,6 +293,23 @@ seconds per answer: fine for a one-question-at-a-time demo, and by design (the p
 CPU serving). Never shrink or quantise the model just to serve it faster: the probe was trained on
 this exact model's hidden states.
 
+### Why not serve with llamafile or Ollama?
+
+[llamafile](https://github.com/mozilla-ai/llamafile) (Mozilla.ai) packs a quantised model and the
+llama.cpp engine into one executable that runs fast on an ordinary CPU, with no installs. Ollama
+is similar. Neither fits the served system:
+
+- **No hidden states.** Their interface returns the answer text (and token probabilities), not the
+  internal vectors at chosen layers that the probe reads. No hidden states means no probe, no bluff
+  score and no gate.
+- **A different model.** They run quantised weights (e.g. 4-bit), whose numbers differ from the
+  model the detectors were trained on: training–serving skew.
+
+The principle: **a guardrail that reads a model's internals ties you to a serving stack that
+exposes them.** The project trades some speed for being able to see inside the model. llamafile
+is still useful for a **live demo of the raw model bluffing**: it answers instantly on a laptop,
+with no GPU and no bluff detector, which is exactly the contrast the system is built to show.
+
 ## 9. Docker
 
 - **Image vs container:** an image is a frozen package of code, Python, libraries and the trained
