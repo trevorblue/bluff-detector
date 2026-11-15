@@ -67,6 +67,22 @@ def load_truthfulqa() -> list[QuestionItem]:
     ]
 
 
+def drop_duplicate_questions(items: list[QuestionItem]) -> list[QuestionItem]:
+    """Public sets repeat some questions under different ids (TriviaQA does). Keep the first
+    copy of each question text. Kenya questions are not passed through here: a duplicate there
+    is a data error that `validate` must report."""
+    seen: set[str] = set()
+    kept = []
+    for it in items:
+        key = " ".join(it.question.lower().split())
+        if key not in seen:
+            seen.add(key)
+            kept.append(it)
+    if len(kept) < len(items):
+        log.info("dropped %d duplicate public questions", len(items) - len(kept))
+    return kept
+
+
 def assign_splits(items: list[QuestionItem], split: dict[str, float], seed: int) -> None:
     trainable = [it for it in items if it.pool not in OOD_POOLS]
     rng = np.random.default_rng(seed)
@@ -96,6 +112,7 @@ def run(cfg: dict[str, Any]) -> dict[str, Any]:
             items += load_truthfulqa()
     else:
         raise ValueError(f"unknown data.source {d['source']!r}")
+    items = drop_duplicate_questions(items)
     items += load_kenya(d["kenya_questions"])
 
     assign_splits(items, d["split"], seed)
