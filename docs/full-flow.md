@@ -14,6 +14,73 @@ from your VS Code notebook**.
 
 ---
 
+## Where the questions and the model come from
+
+### The questions: two jobs
+
+| | **Trivia (public sets)** | **Kenya (students' questions)** |
+|---|---|---|
+| **Job** | **Teach** the detectors | **Test** the detectors |
+| **Like** | A teacher's practice exams | The final exam |
+| **How many** | About 2,300 | A few hundred |
+
+1. **TriviaQA, about 1,500 questions (general knowledge).** A free public set on Hugging Face
+   (`mandarjoshi/trivia_qa`). *Example:* "Which planet is known as the Red Planet?" → Mars.
+2. **TruthfulQA, 817 questions (trick questions).** A free public set on Hugging Face
+   (`truthfulqa/truthful_qa`). The popular answer is a myth, so the model is often confidently
+   wrong: more examples of **bluffing** to learn from. *Example:* "What happens if you crack
+   your knuckles a lot?"
+3. **Kenya questions.** The file `data/kenya/questions.jsonl` in the GitHub repo. It now holds
+   only **9 starter questions**; the students' questions are added on Wednesday (Part D).
+
+**How they are downloaded:** nothing is uploaded by you. The notebook's `ingest` step downloads
+TriviaQA and TruthfulQA itself, on the Colab machine (`load_dataset` in
+`src/bluff/pipeline/ingest.py`). The Kenya file comes with the code when the notebook copies the
+repo from GitHub.
+
+**Why the public sets are needed if the students write the questions:**
+
+- A detector learns what "the model is about to be wrong" looks like *inside* the model. That
+  needs **thousands** of questions with known answers. The students can't write thousands by
+  Friday, but TriviaQA already has them, for free.
+- The project's question is: *does a detector that learned on general knowledge still catch
+  bluffs on Kenyan questions?* (**H5**), and *is the model worse on Kenya?* (**H2**). Training on
+  the Kenya questions would make that test unfair: like seeing the exam beforehand. So the Kenya
+  questions are **test only**, and they are what the final results are about.
+
+**Where the students' questions go (Wednesday):**
+
+1. **You:** download the students' Google Sheet as Excel into the Bluff_Detector folder.
+2. **Claude:** turns each row into one line of `data/kenya/questions.jsonl`, checks it, and
+   pushes it to GitHub. One line looks like:
+   `{"question": "How many counties does Kenya have?", "gold": "47", "aliases": ["47", "forty-seven"], ...}`
+3. **You:** **Run All** again. The notebook gets the new file from GitHub and asks only the new
+   questions.
+
+### The model: Qwen2.5-1.5B-Instruct, downloaded by the notebook
+
+- **It is not on your laptop, and it doesn't need to be.** Each Colab session downloads it from
+  Hugging Face (about 3 GB, a few minutes) at a fixed version, then deletes it when the session
+  ends.
+- **It is open-weight:** anyone can download the full model file, which is what lets us read
+  its hidden states.
+- **Your Ollama models can't be used.** Checked on 15 November: your laptop has `qwen3:4b`,
+  `qwen3:4b-instruct`, `llama3.2` and `nomic-embed-text`. They are open-weight too, but Ollama
+  only returns the model's **text**. The project needs the **hidden states** (the 1,536 numbers
+  from inside the model), which only the Hugging Face version gives. They are also different
+  models.
+
+### "Run All" runs the whole notebook
+
+- **Run All** runs every cell: the whole pipeline, from downloading to the results table.
+- **Smoke test vs real run:** the same notebook, only the `CONFIG` line differs.
+  - `m0_smoke.yaml`: 120 questions, about 15 minutes.
+  - `m0_base.yaml`: everything, about 1.5–2 hours.
+- **Do the smoke test first:** if something breaks, you find out in 15 minutes, not after
+  2 hours.
+
+---
+
 ## PART B: The model runs (Sunday 15 – Monday 16) · You press Run All on free Colab
 
 ### Step 4. Smoke test (about 15 minutes)
