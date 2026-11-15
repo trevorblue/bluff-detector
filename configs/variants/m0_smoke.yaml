@@ -1,0 +1,8 @@
+# M0 smoke test: the real model on the first 120 questions, to check the GPU setup works
+# (about 15 minutes on a free T4) before the full M0 run.
+inherits: m0_base.yaml
+variant:
+  id: m0_smoke
+  description: M0 on 120 questions - checks the real model runs end to end
+generation:
+  limit: 120 # enough validation rows to set the thresholds

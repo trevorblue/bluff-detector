@@ -14,3 +14,5 @@ detectors:
   probe_layer: -1
 evaluation:
   bootstrap: 200
+generation:
+  resume: false # always regenerate the cheap fake answers

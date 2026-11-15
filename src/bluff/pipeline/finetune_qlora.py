@@ -19,9 +19,11 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from bluff.backends import resolve_dtype
 from bluff.utils import read_jsonl
 
 log = logging.getLogger(__name__)
+WINDOW = 1024  # tokens per training window
 
 
 def run(cfg: dict[str, Any], output_dir: str = "artefacts/adapters/m2_qlora") -> None:
@@ -41,17 +43,20 @@ def run(cfg: dict[str, Any], output_dir: str = "artefacts/adapters/m2_qlora") ->
     if not corpus.exists():
         raise FileNotFoundError(f"{corpus} missing - build the fine-tuning corpus first")
     docs = read_jsonl(corpus)
-    name = cfg["model"]["name"]
+    name, revision = cfg["model"]["name"], cfg["model"].get("revision")
+    compute_dtype = resolve_dtype(torch, cfg["model"].get("dtype", "auto"))
 
-    tok = AutoTokenizer.from_pretrained(name)
+    tok = AutoTokenizer.from_pretrained(name, revision=revision)
     tok.pad_token = tok.pad_token or tok.eos_token
     bnb = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
+        bnb_4bit_compute_dtype=compute_dtype,
         bnb_4bit_use_double_quant=True,
     )
-    model = AutoModelForCausalLM.from_pretrained(name, quantization_config=bnb, device_map="auto")
+    model = AutoModelForCausalLM.from_pretrained(
+        name, revision=revision, quantization_config=bnb, device_map="auto"
+    )
     model = prepare_model_for_kbit_training(model)
     lora = LoraConfig(
         r=16,  # TODO: sweep r in {8, 16, 32} on the pilot
@@ -64,9 +69,12 @@ def run(cfg: dict[str, Any], output_dir: str = "artefacts/adapters/m2_qlora") ->
     model = get_peft_model(model, lora)
     model.print_trainable_parameters()
 
-    ds = Dataset.from_list([{"text": d["text"]} for d in docs])
-    ds = ds.map(lambda b: tok(b["text"], truncation=True, max_length=1024), batched=True,
-                remove_columns=["text"])
+    # Whole documents cut into 1,024-token windows: truncating would keep only the start of
+    # each Act and throw the rest away.
+    windows = [ids[i : i + WINDOW] for d in docs
+               for ids in [tok(d["text"])["input_ids"]] for i in range(0, len(ids), WINDOW)]
+    ds = Dataset.from_dict({"input_ids": windows})
+    log.info("%d documents -> %d training windows of up to %d tokens", len(docs), len(ds), WINDOW)
     args = TrainingArguments(
         output_dir=output_dir,
         per_device_train_batch_size=4,
@@ -77,7 +85,8 @@ def run(cfg: dict[str, Any], output_dir: str = "artefacts/adapters/m2_qlora") ->
         warmup_ratio=0.03,
         logging_steps=20,
         save_strategy="epoch",
-        bf16=True,
+        bf16=compute_dtype == torch.bfloat16,
+        fp16=compute_dtype == torch.float16,
         seed=cfg["seed"],
         report_to=["mlflow"] if cfg["tracking"]["mlflow"] else [],
     )

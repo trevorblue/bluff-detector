@@ -1,0 +1,48 @@
+"""Resume: a run cut off part-way and finished later must equal one uninterrupted run."""
+
+import numpy as np
+import pytest
+
+from bluff.config import paths
+from bluff.pipeline import generate, ingest
+from bluff.utils import read_jsonl, write_json
+from tests.conftest import fake_config
+
+pytestmark = pytest.mark.integration
+
+
+def _outputs(cfg: dict) -> dict:
+    p = paths(cfg)
+    hidden = np.load(p.interim / "hidden.npz")["hidden"]
+    out = {}
+    for g in read_jsonl(p.interim / "generations.jsonl"):
+        key = (g["qid"], g["condition"], g["template"])
+        out[key] = (g["answer"], g["token_probs"],
+                    None if g["hidden_index"] is None else hidden[g["hidden_index"]].tolist())
+    return out
+
+
+def test_resumed_run_equals_one_full_run(tmp_path):
+    whole = fake_config(tmp_path / "whole")
+    ingest.run(whole)
+    generate.run(whole)
+
+    split = fake_config(tmp_path / "split", generation={"resume": True, "limit": 50})
+    ingest.run(split)
+    first = generate.run(split)
+    assert first["new"] == 50
+    split["generation"]["limit"] = None  # e.g. new questions arrive, or the session restarts
+    second = generate.run(split)
+    assert second["new"] == second["questions"] - 50
+
+    assert _outputs(split) == _outputs(whole)
+
+
+def test_resume_refuses_a_different_machine(tmp_path):
+    cfg = fake_config(tmp_path, generation={"resume": True, "limit": 20})
+    ingest.run(cfg)
+    generate.run(cfg)
+    write_json(paths(cfg).interim / "run_info.json", {"model": "fake-llm", "device": "Tesla P100"})
+    cfg["generation"]["limit"] = None
+    with pytest.raises(ValueError, match="cannot resume"):
+        generate.run(cfg)

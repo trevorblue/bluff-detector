@@ -37,6 +37,7 @@ class GenerationOutput:
 class Backend(Protocol):
     name: str
     uses_reference: bool  # only the fake backend may see the gold answer
+    run_info: dict[str, Any]  # model, revision, dtype, device and library versions
 
     def generate(
         self, prompt: str, *, question: str, condition: str, reference: str | None = None
@@ -69,6 +70,7 @@ class FakeBackend:
         kenya_know_rate: float = 0.35,
     ) -> None:
         self.name = "fake-llm"
+        self.run_info = {"model": "fake-llm", "device": "cpu"}
         self.shape = (n_layers, n_positions, hidden_dim)
         self.abstain_scale = abstain_scale
         self.general_know_rate = general_know_rate
@@ -142,13 +144,15 @@ class HFBackend:
         name: str,
         layers: list[int],
         positions: list[str],
-        dtype: str = "bfloat16",
+        dtype: str = "auto",
         device: str = "auto",
         max_new_tokens: int = 32,
         adapter: str | None = None,
         seed: int = 42,
+        revision: str | None = None,
     ) -> None:
         import torch
+        import transformers
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         torch.manual_seed(seed)
@@ -157,10 +161,20 @@ class HFBackend:
         self.layers = list(layers)
         self.positions = list(positions)
         self.max_new_tokens = max_new_tokens
-        self.tok = AutoTokenizer.from_pretrained(name)
+        torch_dtype = resolve_dtype(torch, dtype)
+        self.tok = AutoTokenizer.from_pretrained(name, revision=revision)
         self.model = AutoModelForCausalLM.from_pretrained(
-            name, torch_dtype=getattr(torch, dtype), device_map=device
+            name, revision=revision, torch_dtype=torch_dtype, device_map=device
         )
+        # Recorded with every run: different hardware or versions give slightly different numbers.
+        self.run_info = {
+            "model": name,
+            "revision": revision,
+            "dtype": str(torch_dtype).replace("torch.", ""),
+            "device": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu",
+            "torch": torch.__version__,
+            "transformers": transformers.__version__,
+        }
         if adapter:
             from peft import PeftModel
 
@@ -222,6 +236,17 @@ class HFBackend:
         )
 
 
+def resolve_dtype(torch: Any, dtype: str) -> Any:
+    """'auto' = bfloat16 on GPUs with native support (Ampere+), float16 on older GPUs such as
+    the free T4, and bfloat16 on CPU (half the memory of float32 on a small laptop)."""
+    if dtype != "auto":
+        return getattr(torch, dtype)
+    if torch.cuda.is_available():
+        major, _ = torch.cuda.get_device_capability(0)
+        return torch.bfloat16 if major >= 8 else torch.float16
+    return torch.bfloat16
+
+
 def build_backend(cfg: dict[str, Any]) -> Backend:
     m = cfg["model"]
     if m["backend"] == "fake":
@@ -237,10 +262,11 @@ def build_backend(cfg: dict[str, Any]) -> Backend:
             name=m["name"],
             layers=m["layers"],
             positions=m["positions"],
-            dtype=m.get("dtype", "bfloat16"),
+            dtype=m.get("dtype", "auto"),
             device=m.get("device", "auto"),
             max_new_tokens=m.get("max_new_tokens", 32),
             adapter=m.get("adapter"),
             seed=cfg["seed"],
+            revision=m.get("revision"),
         )
     raise ValueError(f"unknown backend {m['backend']!r}")

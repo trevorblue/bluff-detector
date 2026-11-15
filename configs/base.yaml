@@ -18,7 +18,7 @@ data:
   # synthetic = generated test data (CI, smoke tests) | hf = TriviaQA + TruthfulQA from the Hub
   source: hf
   kenya_questions: data/kenya/questions.jsonl
-  trivia_sample: 5000
+  trivia_sample: 1500 # 5-day plan: one free Kaggle session. The full design used 5000.
   truthfulqa: true
   synthetic_trivia: 400
   synthetic_kenya: 120
@@ -33,7 +33,8 @@ model:
   backend: hf # hf | fake
   name: Qwen/Qwen2.5-1.5B-Instruct
   adapter: null # path to a PEFT/QLoRA adapter (variants M2, M3)
-  dtype: bfloat16
+  dtype: auto # bfloat16 where the GPU supports it, float16 on free T4s (see backends.py)
+  revision: 989aa7980e4cf806f80c7fef2b1adb7bc71aa306 # pinned Hugging Face commit
   device: auto
   max_new_tokens: 32
   # Layers to save hidden states from (negative = counted from the top). Pre-register these.
@@ -48,6 +49,8 @@ generation:
   conditions: [open, offered]
   offered_templates: 3
   limit: null # cap the number of questions for quick runs
+  resume: true # keep questions already answered; ask only new ones
+  checkpoint_every: 50 # save progress every N questions
 
 retrieval:
   enabled: false
