@@ -1,5 +1,11 @@
 # GPU setup: free T4s, driven from VS Code
 
+> **Current plan (15 November): Colab in VS Code is the GPU; Kaggle is only a backup.** Use
+> `notebooks/colab_run.ipynb` and follow [next-steps.md](next-steps.md). It saves to a private
+> Hugging Face repo and resumes after a disconnect, so the split runs across several machines
+> described below are not needed for the 5-day plan. Switch to Kaggle only if Colab's free
+> quota runs out: upload the same notebook there with Accelerator = **GPU T4 x2** and run it.
+
 Two jobs need a GPU: answering the questions (`generate`, once per variant) and QLoRA training
 (once, for M2). Everything else runs on the laptop. Free T4 GPUs come from **Colab, which runs
 inside VS Code**, and **Kaggle, which runs in the background and is watched from VS Code's
