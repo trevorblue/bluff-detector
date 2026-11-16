@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bluff Detector: live guard</title>
+<!-- The live guard's demo page, served by app/main.py at "/". It only calls the API
+     (POST /v1/ask, GET /metadata); all the work happens in the API. No external files. -->
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1d2433; --muted: #5d6779; --line: #dfe3ea;
+    --accent: #1f4fd1; --ok: #1e7a3c; --ok-bg: #e6f4ea; --stop: #b3261e; --stop-bg: #fce8e6;
+    --meter: #e9ecf1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --card: #1b1f27; --text: #e6e9ef; --muted: #9aa3b2; --line: #2c323d;
+      --accent: #7aa2ff; --ok: #6fcf8f; --ok-bg: #18301f; --stop: #ff8a80; --stop-bg: #3a1c1a;
+      --meter: #2a2f39;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+          padding: 20px; margin-bottom: 16px; }
+  form { display: flex; gap: 8px; }
+  input[type=text] { flex: 1; min-width: 0; padding: 12px 14px; font: inherit; color: var(--text);
+                     background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button { padding: 12px 18px; font: inherit; font-weight: 600; color: #fff;
+           background: var(--accent); border: 0; border-radius: 8px; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: wait; }
+  .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .chip { padding: 5px 10px; font-size: .85rem; color: var(--text); background: var(--bg);
+          border: 1px solid var(--line); border-radius: 999px; cursor: pointer; font-weight: 400; }
+  .opt { display: flex; align-items: center; gap: 6px; margin-top: 12px; color: var(--muted);
+         font-size: .9rem; }
+  .verdict { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700;
+             font-size: .9rem; }
+  .verdict.answer { color: var(--ok); background: var(--ok-bg); }
+  .verdict.abstain { color: var(--stop); background: var(--stop-bg); }
+  .answer-text { font-size: 1.35rem; font-weight: 600; margin: 12px 0 4px; word-wrap: break-word; }
+  .withheld { color: var(--muted); margin: 4px 0 0; }
+  .withheld b { color: var(--stop); }
+  .meter { position: relative; height: 14px; background: var(--meter); border-radius: 7px;
+           margin: 20px 0 6px; overflow: visible; }
+  .fill { height: 100%; border-radius: 7px; transition: width .4s; }
+  .mark { position: absolute; top: -6px; width: 2px; height: 26px; background: var(--text); }
+  .mark span { position: absolute; top: -20px; left: -40px; width: 82px; text-align: center;
+               font-size: .75rem; color: var(--muted); }
+  .scale { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 16px 0 0;
+       font-size: .9rem; }
+  dt { color: var(--muted); }
+  dd { margin: 0; word-break: break-all; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  .muted { color: var(--muted); font-size: .9rem; }
+  .error { color: var(--stop); }
+  h2 { font-size: 1.05rem; margin: 0 0 10px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Bluff Detector: live guard</h1>
+  <p class="sub">Ask a question. The model answers, a probe reads the model's own hidden state to
+    estimate the chance the answer is wrong, and the guard blocks the answer if that chance is
+    above the line.</p>
+
+  <section class="card">
+    <form id="ask">
+      <label for="q" class="muted" style="position:absolute;left:-9999px">Question</label>
+      <input id="q" type="text" placeholder="e.g. How many counties does Kenya have?"
+             minlength="3" maxlength="500" required autocomplete="off">
+      <button id="go" type="submit">Ask</button>
+    </form>
+    <div class="examples" id="examples"></div>
+    <label class="opt"><input type="checkbox" id="reveal" checked> When the guard blocks an
+      answer, also show what the model would have said (demo only)</label>
+  </section>
+
+  <section class="card" id="result" hidden aria-live="polite"></section>
+
+  <section class="card">
+    <h2>This session</h2>
+    <table>
+      <thead><tr><th>Question</th><th>Verdict</th><th>P(wrong)</th><th>Time</th></tr></thead>
+      <tbody id="history"><tr><td colspan="4" class="muted">No questions yet.</td></tr></tbody>
+    </table>
+  </section>
+
+  <p class="muted" id="meta">Loading the detector's details…</p>
+</main>
+
+<script>
+const EXAMPLES = [
+  "How many counties does Kenya have?",
+  "What is the name of King Lear's youngest daughter?",
+  "What is the capital of Australia?",
+  "Who wrote the novel Petals of Blood?",
+  "In what year was Kenya's 48th county created?",
+];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const history = [];
+
+for (const text of EXAMPLES) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.textContent = text;
+  b.onclick = () => { $("q").value = text; ask(); };
+  $("examples").appendChild(b);
+}
+
+async function ask() {
+  const question = $("q").value.trim();
+  if (question.length < 3) return;
+  $("go").disabled = true; $("go").textContent = "Thinking…";
+  $("result").hidden = false;
+  $("result").innerHTML = '<p class="muted">The model is answering on this computer\'s CPU, ' +
+                          'which takes a few seconds…</p>';
+  try {
+    const res = await fetch("/v1/ask", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, reveal: $("reveal").checked }),
+    });
+    const r = await res.json();
+    if (!res.ok) throw new Error(r.detail ? JSON.stringify(r.detail) : res.statusText);
+    show(question, r);
+  } catch (e) {
+    $("result").innerHTML = `<p class="error">Request failed: ${esc(e.message)}</p>`;
+  } finally {
+    $("go").disabled = false; $("go").textContent = "Ask";
+  }
+}
+
+function show(question, r) {
+  const blocked = r.verdict === "abstain";
+  const pct = Math.round(r.bluff_score * 100);
+  const colour = blocked ? "var(--stop)" : "var(--ok)";
+  $("result").innerHTML = `
+    <span class="verdict ${blocked ? "abstain" : "answer"}">
+      ${blocked ? "BLOCKED: the guard abstained" : "ANSWERED"}</span>
+    <p class="answer-text">${blocked ? "I'm not confident enough to answer that."
+                                     : esc(r.answer)}</p>
+    ${blocked && r.withheld_answer != null ? `<p class="withheld">The model was about to say:
+      <b>${esc(r.withheld_answer)}</b></p>` : ""}
+    <div class="meter" role="img" aria-label="P(wrong) ${pct}%, threshold ${r.threshold}">
+      <div class="fill" style="width:${pct}%;background:${colour}"></div>
+      <div class="mark" style="left:${r.threshold * 100}%"><span>block above
+        ${r.threshold}</span></div>
+    </div>
+    <div class="scale"><span>0: surely right</span><span>P(wrong) = ${r.bluff_score.toFixed(3)}
+      </span><span>1: surely wrong</span></div>
+    <dl>
+      <dt>Question</dt><dd>${esc(question)}</dd>
+      <dt>Detector</dt><dd>${esc(r.detector)} (${esc(r.variant)})</dd>
+      <dt>Model version</dt><dd>${esc(r.model_version)}</dd>
+      <dt>Time</dt><dd>${(r.latency_ms / 1000).toFixed(1)} s</dd>
+      <dt>Request id</dt><dd>${esc(r.request_id)}</dd>
+    </dl>`;
+  history.unshift({ question, blocked, p: r.bluff_score, ms: r.latency_ms });
+  $("history").innerHTML = history.map((h) => `<tr><td>${esc(h.question)}</td>
+    <td>${h.blocked ? "blocked" : "answered"}</td><td>${h.p.toFixed(3)}</td>
+    <td>${(h.ms / 1000).toFixed(1)} s</td></tr>`).join("");
+}
+
+$("ask").addEventListener("submit", (e) => { e.preventDefault(); ask(); });
+
+fetch("/metadata").then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((m) => {
+  $("meta").textContent = `Serving ${m.detector} (variant ${m.variant}, version ${m.version}),
+    trained ${m.trained_at} on ${m.n_train} questions. Validation AUROC
+    ${m.val && m.val.auroc != null ? m.val.auroc.toFixed(3) : "n/a"}. Block line
+    t_abstain = ${m.t_abstain}.`;
+}).catch(() => { $("meta").textContent = "The detector is still loading or missing."; });
+</script>
+</body>
+</html>

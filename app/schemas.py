@@ -16,12 +16,19 @@ class AskRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     question: str = Field(min_length=3, max_length=500)
+    reveal: bool = Field(
+        default=False,
+        description="demo only: when the gate abstains, also return what the model would have said",
+    )
 
 
 class AskResponse(BaseModel):
     request_id: str
     verdict: Literal["answer", "answer_with_citation", "abstain"]
     answer: str | None = Field(description="null when the gate abstains")
+    withheld_answer: str | None = Field(
+        default=None, description="the blocked answer, only when the request set reveal=true"
+    )
     bluff_score: float = Field(ge=0.0, le=1.0, description="detector P(wrong)")
     threshold: float = Field(description="abstain when bluff_score > threshold")
     sources: list[str] = Field(default_factory=list, description="retrieved passage ids")

@@ -12,3 +12,4 @@ tests
 artefacts/registry
 artefacts/adapters
 mlruns
+logs

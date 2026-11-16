@@ -27,7 +27,8 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     OMP_NUM_THREADS=1 \
-    BLUFF_CONFIG=configs/variants/dev_fake.yaml
+    BLUFF_CONFIG=configs/variants/dev_fake.yaml \
+    BLUFF_REQUEST_LOG=/tmp/requests.jsonl
 WORKDIR /srv
 COPY app/ app/
 COPY configs/ configs/

@@ -20,6 +20,7 @@ data/datasets/*
 !data/datasets/.gitkeep
 !reports/.gitkeep
 mlruns/
+logs/
 mlflow.db
 
 # packaging and OS noise
