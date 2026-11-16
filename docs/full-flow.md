@@ -491,6 +491,42 @@ the command above, reads the report with you, and uploads `data/kenya/questions.
     - You ask a question → the model answers → the probe gives P(wrong).
     - **Above 0.25 → abstain; otherwise → the answer.**
     - Each reply includes an audit record, and **latency p50/p99** is measured.
+    **Built 16 November.** Start it yourself (VS Code terminal, inside `bluff-detector`):
+
+    ```
+    powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1
+    ```
+
+    Wait for `Uvicorn running on http://127.0.0.1:8000`, then open **http://127.0.0.1:8000**.
+    Stop it with **Ctrl+C**.
+
+    - **The page** (`app/static/index.html`): a question box, example questions, the verdict
+      (ANSWERED / BLOCKED), a P(wrong) meter with the 0.25 line, *"the model was about to
+      say…"* when it blocks (the `reveal` option, demo only), and this session's questions.
+    - **The model** is a local copy of the pinned Qwen2.5-1.5B-Instruct in
+      `C:\Users\Admin\models\qwen2.5-1.5b-instruct` (3 GB; Hugging Face's own downloader
+      stalled on this connection, so it was fetched with a resumable `curl`). The detector is
+      the champion, `artefacts/m0_base/serving/` (v2, TriviaQA only).
+    - **Speed: 20–40 s per question** on this laptop (7.7 GB RAM, CPU only, bfloat16), against
+      0.2 s on the T4. RAM is the bottleneck; close Chrome and Discord before a demo.
+    - **First real answers:** "Capital of Australia?" → Canberra, P(wrong) 0.000, **answered**;
+      "King Lear's youngest daughter?" → Goneril (wrong), 0.948, **blocked**; "How many counties
+      does Kenya have?" → 47 (right), 0.688, **blocked**: the 0.25 line is cautious, as the
+      results predicted (it loses about half the right answers).
+    - **Note for the report:** the probe was trained on hidden states from a T4 in float16; the
+      laptop computes them in bfloat16 on a CPU, so its scores can shift slightly. Monitoring's
+      prediction-drift check is there to catch exactly this.
+
+    **Monitoring (built 16 November):** every request is appended to `logs/requests.jsonl`
+    (question, verdict, P(wrong), the 8 confidence numbers, time). Then:
+
+    ```
+    .venv\Scripts\bluff monitor --config configs/variants/m0_base.yaml
+    ```
+
+    writes `reports/m0_base/monitoring/drift_report.md`: the live block rate and latency against
+    the validation baseline, and for each confidence number and for P(wrong) a PSI and a KS test
+    against the training data (OK / WATCH / DRIFT). Below 30 requests it says **TOO EARLY**.
 16. **Claude:** put the real results in the README.
 17. **You:** write the report in your own words. Include what was cut and why: M1/H4, UK twins
     if missing, monitoring, and M2/H3 if not reached.
