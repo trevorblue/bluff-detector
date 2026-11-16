@@ -112,6 +112,7 @@ def run(cfg: dict[str, Any], log_path: str | Path = "logs/requests.jsonl") -> di
                              val_scores[served].to_numpy(), live["bluff_score"].to_numpy()))
 
     ref_block = float((val_scores[served] > threshold).mean())
+    live_block = None if live.empty else float((live["verdict"] == "abstain").mean())
     lat = live["latency_ms"].to_numpy() if not live.empty else np.array([])
     summary = {
         "variant": meta["variant"], "detector": meta["detector"],
@@ -120,8 +121,7 @@ def run(cfg: dict[str, Any], log_path: str | Path = "logs/requests.jsonl") -> di
         "live_requests": int(len(live)), "enough_to_judge": bool(len(live) >= MIN_LIVE),
         "first_request": None if live.empty else str(live["ts"].min()),
         "last_request": None if live.empty else str(live["ts"].max()),
-        "block_rate": {"validation": ref_block,
-                       "live": None if live.empty else float((live["verdict"] == "abstain").mean())},
+        "block_rate": {"validation": ref_block, "live": live_block},
         "latency_ms": {} if lat.size == 0 else {
             k: float(np.percentile(lat, q)) for k, q in (("p50", 50), ("p95", 95), ("p99", 99))},
         "checks": checks,
