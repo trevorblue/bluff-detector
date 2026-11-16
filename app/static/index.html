@@ -5,96 +5,197 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bluff Detector: live guard</title>
 <!-- The live guard's demo page, served by app/main.py at "/". It only calls the API
-     (POST /v1/ask, GET /metadata); all the work happens in the API. No external files. -->
+     (POST /v1/ask, GET /v1/model-card); all the work happens in the API. No external files. -->
 <style>
   :root {
-    --bg: #f6f7f9; --card: #ffffff; --text: #1d2433; --muted: #5d6779; --line: #dfe3ea;
-    --accent: #1f4fd1; --ok: #1e7a3c; --ok-bg: #e6f4ea; --stop: #b3261e; --stop-bg: #fce8e6;
-    --meter: #e9ecf1;
+    --bg: #f5f6f8; --card: #ffffff; --text: #1c2230; --muted: #5b6577; --line: #e0e4ea;
+    --accent: #1f4fd1; --accent-bg: #e8eefc; --ok: #1b7a3a; --ok-bg: #e5f4ea;
+    --warn: #9a6200; --warn-bg: #fdf3e1; --stop: #b3261e; --stop-bg: #fce9e7; --track: #e9ecf1;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #12151b; --card: #1b1f27; --text: #e6e9ef; --muted: #9aa3b2; --line: #2c323d;
-      --accent: #7aa2ff; --ok: #6fcf8f; --ok-bg: #18301f; --stop: #ff8a80; --stop-bg: #3a1c1a;
-      --meter: #2a2f39;
+      --bg: #11141a; --card: #1a1e26; --text: #e6e9ef; --muted: #9aa3b2; --line: #2b313c;
+      --accent: #7ea6ff; --accent-bg: #1d2a47; --ok: #6fcf8f; --ok-bg: #17301f;
+      --warn: #f0b85a; --warn-bg: #3a2c12; --stop: #ff8a80; --stop-bg: #3a1c1a; --track: #2a2f39;
     }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-         font: 16px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
-  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 48px; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); margin: 0 0 24px; }
+         font: 15.5px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 28px 16px 56px; }
+  h1 { font-size: 1.65rem; margin: 0 0 4px; letter-spacing: -.01em; }
+  h2 { font-size: 1.08rem; margin: 0 0 4px; }
+  h3 { font-size: .95rem; margin: 18px 0 6px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--muted); margin: 0 0 18px; max-width: 70ch; }
+  .muted { color: var(--muted); font-size: .9rem; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
           padding: 20px; margin-bottom: 16px; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+          padding: 12px 14px; font-size: .9rem; }
+  .step b { display: block; margin-bottom: 2px; }
+  .step .n { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 6px;
+             border-radius: 50%; background: var(--accent-bg); color: var(--accent); font-size: .8rem;
+             font-weight: 700; }
   form { display: flex; gap: 8px; }
   input[type=text] { flex: 1; min-width: 0; padding: 12px 14px; font: inherit; color: var(--text);
                      background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
-  input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input[type=text]:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px; }
   button { padding: 12px 18px; font: inherit; font-weight: 600; color: #fff;
            background: var(--accent); border: 0; border-radius: 8px; cursor: pointer; }
   button:disabled { opacity: .6; cursor: wait; }
   .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-  .chip { padding: 5px 10px; font-size: .85rem; color: var(--text); background: var(--bg);
-          border: 1px solid var(--line); border-radius: 999px; cursor: pointer; font-weight: 400; }
+  .chip { padding: 5px 11px; font-size: .85rem; font-weight: 400; color: var(--text);
+          background: var(--bg); border: 1px solid var(--line); border-radius: 999px; }
   .opt { display: flex; align-items: center; gap: 6px; margin-top: 12px; color: var(--muted);
-         font-size: .9rem; }
-  .verdict { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700;
-             font-size: .9rem; }
-  .verdict.answer { color: var(--ok); background: var(--ok-bg); }
-  .verdict.abstain { color: var(--stop); background: var(--stop-bg); }
-  .answer-text { font-size: 1.35rem; font-weight: 600; margin: 12px 0 4px; word-wrap: break-word; }
-  .withheld { color: var(--muted); margin: 4px 0 0; }
+         font-size: .88rem; }
+  .banner { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px;
+            border-radius: 10px; margin-bottom: 14px; }
+  .banner.answer { background: var(--ok-bg); }
+  .banner.abstain { background: var(--stop-bg); }
+  .badge { flex: none; padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: .8rem;
+           color: #fff; }
+  .answer .badge { background: var(--ok); }
+  .abstain .badge { background: var(--stop); }
+  .big { font-size: 1.4rem; font-weight: 650; margin: 2px 0 8px; word-wrap: break-word; }
   .withheld b { color: var(--stop); }
-  .meter { position: relative; height: 14px; background: var(--meter); border-radius: 7px;
-           margin: 20px 0 6px; overflow: visible; }
-  .fill { height: 100%; border-radius: 7px; transition: width .4s; }
-  .mark { position: absolute; top: -6px; width: 2px; height: 26px; background: var(--text); }
-  .mark span { position: absolute; top: -20px; left: -40px; width: 82px; text-align: center;
-               font-size: .75rem; color: var(--muted); }
-  .scale { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); }
-  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 16px 0 0;
-       font-size: .9rem; }
-  dt { color: var(--muted); }
-  dd { margin: 0; word-break: break-all; }
-  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); }
-  th { color: var(--muted); font-weight: 600; }
-  .muted { color: var(--muted); font-size: .9rem; }
+  .gauge { position: relative; height: 16px; background: var(--track); border-radius: 8px;
+           margin: 30px 0 6px; }
+  .gauge .fill { height: 100%; border-radius: 8px; transition: width .5s; }
+  .line { position: absolute; top: -8px; width: 2px; height: 32px; background: var(--text); }
+  .line span { position: absolute; top: -21px; left: 50%; transform: translateX(-50%);
+               white-space: nowrap; font-size: .75rem; color: var(--muted); }
+  .scale { display: flex; justify-content: space-between; font-size: .78rem; color: var(--muted); }
+  .rows { display: grid; gap: 10px; margin-top: 6px; }
+  .drow { display: grid; grid-template-columns: 210px 1fr 54px; gap: 10px; align-items: center; }
+  .drow .name { font-size: .9rem; }
+  .drow .name small { display: block; color: var(--muted); font-size: .78rem; }
+  .bar { position: relative; height: 12px; background: var(--track); border-radius: 6px; }
+  .bar .fill { height: 100%; border-radius: 6px; }
+  .bar .line { top: -4px; height: 20px; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .tag { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 4px;
+         font-size: .72rem; background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+  .note { margin-top: 12px; padding: 10px 12px; border-left: 3px solid var(--accent);
+          background: var(--accent-bg); border-radius: 0 8px 8px 0; font-size: .9rem; }
+  .tokens { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .tok { display: grid; justify-items: center; padding: 6px 8px; border-radius: 8px;
+         min-width: 44px; border: 1px solid var(--line); }
+  .tok .w { font-weight: 600; white-space: pre; }
+  .tok .p { font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .hi { background: var(--ok-bg); } .mid { background: var(--warn-bg); }
+  .lo { background: var(--stop-bg); }
+  .legend { display: flex; gap: 12px; font-size: .78rem; color: var(--muted); margin-top: 6px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px;
+              margin-right: 4px; vertical-align: -1px; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line);
+           vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: .8rem; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .like-right { color: var(--ok); font-weight: 600; }
+  .like-wrong { color: var(--stop); font-weight: 600; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;
+           margin: 12px 0; }
+  .tile { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .tile .v { font-size: 1.45rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tile .k { font-size: .8rem; color: var(--muted); font-weight: 600; text-transform: uppercase;
+             letter-spacing: .03em; }
+  .tile p { font-size: .84rem; color: var(--muted); margin: 4px 0 0; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 8px 0 0;
+       font-size: .88rem; }
+  dt { color: var(--muted); } dd { margin: 0; word-break: break-word; }
+  details summary { cursor: pointer; font-weight: 600; }
+  details[open] summary { margin-bottom: 8px; }
+  .glossary dt { color: var(--text); font-weight: 600; }
+  .glossary dd { color: var(--muted); margin-bottom: 6px; }
   .error { color: var(--stop); }
-  h2 { font-size: 1.05rem; margin: 0 0 10px; }
+  .scroll { overflow-x: auto; }
+  @media (max-width: 640px) {
+    .steps { grid-template-columns: 1fr; }
+    .drow { grid-template-columns: 1fr 54px; }
+    .drow .bar { grid-column: 1 / -1; grid-row: 2; }
+    form { flex-direction: column; }
+  }
 </style>
 </head>
 <body>
 <main>
   <h1>Bluff Detector: live guard</h1>
-  <p class="sub">Ask a question. The model answers, a probe reads the model's own hidden state to
-    estimate the chance the answer is wrong, and the guard blocks the answer if that chance is
-    above the line.</p>
+  <p class="sub">A small language model (Qwen2.5-1.5B) answers your question. A detector then reads
+    the model's <b>own hidden state</b> to estimate the chance the answer is wrong, and a guard
+    refuses to answer when that chance is too high. The point: catch the model when it
+    <i>bluffs</i>, sounding sure while its inside is not.</p>
+
+  <div class="steps" aria-label="How it works">
+    <div class="step"><span class="n">1</span><b>The model answers</b>It writes a short answer,
+      word by word, and the API records how sure it was of each word and its hidden state.</div>
+    <div class="step"><span class="n">2</span><b>Detectors read it</b>Four trained detectors
+      each estimate P(wrong): two from the word confidences, two from the hidden state.</div>
+    <div class="step"><span class="n">3</span><b>The guard decides</b>If the served detector's
+      P(wrong) is above the line, the answer is withheld; otherwise it is shown.</div>
+  </div>
 
   <section class="card">
     <form id="ask">
-      <label for="q" class="muted" style="position:absolute;left:-9999px">Question</label>
-      <input id="q" type="text" placeholder="e.g. How many counties does Kenya have?"
+      <label for="q" style="position:absolute;left:-9999px">Your question</label>
+      <input id="q" type="text" placeholder="Type a factual question, e.g. Who wrote Petals of Blood?"
              minlength="3" maxlength="500" required autocomplete="off">
       <button id="go" type="submit">Ask</button>
     </form>
-    <div class="examples" id="examples"></div>
+    <div class="examples" id="examples" aria-label="Example questions"></div>
     <label class="opt"><input type="checkbox" id="reveal" checked> When the guard blocks an
-      answer, also show what the model would have said (demo only)</label>
+      answer, also show what the model would have said (for the demo; a real deployment hides it)</label>
   </section>
 
   <section class="card" id="result" hidden aria-live="polite"></section>
 
-  <section class="card">
-    <h2>This session</h2>
-    <table>
-      <thead><tr><th>Question</th><th>Verdict</th><th>P(wrong)</th><th>Time</th></tr></thead>
-      <tbody id="history"><tr><td colspan="4" class="muted">No questions yet.</td></tr></tbody>
-    </table>
+  <section class="card" id="about">
+    <h2>About this detector</h2>
+    <p class="muted" id="about-body">Loading…</p>
   </section>
 
-  <p class="muted" id="meta">Loading the detector's details…</p>
+  <section class="card">
+    <h2>This session</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Question</th><th>Model's answer</th><th>Guard</th><th>P(wrong)</th>
+        <th>Time</th></tr></thead>
+      <tbody id="history"><tr><td colspan="5" class="muted">No questions yet.</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="card glossary">
+    <details>
+      <summary>Glossary: what the words on this page mean</summary>
+      <dl>
+        <dt>P(wrong)</dt><dd>A detector's estimate of the chance that the model's answer is wrong,
+          from 0 (surely right) to 1 (surely wrong).</dd>
+        <dt>The guard's line (t_abstain)</dt><dd>The guard withholds an answer when P(wrong) is
+          above it. Here a confident wrong answer counts as 3 times worse than a needless refusal,
+          so the line is 1 / (1 + 3) = 0.25.</dd>
+        <dt>Hidden state</dt><dd>The 1,536 numbers inside the model at the end of its answer (layer
+          21 of 28): its internal "thought". The probes read it.</dd>
+        <dt>Outside vs inside</dt><dd>Outside detectors (logistic regression, XGBoost) only see how
+          sure the model was of its words. Inside detectors (the probes) read the hidden state.</dd>
+        <dt>Silent knowing</dt><dd>The model states a wrong answer confidently while its hidden
+          state already signals doubt. Hypothesis H1 of the project.</dd>
+        <dt>AUROC</dt><dd>Take one right and one wrong answer at random: the share of times the
+          detector gives the wrong one the higher P(wrong). 1.0 = perfect, 0.5 = a coin flip.</dd>
+        <dt>ECE (calibration error)</dt><dd>How far P(wrong) is from the real share of wrong
+          answers, on average. 0 = its probabilities can be taken at face value.</dd>
+        <dt>Entropy ("hesitation")</dt><dd>How spread the model's probability was over the
+          possible next words. 0 = no doubt at all; higher = torn between options.</dd>
+        <dt>95% CI</dt><dd>The range the true value very likely lies in, given how many test
+          questions there were.</dd>
+      </dl>
+    </details>
+  </section>
+
+  <p class="muted">API: <a href="/docs">interactive docs</a> · <a href="/v1/model-card">model card
+    (JSON)</a> · <a href="/metadata">metadata</a>. Every question asked here is logged for
+    monitoring (<code>bluff monitor</code>).</p>
 </main>
 
 <script>
@@ -105,9 +206,35 @@ const EXAMPLES = [
   "Who wrote the novel Petals of Blood?",
   "In what year was Kenya's 48th county created?",
 ];
+const DET = {
+  logreg: { name: "Logistic regression", reads: "outside: the 8 confidence numbers" },
+  xgboost: { name: "XGBoost", reads: "outside: the 8 confidence numbers" },
+  probe_linear: { name: "Linear probe", reads: "inside: the hidden state" },
+  probe_mlp: { name: "MLP probe", reads: "inside: the hidden state" },
+};
+const OUTSIDE = ["logreg", "xgboost"], INSIDE = ["probe_linear", "probe_mlp"];
+const exp = Math.exp;
+const SIGNALS = [
+  ["mean_logprob", "Average word confidence",
+   "How sure it was, on average, of each word it chose.", (v) => pct(exp(v))],
+  ["min_logprob", "Least-sure word", "Its confidence in the word it was least sure of.",
+   (v) => pct(exp(v))],
+  ["frac_low_prob", "Unsure words", "Share of words it gave under 50% probability.", (v) => pct(v)],
+  ["mean_entropy", "Average hesitation", "How torn it was between possible words (0 = no doubt).",
+   (v) => v.toFixed(2)],
+  ["max_entropy", "Biggest hesitation", "Its most torn moment in the answer.", (v) => v.toFixed(2)],
+  ["last_entropy", "Hesitation at the last word", "How torn it was when finishing the answer.",
+   (v) => v.toFixed(2)],
+  ["n_tokens", "Answer length", "Number of word pieces (tokens) in the answer.",
+   (v) => String(Math.round(v))],
+];
 const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pct = (x, d = 0) => (x == null || isNaN(x)) ? "–" : `${(x * 100).toFixed(d)}%`;
+const f3 = (x) => (x == null || isNaN(x)) ? "–" : Number(x).toFixed(3);
+const colour = (p, t) => p > t ? "var(--stop)" : "var(--ok)";
+let CARD = null;
 const history = [];
 
 for (const text of EXAMPLES) {
@@ -120,64 +247,204 @@ for (const text of EXAMPLES) {
 async function ask() {
   const question = $("q").value.trim();
   if (question.length < 3) return;
-  $("go").disabled = true; $("go").textContent = "Thinking…";
+  $("go").disabled = true;
+  const t0 = Date.now();
+  const tick = () => { $("go").textContent = `Thinking… ${Math.round((Date.now() - t0) / 1000)} s`; };
+  tick(); const timer = setInterval(tick, 1000);
   $("result").hidden = false;
-  $("result").innerHTML = '<p class="muted">The model is answering on this computer\'s CPU, ' +
-                          'which takes a few seconds…</p>';
+  $("result").innerHTML = `<p class="muted">The model is answering on this computer's processor.
+    On this laptop that takes 20–40 seconds (on the Colab GPU it took 0.2 s).</p>`;
   try {
-    const res = await fetch("/v1/ask", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, reveal: $("reveal").checked }),
-    });
+    const res = await fetch("/v1/ask", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, reveal: $("reveal").checked }) });
     const r = await res.json();
     if (!res.ok) throw new Error(r.detail ? JSON.stringify(r.detail) : res.statusText);
     show(question, r);
   } catch (e) {
-    $("result").innerHTML = `<p class="error">Request failed: ${esc(e.message)}</p>`;
+    $("result").innerHTML = `<p class="error">The request failed: ${esc(e.message)}</p>`;
   } finally {
-    $("go").disabled = false; $("go").textContent = "Ask";
+    clearInterval(timer); $("go").disabled = false; $("go").textContent = "Ask";
   }
 }
 
 function show(question, r) {
   const blocked = r.verdict === "abstain";
-  const pct = Math.round(r.bluff_score * 100);
-  const colour = blocked ? "var(--stop)" : "var(--ok)";
+  const said = blocked ? r.withheld_answer : r.answer;
+  const t = r.threshold, p = r.bluff_score, dn = DET[r.detector]?.name || r.detector;
+  const sentence = blocked
+    ? `${said != null ? `The model's answer was <b>“${esc(said)}”</b>. ` : ""}The ${esc(dn)}, reading
+       the model's hidden state, puts the chance this answer is wrong at <b>${pct(p)}</b>. That is
+       above the guard's line of ${pct(t)}, so the guard <b>refused to answer</b>.`
+    : `The model answered <b>“${esc(said)}”</b>. The ${esc(dn)}, reading the model's hidden state,
+       puts the chance this is wrong at <b>${pct(p)}</b>, below the guard's line of ${pct(t)}, so
+       the guard <b>let the answer through</b>.`;
+
   $("result").innerHTML = `
-    <span class="verdict ${blocked ? "abstain" : "answer"}">
-      ${blocked ? "BLOCKED: the guard abstained" : "ANSWERED"}</span>
-    <p class="answer-text">${blocked ? "I'm not confident enough to answer that."
-                                     : esc(r.answer)}</p>
-    ${blocked && r.withheld_answer != null ? `<p class="withheld">The model was about to say:
-      <b>${esc(r.withheld_answer)}</b></p>` : ""}
-    <div class="meter" role="img" aria-label="P(wrong) ${pct}%, threshold ${r.threshold}">
-      <div class="fill" style="width:${pct}%;background:${colour}"></div>
-      <div class="mark" style="left:${r.threshold * 100}%"><span>block above
-        ${r.threshold}</span></div>
+    <div class="banner ${blocked ? "abstain" : "answer"}">
+      <span class="badge">${blocked ? "BLOCKED" : "ANSWERED"}</span>
+      <div>
+        <div class="big">${blocked ? "I'm not confident enough to answer that." : esc(r.answer)}</div>
+        <div>${sentence}</div>
+      </div>
     </div>
-    <div class="scale"><span>0: surely right</span><span>P(wrong) = ${r.bluff_score.toFixed(3)}
-      </span><span>1: surely wrong</span></div>
-    <dl>
+
+    <h3>The guard's decision</h3>
+    <div class="gauge" role="img" aria-label="P(wrong) ${pct(p)}, line ${pct(t)}">
+      <div class="fill" style="width:${p * 100}%;background:${colour(p, t)}"></div>
+      <div class="line" style="left:${t * 100}%"><span>guard's line ${pct(t)}</span></div>
+    </div>
+    <div class="scale"><span>0%: surely right → answers</span><span>P(wrong) =
+      <b>${pct(p, 1)}</b></span><span>blocks ← 100%: surely wrong</span></div>
+    <p class="muted">Why ${pct(t)}? A confident wrong answer is counted as 3× worse than a needless
+      refusal, so refusing pays off once the chance of being wrong passes 1 / (1 + 3) = 25%.</p>
+
+    ${detectorsHtml(r)}
+    ${tokensHtml(r)}
+    ${signalsHtml(r)}
+
+    <details><summary>Call details (the audit record)</summary><dl>
       <dt>Question</dt><dd>${esc(question)}</dd>
-      <dt>Detector</dt><dd>${esc(r.detector)} (${esc(r.variant)})</dd>
+      <dt>Served detector</dt><dd>${esc(dn)} (${esc(r.detector)}), variant ${esc(r.variant)}</dd>
       <dt>Model version</dt><dd>${esc(r.model_version)}</dd>
-      <dt>Time</dt><dd>${(r.latency_ms / 1000).toFixed(1)} s</dd>
+      <dt>Time taken</dt><dd>${(r.latency_ms / 1000).toFixed(1)} s</dd>
       <dt>Request id</dt><dd>${esc(r.request_id)}</dd>
-    </dl>`;
-  history.unshift({ question, blocked, p: r.bluff_score, ms: r.latency_ms });
+    </dl></details>`;
+
+  history.unshift({ question, said, blocked, p, ms: r.latency_ms });
   $("history").innerHTML = history.map((h) => `<tr><td>${esc(h.question)}</td>
-    <td>${h.blocked ? "blocked" : "answered"}</td><td>${h.p.toFixed(3)}</td>
-    <td>${(h.ms / 1000).toFixed(1)} s</td></tr>`).join("");
+    <td>${h.said == null ? '<span class="muted">hidden</span>' : esc(h.said)}</td>
+    <td class="${h.blocked ? "like-wrong" : "like-right"}">${h.blocked ? "blocked" : "answered"}</td>
+    <td class="n">${pct(h.p)}</td><td class="n">${(h.ms / 1000).toFixed(1)} s</td></tr>`).join("");
+}
+
+function detectorsHtml(r) {
+  const all = r.all_detectors || {};
+  const names = Object.keys(DET).filter((n) => n in all);
+  if (!names.length) return "";
+  const avg = (list) => { const v = list.filter((n) => n in all).map((n) => all[n]);
+                          return v.length ? v.reduce((a, b) => a + b) / v.length : null; };
+  const out = avg(OUTSIDE), ins = avg(INSIDE);
+  let note = "Inside and outside agree on this answer.";
+  if (out != null && ins != null && ins - out > 0.25)
+    note = `<b>The words sound surer than the model's inside is.</b> The outside detectors see
+      a fairly confident answer (${pct(out)} wrong), but the probes reading the hidden state see
+      ${pct(ins)}. Doubt that the confidence numbers miss is the pattern this project calls
+      <b>silent knowing</b>.`;
+  else if (out != null && ins != null && out - ins > 0.25)
+    note = `The words sound unsure (outside ${pct(out)}), but the model's inside looks more
+      confident (${pct(ins)}).`;
+  const rows = names.map((n) => `<div class="drow">
+      <div class="name">${DET[n].name}${n === r.detector ? '<span class="tag">used by the guard</span>' : ""}
+        <small>${DET[n].reads}</small></div>
+      <div class="bar"><div class="fill" style="width:${all[n] * 100}%;background:${colour(all[n], r.threshold)}"></div>
+        <div class="line" style="left:${r.threshold * 100}%"></div></div>
+      <div class="num">${pct(all[n])}</div></div>`).join("");
+  return `<h3>Inside vs outside: what all four detectors say</h3>
+    <p class="muted">Each bar is one detector's P(wrong) for this answer; the black mark is the
+      guard's line. Only the tagged detector decides; the others are shown for comparison.</p>
+    <div class="rows">${rows}</div><div class="note">${note}</div>`;
+}
+
+function tokensHtml(r) {
+  if (!r.tokens || !r.tokens.length) {
+    return r.verdict === "abstain" ? `<h3>Word by word</h3><p class="muted">Hidden, because the
+      guard blocked this answer. Tick "show what the model would have said" to see it.</p>` : "";
+  }
+  const chips = r.tokens.map((t) => {
+    const cls = t.prob >= 0.8 ? "hi" : t.prob >= 0.5 ? "mid" : "lo";
+    const shown = t.text.replace(/\n/g, "↵") || "·";
+    return `<div class="tok ${cls}" title="probability ${pct(t.prob, 1)}, hesitation ${t.entropy.toFixed(2)}">
+      <span class="w">${esc(shown)}</span><span class="p">${pct(t.prob)}</span></div>`; }).join("");
+  return `<h3>Word by word: how sure the model was of each piece of its answer</h3>
+    <div class="tokens">${chips}</div>
+    <div class="legend"><span><i class="hi"></i>80% or more</span><span><i class="mid"></i>50–80%</span>
+      <span><i class="lo"></i>under 50%</span></div>
+    <p class="muted">A bluff often looks like this row of green: every word stated with high
+      confidence. That is why the outside detectors can miss it.</p>`;
+}
+
+function signalsHtml(r) {
+  const s = r.signals || {}, ref = CARD?.signal_reference || {};
+  if (!Object.keys(s).length) return "";
+  const rows = SIGNALS.filter(([k]) => k in s).map(([k, label, help, fmt]) => {
+    const v = s[k], rf = ref[k];
+    let like = "–";
+    if (rf && rf.right !== rf.wrong) {
+      const right = Math.abs(v - rf.right) <= Math.abs(v - rf.wrong);
+      like = `<span class="${right ? "like-right" : "like-wrong"}">${right ? "a right answer" : "a wrong answer"}</span>`;
+    }
+    return `<tr><td><b>${label}</b><br><span class="muted">${help}</span></td>
+      <td class="n">${fmt(v)}</td><td class="n">${rf ? fmt(rf.right) : "–"}</td>
+      <td class="n">${rf ? fmt(rf.wrong) : "–"}</td><td>${like}</td></tr>`; }).join("");
+  return `<h3>The 8 confidence numbers (what the outside detectors read)</h3>
+    <div class="scroll"><table><thead><tr><th>Signal</th><th>This answer</th>
+      <th>Typical right answer</th><th>Typical wrong answer</th><th>Closer to</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <p class="muted">"Typical" = the median over the training questions the model got right, and
+      the ones it got wrong. The eighth number, the retrieval score, is only used by the RAG variant.</p>`;
+}
+
+function aboutHtml(c) {
+  const test = c.test?.[c.detector]?.trivia_test, beh = c.behaviour?.trivia_test;
+  const ke = c.test?.[c.detector]?.kenya;
+  const dn = DET[c.detector]?.name || c.detector;
+  const where = c.probe_layer != null ? ` It reads layer ${29 + c.probe_layer} of 28 at the
+    ${c.probe_position === "last_answer" ? "last word" : "average of the answer's words"}.` : "";
+  let html = `<p>The guard uses the <b>${esc(dn)}</b> (version ${esc(c.version)}), trained on
+    ${c.n_train ?? "?"} TriviaQA questions on ${esc((c.trained_at || "").slice(0, 10))} and
+    validated on ${c.n_val ?? "?"} more.${where} The numbers below are from
+    ${test ? `${test.n} held-out test questions it never saw` : "its validation set"}.</p>`;
+  const tiles = [];
+  const a = test?.auroc ?? c.validation?.auroc;
+  if (a != null) tiles.push(["Spots wrong answers (AUROC)", f3(a), `Given one right and one wrong
+    answer, it ranks the wrong one higher ${pct(a)} of the time${test?.auroc_lo != null ? `
+    (95% CI ${pct(test.auroc_lo)}–${pct(test.auroc_hi)})` : ""}. A coin flip would be 50%.`]);
+  const e = test?.ece ?? c.validation?.ece;
+  if (e != null) tiles.push(["Calibration error (ECE)", f3(e), `Its P(wrong) is off by about
+    ${(e * 100).toFixed(0)} percentage points on average, so read it as a ranking more than an
+    exact chance.`]);
+  if (test?.wrong_rate != null) tiles.push(["The model is wrong", pct(test.wrong_rate), `On the
+    test questions. A 1.5-billion-parameter model gets most trivia wrong: there is a lot to catch.`]);
+  if (beh?.silent_knowing_rate) { const s = beh.silent_knowing_rate;
+    tiles.push(["Silent knowing (H1)", pct(s.point), `Of the wrong answers it stated
+      confidently, the probe flagged this share as "unsure" inside (95% CI ${pct(s.lo)}–${pct(s.hi)}).`]); }
+  if (beh?.verbalisation_gap) { const g = beh.verbalisation_gap;
+    tiles.push(["Knows more than it says", `+${f3(g.point)}`, `Inside (probe) separates right from
+      wrong at ${f3(beh.internal_detection?.point)}; its own "I don't know" only at
+      ${f3(beh.expressed_detection?.point)} (gap 95% CI ${f3(g.lo)} to ${f3(g.hi)}).`]); }
+  if (ke) tiles.push(["Kenya questions so far", String(ke.n), ke.n < 30 ? `Too few to judge
+    Kenya yet (hypotheses H2 and H5); the students' questions are being added.` : `Kenya AUROC
+    ${f3(ke.auroc)}.`]);
+  html += `<div class="tiles">${tiles.map(([k, v, p]) => `<div class="tile"><div class="k">${k}</div>
+    <div class="v">${v}</div><p>${p}</p></div>`).join("")}</div>`;
+  if (c.test) {
+    const rows = Object.keys(DET).filter((d) => c.test[d]?.trivia_test).map((d) => {
+      const t = c.test[d].trivia_test;
+      return `<tr><td>${DET[d].name}${d === c.detector ? '<span class="tag">served</span>' : ""}
+        <br><span class="muted">${DET[d].reads}</span></td>
+        <td class="n">${f3(t.auroc)}<br><span class="muted">${f3(t.auroc_lo)}–${f3(t.auroc_hi)}</span></td>
+        <td class="n">${f3(t.pr_auc)}</td><td class="n">${f3(t.ece)}</td>
+        <td class="n">${pct(t.risk_at_80)}</td></tr>`; }).join("");
+    html += `<h3>All four detectors on the test questions</h3><div class="scroll"><table>
+      <thead><tr><th>Detector</th><th>AUROC (95% CI)</th><th>PR-AUC</th><th>ECE</th>
+      <th>Wrong when answering its surest 80%</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="muted">PR-AUC: like AUROC, but focused on catching the wrong answers. Last column:
+      if the system answered only the 80% of questions the detector is surest about, the share of
+      those answers that would be wrong (lower is better; answering everything:
+      ${pct(test?.wrong_rate)}).</p>`;
+  }
+  html += `<p class="muted">The guard's line is ${f3(c.t_abstain)} (from a ${c.cost_matrix?.cost_confident_wrong ?? 3}:1
+    cost of a confident wrong answer vs a needless refusal). The probe's separate "unsure" flag,
+    used for the silent-knowing count, is ${f3(c.tau_flag)}: only 10% of right validation answers
+    cross it.</p>`;
+  return html;
 }
 
 $("ask").addEventListener("submit", (e) => { e.preventDefault(); ask(); });
-
-fetch("/metadata").then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((m) => {
-  $("meta").textContent = `Serving ${m.detector} (variant ${m.variant}, version ${m.version}),
-    trained ${m.trained_at} on ${m.n_train} questions. Validation AUROC
-    ${m.val && m.val.auroc != null ? m.val.auroc.toFixed(3) : "n/a"}. Block line
-    t_abstain = ${m.t_abstain}.`;
-}).catch(() => { $("meta").textContent = "The detector is still loading or missing."; });
+fetch("/v1/model-card").then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((c) => {
+  CARD = c; $("about-body").outerHTML = `<div id="about-body">${aboutHtml(c)}</div>`;
+}).catch(() => { $("about-body").textContent = "The detector is still loading, or missing."; });
 </script>
 </body>
 </html>

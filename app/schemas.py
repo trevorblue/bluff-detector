@@ -22,6 +22,14 @@ class AskRequest(BaseModel):
     )
 
 
+class Token(BaseModel):
+    """One piece of the answer as the model produced it, with its probability and entropy."""
+
+    text: str
+    prob: float
+    entropy: float
+
+
 class AskResponse(BaseModel):
     request_id: str
     verdict: Literal["answer", "answer_with_citation", "abstain"]
@@ -36,3 +44,15 @@ class AskResponse(BaseModel):
     detector: str
     model_version: str
     latency_ms: float
+    all_detectors: dict[str, float] = Field(
+        default_factory=dict,
+        description="P(wrong) from every trained detector of this variant, served one included",
+    )
+    signals: dict[str, float] = Field(
+        default_factory=dict, description="the 8 confidence numbers the summary detectors read"
+    )
+    tokens: list[Token] = Field(
+        default_factory=list,
+        description="the answer word by word with its probability (empty when an abstention "
+        "is not revealed)",
+    )

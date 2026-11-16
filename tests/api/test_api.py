@@ -39,6 +39,22 @@ def test_ask_contract(client):
     assert 0.0 <= body["bluff_score"] <= 1.0
     assert (body["answer"] is None) == (body["verdict"] == "abstain")
     assert body["threshold"] == 0.25
+    assert set(body["all_detectors"]) == {"logreg", "xgboost", "probe_linear", "probe_mlp"}
+    assert body["all_detectors"]["probe_linear"] == pytest.approx(body["bluff_score"])
+    assert "min_logprob" in body["signals"]
+    if body["verdict"] != "abstain":
+        assert body["tokens"] and all(0 <= t["prob"] <= 1 for t in body["tokens"])
+    else:
+        assert body["tokens"] == []  # word-level detail would reveal the blocked answer
+
+
+def test_model_card(client):
+    card = client.get("/v1/model-card").json()
+    assert card["detector"] == "probe_linear" and card["t_abstain"] == 0.25
+    assert card["test"]["probe_linear"]["trivia_test"]["auroc"] is not None
+    assert "silent_knowing_rate" in card["behaviour"]["trivia_test"]
+    ref = card["signal_reference"]["min_logprob"]
+    assert set(ref) == {"right", "wrong"}
 
 
 def test_withheld_answer_only_on_request(client, monkeypatch):

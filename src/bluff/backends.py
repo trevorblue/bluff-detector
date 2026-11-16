@@ -44,6 +44,13 @@ class Backend(Protocol):
     ) -> GenerationOutput: ...
 
 
+def _fake_tokens(answer: str, n: int) -> list[str]:
+    """The fake model has no tokenizer: split its answer into n pieces, one per probability."""
+    words = answer.split() or [answer]
+    pieces = [(" " if i else "") + w for i, w in enumerate(words)][:n]
+    return pieces + [""] * (n - len(pieces))
+
+
 class FakeBackend:
     """Simulates a model that 'knows' some questions and guesses on others.
 
@@ -120,7 +127,7 @@ class FakeBackend:
             token_entropies=ents.tolist(),
             hidden=hidden.astype(np.float32),
             latency_ms=latency,
-            meta={"knows": knows},
+            meta={"knows": knows, "tokens": _fake_tokens(answer, len(probs))},
         )
 
     def _answer(self, knows: bool, reference: str | None, rng: np.random.Generator) -> str:
@@ -233,6 +240,7 @@ class HFBackend:
             token_entropies=entropy.cpu().tolist(),
             hidden=hidden.astype(np.float32),
             latency_ms=(time.perf_counter() - start) * 1000,
+            meta={"tokens": [self.tok.decode([int(i)]) for i in gen_ids]},  # one per token_prob
         )
 
 
