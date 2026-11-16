@@ -38,6 +38,27 @@ def test_resumed_run_equals_one_full_run(tmp_path):
     assert _outputs(split) == _outputs(whole)
 
 
+def test_resume_survives_files_from_different_saves(tmp_path):
+    """An upload caught a save half-way: the answers file is newer than the hidden-state file.
+    Questions past the end of the older file are asked again, and the result is unchanged."""
+    whole = fake_config(tmp_path / "whole")
+    ingest.run(whole)
+    generate.run(whole)
+
+    cfg = fake_config(tmp_path / "split", generation={"resume": True, "limit": 40})
+    ingest.run(cfg)
+    generate.run(cfg)
+    p = paths(cfg)
+    with np.load(p.interim / "hidden.npz") as f:
+        older = {k: f[k] for k in ("hidden", "layers", "positions")}
+    np.savez_compressed(p.interim / "hidden.npz", hidden=older["hidden"][:30],
+                        layers=older["layers"], positions=older["positions"])
+    cfg["generation"]["limit"] = None
+    second = generate.run(cfg)
+    assert second["new"] == second["questions"] - 30
+    assert _outputs(cfg) == _outputs(whole)
+
+
 def test_resume_refuses_a_different_machine(tmp_path):
     cfg = fake_config(tmp_path, generation={"resume": True, "limit": 20})
     ingest.run(cfg)

@@ -128,12 +128,12 @@ def _resume(folder: Path, cfg: dict[str, Any], wanted: set[str],
     gens_path, hidden_path = folder / "generations.jsonl", folder / "hidden.npz"
     if not (gens_path.exists() and hidden_path.exists()):
         return [], []
-    store = np.load(hidden_path)
-    if list(store["layers"]) != list(cfg["model"]["layers"]):
+    with np.load(hidden_path) as store:  # closed at once, so a later save can replace it
+        layers, hidden = list(store["layers"]), store["hidden"]
+    if layers != list(cfg["model"]["layers"]):
         log.warning("saved run used layers %s, config says %s: starting fresh",
-                    list(store["layers"]), cfg["model"]["layers"])
+                    layers, cfg["model"]["layers"])
         return [], []
-    hidden = store["hidden"]
     by_question: dict[str, list[dict]] = defaultdict(list)
     for rec in read_jsonl(gens_path):
         by_question[rec["qid"]].append(rec)
@@ -141,6 +141,12 @@ def _resume(folder: Path, cfg: dict[str, Any], wanted: set[str],
     for qid, recs in by_question.items():
         if qid not in wanted or len(recs) != per_question:
             continue  # dropped from the question set, or cut off mid-question
+        if any(r.get("hidden_index") is not None and r["hidden_index"] >= len(hidden)
+               for r in recs):
+            # The two files came from different saves (an upload caught a save half-way).
+            # Rows are only ever appended, so the older file is a prefix of the newer one:
+            # questions past its end are simply asked again.
+            continue
         for rec in recs:
             if rec.get("hidden_index") is not None:
                 rows.append(hidden[rec["hidden_index"]])
