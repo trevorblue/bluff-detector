@@ -19,7 +19,7 @@ data:
   source: hf
   kenya_questions: data/kenya/questions.jsonl
   trivia_sample: 1500 # 5-day plan: one free Kaggle session. The full design used 5000.
-  truthfulqa: true
+  truthfulqa: false # off 16 Nov: its accepted answers are sentences, so word-matching marked 98% "wrong" (see docs/full-flow.md)
   synthetic_trivia: 400
   synthetic_kenya: 120
   synthetic_unanswerable: 40

@@ -59,6 +59,21 @@ def test_resume_survives_files_from_different_saves(tmp_path):
     assert _outputs(cfg) == _outputs(whole)
 
 
+def test_resume_drops_answers_to_removed_questions(tmp_path):
+    """A source taken out of the question set (e.g. TruthfulQA) leaves no stale answers behind,
+    and nothing is asked again."""
+    cfg = fake_config(tmp_path, generation={"resume": True})
+    ingest.run(cfg)
+    generate.run(cfg)
+    cfg["generation"]["limit"] = 30
+    again = generate.run(cfg)
+    assert again["new"] == 0
+    p = paths(cfg)
+    assert len({g["qid"] for g in read_jsonl(p.interim / "generations.jsonl")}) == 30
+    out = _outputs(cfg)
+    assert all(h is None or len(h) > 0 for _, _, h in out.values())
+
+
 def test_resume_refuses_a_different_machine(tmp_path):
     cfg = fake_config(tmp_path, generation={"resume": True, "limit": 20})
     ingest.run(cfg)

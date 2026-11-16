@@ -41,8 +41,50 @@ There are two kinds of model, and keeping them apart is the key to the whole pro
     torn between many possibilities.
 - **Hidden states:** the model has 28 layers. Each layer turns every token into a vector of
   1,536 numbers, its internal "thought" at that point. The code saves this vector at two layers
-  (8th and 4th from the top) and two positions (the last answer token, and the average over all
-  answer tokens).
+  (8th and 4th from the top: layers 21 and 25 of 28) and two positions (the last answer token,
+  and the average over all answer tokens).
+
+#### Weights vs hidden states: 1.5 billion vs 1,536
+
+They count two different things.
+
+| | **Weights (parameters)** | **Hidden state** |
+|---|---|---|
+| How many | About 1.5 billion | 1,536 per layer, per token |
+| What they are | The model's fixed "wiring", learned in training | Its "thought" while answering *this* question |
+| Change per question? | No, never | Yes, every question |
+| Analogy | The wiring of a brain | A brain scan taken while it answers |
+| Do we read them? | **No** | **Yes**: this is what the probes read |
+
+**Where 1,536 comes from (not a guess):** the model's published settings file. On
+huggingface.co/Qwen/Qwen2.5-1.5B-Instruct → *Files* → `config.json`: `"hidden_size": 1536`,
+`"num_hidden_layers": 28`. It is the model's *width*: every layer takes in 1,536 numbers per token
+and gives out 1,536.
+
+**How 1.5 billion is built from 1,536-sized pieces** (rounded):
+
+| Piece | Size | Weights |
+|---|---|---|
+| Word table (151,936 tokens × 1,536) | 151,936 × 1,536 | ≈ 0.23 billion |
+| Each layer's attention | ≈ 1,536 × 1,536 × 2 + smaller parts | ≈ 5.5 million |
+| Each layer's feed-forward block | 3 × 1,536 × 8,960 | ≈ 41 million |
+| 28 layers × ≈ 47 million | | ≈ 1.31 billion |
+| **Total** | | **≈ 1.54 billion** |
+
+**How the hidden states are read, technically** (`src/bluff/backends.py`, `HFBackend.generate`):
+
+1. Load the model from Hugging Face with the `transformers` library, on the GPU.
+2. It answers normally: "How many counties does Kenya have?" → "52".
+3. Feed the question plus answer back in once, with `output_hidden_states=True`, a built-in
+   `transformers` option. The model returns its "thought" after **every** layer, for **every**
+   token: 29 tables (the word table plus 28 layers), each *tokens × 1,536*.
+4. Keep a small slice: layers 21 and 25 × (last answer token, average of answer tokens) =
+   4 vectors of 1,536 numbers, saved per question.
+5. The served probe reads one of them, **layer 21, last answer token**: 1,536 numbers in,
+   P(wrong) out. "52" → 0.81.
+
+**Why Ollama can't be used:** it returns only the text "52", so step 3 is impossible. The
+models on the laptop (`qwen3:4b`, `llama3.2`) are also different models.
 
 ### 2b. The variants: the interventions under test
 
@@ -72,6 +114,68 @@ They are trained on **trivia questions only** (70% train, 15% validation, 15% te
 questions and their UK twins are never used in training, which makes them true
 out-of-distribution tests. *Probe* just means a simple classifier that reads a model's hidden
 states.
+
+#### How each detector works, with an example
+
+**The training data.** Every trivia question becomes one row:
+
+| Question | Label (wrong?) | 8 summary numbers | 1,536 hidden numbers |
+|---|---|---|---|
+| "Capital of Australia?" → "Sydney" | 1 (wrong) | min prob 0.22, max entropy 2.1, … | −0.4, 1.7, 0.02, … |
+| "Red Planet?" → "Mars" | 0 (right) | min prob 0.97, max entropy 0.1, … | 0.9, −0.3, 0.5, … |
+
+Each detector learns from about 1,600 such rows (70% of the trivia) to output **P(wrong)** for a
+new answer.
+
+**1. Logistic regression (`logreg`), the simple baseline.**
+
+- It gives each of the 8 numbers a weight, adds them up, and squashes the total into 0–1.
+- It learns rules like "low minimum probability → more likely wrong" (a big weight) and
+  "number of tokens → hardly matters" (a weight near 0).
+- *Example:* "52", with min probability 0.31 and high entropy → P(wrong) = 0.74.
+- **Why:** fast, and you can read its weights to see which signal matters most.
+
+**2. XGBoost (`xgboost`), trees on the same 8 numbers.**
+
+- It builds 300 small decision trees. Each asks up to 3 yes/no questions, e.g. "min prob below
+  0.4? → max entropy above 1.5? → probably wrong".
+- Each new tree focuses on the rows the earlier trees got wrong ("boosting"). The trees' votes
+  are added up into P(wrong).
+- **Why:** it catches combinations and cut-offs that logistic regression can't, e.g. "only
+  suspicious when *both* are bad".
+
+**3. Linear probe (`probe_linear`), the one used live.**
+
+- The same maths as logistic regression, but on the **1,536 hidden numbers**: 1,536 weights.
+- Those weights point out one **direction** in the model's "thought space" that means "I don't
+  really know this". The probe measures how far an answer's thought lies along it.
+- Strong regularisation (C = 0.05): 1,536 inputs from about 1,600 rows could be memorised, so the
+  weights are kept small.
+- *Example:* "52" → P(wrong) = 0.81.
+- **Why it is served:** one multiply-and-add, so it costs almost nothing per request. If it works,
+  that also shows the knowledge is written **plainly (linearly)** inside the model.
+
+**4. MLP probe (`probe_mlp`), a small neural network on the same 1,536 numbers.**
+
+- 1,536 inputs → 128 hidden units → P(wrong). Each of the 128 units learns to spot one pattern;
+  the last step combines them.
+- It can find curved (non-linear) patterns a straight line misses. Early stopping halts training
+  when the validation score stops improving, to avoid memorising.
+- **Why:** a check on the linear probe. If the MLP is not clearly better, the signal really is
+  linear, and the simple probe is the right one to serve.
+
+**What comparing them tells us.**
+
+| Comparison | Question it answers |
+|---|---|
+| Probes (inside) vs logreg and XGBoost (outside) | Does the "brain scan" know more than the confidence numbers show? |
+| MLP vs linear probe | Is the signal simple (linear) or complex? |
+| Probe vs the model saying "I don't know" | **The verbalisation gap**: how much more it knows than it says (H1, H3) |
+| Trivia vs Kenya, for every detector | **The OOD drop (H5)**: does what they learned carry over to Kenya? |
+
+Every detector outputs P(wrong) for every test question; the metrics in section 6 (AUROC, ECE
+and the rest) are computed from those probabilities. The served probe also gets the live
+threshold: P(wrong) above 0.25 → abstain.
 
 ## 3. RAG, step by step (variant M1)
 

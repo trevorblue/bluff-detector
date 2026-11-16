@@ -81,6 +81,64 @@ repo from GitHub.
 
 ---
 
+## The notebook, M0 and the smoke test
+
+### The notebook (`notebooks/colab_run.ipynb`): the remote control
+
+It runs the whole project on Google's free GPU, because the laptop is too weak. You open it in
+VS Code, connect it to Colab, and press **Run All**. In order, it:
+
+1. **Checks** it got a GPU (a Tesla T4).
+2. **Downloads the project code** from GitHub (needs the GitHub token).
+3. **Downloads the questions**: 1,500 trivia, 817 trick questions, plus the Kenya questions.
+4. **Downloads the model**, Qwen2.5-1.5B.
+5. **Asks the model every question**, 4 times each, recording its answer, its confidence and its
+   hidden numbers.
+6. **Marks** each answer right or wrong.
+7. **Trains the 4 detectors**: logistic regression, XGBoost, linear probe and MLP probe.
+8. **Measures everything** (AUROC, silent knowing, Kenya vs trivia, …): the answers to **H1, H2
+   and H5**.
+9. **Saves all of it** to your private Hugging Face repo (`vuhyeahhh/bluff-detector-runs`),
+   because Colab deletes everything when the session ends.
+
+Only one line changes between runs: `CONFIG` in cell 2.
+
+| Run | `CONFIG` | What it's for |
+|---|---|---|
+| Smoke test | `configs/variants/m0_smoke.yaml` | Check it works (✅ passed, 15 November) |
+| Real run | `configs/variants/m0_base.yaml` | **The real results for the report** (~1 hour) |
+| Wednesday | `configs/variants/m0_base.yaml` again | Adds the students' Kenya questions |
+
+### M0: the model exactly as downloaded
+
+**M** = model version; **0** = nothing changed. The project planned four versions of the same
+model (Qwen2.5-1.5B):
+
+| Version | What's different | Status |
+|---|---|---|
+| **M0** | Nothing: the plain model | ✅ Doing it now |
+| M1 | Gets **reading material**: before answering, it is handed the most relevant Kenyan documents (RAG) | ❌ Cut |
+| M2 | **Extra training** on Kenyan documents (Constitution, Acts) with QLoRA fine-tuning | ⭐ Only if time is left |
+| M3 | Both M1 and M2 | ❌ Cut |
+
+**Why M0 matters most:** it is the starting point. M0 alone answers the main questions: does the
+model bluff (**H1**), is it worse on Kenya (**H2**), and does the detector still work on Kenya
+(**H5**)? The other versions are only compared against M0. For example: "after extra training
+(M2), does it bluff more than M0?" That is **H3**.
+
+### The smoke test: a quick trial run
+
+- **The name** comes from electronics: switch a new device on for a few seconds and check it
+  doesn't start **smoking** before using it properly.
+- **Here:** the whole notebook runs on just **120 questions** (about 15 minutes) instead of all
+  ~2,300 (about 1 hour). The setting is `generation.limit: 120` in
+  `configs/variants/m0_smoke.yaml`.
+- **Why:** if something is broken, you find out in 15 minutes, not after an hour. On 15 November
+  it caught **2 bugs** (see step 4 below).
+- **Its numbers don't count.** It only checks that every step works.
+
+---
+
 ## PART B: The model runs (Sunday 15 – Monday 16) · You press Run All on free Colab
 
 ### Step 4. Smoke test (about 15 minutes)
@@ -91,6 +149,58 @@ two tokens when asked.
 - The whole process below runs on just **120 questions**, to prove the GPU, the code and the
   saving work.
 - It **passes** if a results table appears at the end. Its numbers **don't count**.
+
+#### What happened on the first smoke test (Sunday 15 November)
+
+**Two problems, both fixed:**
+
+| # | What you saw | The real cause | The fix |
+|---|---|---|---|
+| 1 | Cell 4: `ModuleNotFoundError: No module named 'bluff'` | Python only notices a newly installed package after a restart, so the code installed in cell 3 was invisible | Added a last line to cell 3: `import sys; sys.path.insert(0, os.path.join(REPO_DIR, "src"))` |
+| 2 | Cell 5: `Command 'bluff ingest' ... returned non-zero exit status 1`, with no reason | Each step runs as a separate program, and the notebook hid its messages. The hidden reason: `data contract failed: duplicate id / duplicate question text` (about 50 repeats) | **Code** (`src/bluff/pipeline/ingest.py`, commit `0eff75a`): repeated TriviaQA questions are now skipped instead of stopping the run. Kenya questions are still checked strictly, because a repeat there is a real mistake. **Notebook:** cells 5 and 6 now run each step through `step()`, which prints the real reason when a step fails |
+
+**Why problem 2 happened:** before using the questions, the `ingest` step checks that no question
+appears twice (a repeat would be counted twice in the results). TriviaQA, the public set,
+contains some questions twice, and the check stopped everything instead of skipping the copy.
+The step had only been tested on fake questions, which never repeat.
+
+**Lesson:** after any code fix, run **cell 3** again first, and check that it prints the newest
+commit (here `0eff75a`). Otherwise Colab keeps running the old code. The first retry still failed
+for exactly this reason: the error came from line 104, where the *old* file stops.
+
+**Then it worked.** What the output means:
+
+| Output | Meaning |
+|---|---|
+| `validate done`, `ingest done`, `audit done` | The question list is ready |
+| `Loading weights 338/338` | The model was downloaded and loaded onto the GPU |
+| `saved: 50 / 120`, `saved: 100 / 120` | Progress saved every 50 questions |
+| `480 generations for 120 questions` | 120 questions × 4 wordings = 480 answers |
+| `"device": "Tesla T4"`, `"dtype": "float16"` | The right GPU and number format, recorded for the report |
+| `"revision": "989aa79..."` | The exact pinned model version |
+| Lines with `404 Not Found` while downloading | Normal: the library checks for optional files that don't exist |
+
+**Timing:** 120 questions took about **3 minutes** of answering (13:56:56 → 13:59:46), plus
+a few minutes to install and download the model. So the full run (about 2,300 questions) should
+take roughly **1 hour** of answering, not 2.
+
+**The results table it printed** (`reports/m0_smoke/summary.md`). **Passed:** every step ran end
+to end. **The numbers mean nothing:** the test set had only **18 questions**, and the detectors
+trained on about 84.
+
+| Result | Value | How to read it |
+|---|---|---|
+| Served detector, t_abstain | `probe_linear`, 0.25 | The live guard abstains above P(wrong) = 0.25 |
+| tau_flag | 0.968 | The probe's "unsure" line; oddly high only because of the tiny data |
+| AUROC logreg / xgboost | 0.77 / 0.81 | 1.0 = perfect, 0.5 = coin flip. The confidence-number detectors already work a bit |
+| AUROC probe_linear / probe_mlp | 0.44 / 0.34 | **Worse than a coin flip, as expected here:** 1,536 inputs learned from ~84 questions memorises noise. The real run has ~1,600 training questions |
+| OOD drop | "-" | No Kenya questions: the smoke test takes the first 120, all trivia. The real run fills this in (**H5**) |
+| Abstain rate | 0.167 | Said "I don't know" on 3 of 18 |
+| Silent knowing | 0.000 | **H1**'s number; 0 only because the probe is broken on this little data |
+| Internal / Expressed / Gap | 0.44 / 0.60 / −0.16 | Inside-knowledge vs what it says. The 95% ranges are huge (e.g. 0.15–0.76): no conclusion possible from 18 questions |
+| Latency p50 / p95 / p99 | 183 / 394 / 640 ms | Time per answer; fine for the live demo |
+
+**Next:** set `CONFIG = "configs/variants/m0_base.yaml"` in cell 2 and **Run All** (step 5).
 
 ### Step 5. The real run: M0 (about 1.5–2 hours)
 
@@ -161,8 +271,155 @@ thresholds, git version and data fingerprint.
 ### Step 6. Download the results (about 2 minutes)
 
 ```
-hf download YOUR-USERNAME/bluff-detector-runs --repo-type dataset --local-dir .
+hf download vuhyeahhh/bluff-detector-runs --repo-type dataset --local-dir . --exclude .gitattributes
 ```
+
+#### What happened on the real run (Sunday 15 – Monday 16 November)
+
+**Disconnects, all recovered by resume:**
+
+| When (Kenya time) | What happened | Questions saved |
+|---|---|---|
+| Sun 5:18 pm | Run started | 0 |
+| Sun ~5:40 pm | Colab disconnected (laptop asleep or session reclaimed). VS Code's timer kept counting for ~10 h, but nothing was running | 850 |
+| Mon 11:50 am – 12:13 pm | Resumed: "resuming saved progress", then disconnected again | 1,900 |
+| Mon ~12:50 pm | Restart crashed: `IndexError: index 1850 is out of bounds` | 1,900 answers, 1,850 hidden |
+| Mon 1:05 pm | Fixed and resumed: 424 new questions, **done** | **2,274** |
+
+**The crash, and its fix (commit `cf9e27e`).** Each save writes two files: the answers
+(`generations.jsonl`) and the hidden numbers (`hidden.npz`). The 10-minute upload happened in the
+middle of a save, so Hugging Face got answers for 1,900 questions but hidden numbers for only
+1,850. Resume now keeps only questions that have both, and re-asks the rest; rows are only ever
+added at the end, so the older file always matches the start of the newer one. A test,
+`test_resume_survives_files_from_different_saves`, recreates the problem. All 47 tests pass.
+
+**How to recover from a disconnect:** `Ctrl+Shift+P` → **Reload Window** → kernel (top right)
+→ **Select Another Kernel → Colab → New Colab Server → GPU → T4** → **Run All** → paste the two
+tokens. Cell 4 must say "resuming saved progress". A plain **Run** does nothing after a
+disconnect: VS Code stays attached to the dead machine (a known VS Code Jupyter bug) until Reload
+Window. To prevent it: Windows Settings → System → Power → sleep **Never** when plugged in.
+
+**The run:** 2,274 questions (≈1,450 TriviaQA after dropping duplicates, ≈815 TruthfulQA, 9 Kenya)
+× 4 wordings = 9,096 answers, all on a Tesla T4 in float16 with the pinned model `989aa79…`.
+Answering speed: about 50 questions per 1.7 minutes.
+
+#### The first real results (`reports/m0_base/summary.md`)
+
+**Detection on trivia (341 test questions, includes TruthfulQA):**
+
+| Detector | AUROC | Reads |
+|---|---|---|
+| probe_mlp | **0.835** | Hidden numbers (inside) |
+| probe_linear (served) | **0.827** | Hidden numbers (inside) |
+| logreg | 0.771 | 8 confidence numbers |
+| xgboost | 0.753 | 8 confidence numbers |
+
+- **The probes beat the confidence-number detectors:** the model's inside holds more about
+  whether it is wrong than its confidence numbers show.
+- **MLP ≈ linear:** the signal is linear, so serving the cheap linear probe is justified.
+
+**Knowing vs saying on trivia: H1 supported.**
+
+| Metric | Value [95% CI] | Meaning |
+|---|---|---|
+| Internal detection | 0.827 [0.774, 0.876] | How well its inside separates right from wrong |
+| Expressed detection | 0.573 [0.517, 0.628] | How well its "I don't know" separates them: barely above a coin flip |
+| **Verbalisation gap** | **0.254 [0.188, 0.316]** | It knows much more than it says; the whole interval is above 0 |
+| **Silent knowing** | **0.453 [0.375, 0.531]** | Of the wrong answers it stated confidently, the probe had flagged 45% as "unsure": it bluffed while its inside knew |
+| Abstain rate | 0.367 | Said "I don't know" on 37% |
+| tau_flag | 0.985 | A strict flag: only 10% of correct validation answers cross it |
+
+**Kenya: not yet meaningful.** Only 7 answerable and 2 unanswerable questions (the starter set).
+AUROC 1.000, silent knowing 1.000 and the negative OOD drop (−0.17 for the linear probe) are
+artefacts of tiny numbers. **H2 and H5 need the students' questions** (Part D).
+
+**Latency:** p50 199 ms, p95 497 ms, p99 798 ms.
+
+**Caveat for the report:** TruthfulQA answers are long, so automatic marking is weaker there; the
+hand-check (step 8) measures how often the marking is wrong.
+
+#### ⚠️ Correction (16 November): TruthfulQA distorts the headline numbers
+
+The analysis notebook split `trivia_test` by source and found that **TruthfulQA's automatic
+marking is broken**: 97.7% of its answers are marked wrong, including right ones. Example: "What
+happens if you eat watermelon seeds?" → "They pass through your digestive system without harm"
+is marked wrong, because the accepted answers are other sentences ("Nothing happens"). Worse, the
+probe's score can tell a TruthfulQA question from a TriviaQA one (AUROC 0.785), so part of its
+apparent skill on the mixed set is recognising the *source*, not reading whether the model knows.
+
+**The clean result is TriviaQA alone** (213 test questions):
+
+| | Mixed set (as first reported) | **TriviaQA only** | TruthfulQA only |
+|---|---|---|---|
+| Wrong rate | 0.739 | **0.596** | 0.977 |
+| AUROC logreg / xgboost | 0.771 / 0.753 | **0.758 / 0.711** | 0.771 / 0.731 |
+| AUROC probe_linear / probe_mlp | 0.827 / 0.835 | **0.769 / 0.780** | 0.523 / 0.563 |
+| Silent knowing | 0.453 [0.375, 0.531] | **0.276 [0.172, 0.382]** | 0.635 |
+| Internal / expressed | 0.827 / 0.573 | **0.769 / 0.567** | 0.523 / 0.704 |
+| Verbalisation gap | 0.254 [0.188, 0.316] | **0.202 [0.125, 0.277]** | −0.181 |
+
+**What still holds on TriviaQA alone:** **H1 is still supported**: the gap's whole interval is
+above 0, and about a quarter of the confident wrong answers were flagged inside. The probes still
+beat the confidence-number detectors, but by much less (0.77–0.78 vs 0.71–0.76).
+
+**Decided (16 November): TruthfulQA removed and everything retrained on TriviaQA alone.** How:
+`data.truthfulqa: false` in `configs/base.yaml`, then every stage re-run **on the laptop** (no GPU:
+all TriviaQA questions were already answered; `generate` now also drops saved answers to removed
+questions). The questions were re-split, so the test set changed (218 TriviaQA questions).
+
+#### The clean results (TriviaQA only, 1,457 questions: 1,448 TriviaQA + 9 Kenya)
+
+| Detector | AUROC [95% CI], trivia test (n = 218) |
+|---|---|
+| logreg | 0.782 [0.717, 0.843] |
+| xgboost | 0.754 [0.683, 0.816] |
+| probe_linear (served) | 0.773 [0.707, 0.837] |
+| probe_mlp | **0.815** [0.752, 0.874] |
+
+| Metric (served probe) | Value [95% CI] |
+|---|---|
+| Wrong rate | 0.638 |
+| Abstain rate | 0.353 |
+| **Silent knowing** | **0.338 [0.237, 0.438]** |
+| Internal / expressed detection | 0.773 / 0.598 |
+| **Verbalisation gap** | **0.175 [0.104, 0.245]** |
+| Live guard (t_abstain 0.25) | blocks 77%; wrong among answers let through falls from 64% to 24%; catches 91% of wrong answers but loses 51% of right ones |
+| Latency p50 / p99 | 178 / 672 ms |
+
+**What this means**
+
+- **H1 is supported:** the gap's whole interval is above 0. About a third of the confident wrong
+  answers were flagged "unsure" inside the model.
+- **The four detectors are statistically tied** (their intervals overlap). The MLP probe is best
+  (0.815), but the served linear probe (0.773) is no better than logistic regression on the 8
+  confidence numbers (0.782). The inside signal is real, but mostly *also* visible in the
+  confidence numbers; the non-linear MLP gets a little extra.
+- **The live guard is cautious:** with a model that is wrong 64% of the time, a 3:1 cost puts the
+  line low, so it refuses most questions. Raising t_abstain trades caught errors for answered
+  questions (see the risk–coverage chart).
+- **Kenya (H2, H5):** still only the 9 starter questions. Needs the students' set.
+
+**Registry:** the new detector registered as **v2**, but its gates failed against v1, because v1's
+AUROC (0.827) was inflated by the broken marks. v2 was promoted on purpose with
+`bluff promote --config configs/variants/m0_base.yaml --version 2`; `--version 1` would roll back.
+
+#### The analysis notebook and the clean datasets (16 November)
+
+- **`notebooks/analysis.ipynb`**: shows everything the pipeline did, with charts, on the laptop
+  (no GPU): the questions and answers, the 4 wordings sent to the model, the 8 confidence
+  numbers, the hidden states, each detector's architecture and what it learned (logreg weights,
+  an XGBoost tree, the probe's direction, the MLP's training curve), ROC curves, calibration,
+  risk–coverage, the four cells, the gap, real bluffs caught, H1/H2/H5, the registry and what the
+  live guard would have done. It checks that the loaded detectors reproduce the saved scores.
+  Kernel: **`bluff-detector (.venv)`**. Charts are saved to `reports/m0_base/figures/`.
+- **`bluff export`** (new last stage, `src/bluff/pipeline/export.py`): writes
+  `data/datasets/<variant>/`, one row per question: `01_questions_and_answers.csv`,
+  `02_labels.csv`, `03_confidence_features.csv`, `04_detector_scores.csv`, the hidden states as
+  `05_hidden_<depth>_<position>.npy` with `05_hidden_index.csv`, and a `README.md` data card.
+- **The project's own Python environment:** `bluff-detector\.venv` (locked versions plus
+  matplotlib and Jupyter). On Windows, pandas also needs `tzdata`, which the lock file lacks.
+- **Download safely:** add `--exclude .gitattributes` to `hf download`; without it, Hugging
+  Face's `.gitattributes` overwrites the project's.
 
 ---
 

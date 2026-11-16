@@ -55,6 +55,10 @@ def run(cfg: dict[str, Any]) -> dict[str, Any]:
     if done:
         log.info("resuming: %d questions already answered, %d to go", len(done), len(todo))
     if not todo:
+        if records:  # rewrite without answers to questions no longer in the set
+            info_path = p.interim / "run_info.json"
+            _save(p.interim, cfg, records, hidden_rows,
+                  read_json(info_path) if info_path.exists() else {})
         return {"questions": len(items), "generations": len(records), "new": 0}
 
     backend = build_backend(cfg)

@@ -75,7 +75,7 @@ All **46 tests pass** (44 before, 2 new), and the full pipeline runs end to end 
 In VS Code's terminal, inside the `bluff-detector` folder:
 
 ```
-hf download YOUR-HF-USERNAME/bluff-detector-runs --repo-type dataset --local-dir .
+hf download vuhyeahhh/bluff-detector-runs --repo-type dataset --local-dir . --exclude .gitattributes
 ```
 
 Open `reports/m0_base/summary.md`: the **first real results** (H1, H5, and H2 on the Kenya

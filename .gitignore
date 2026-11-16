@@ -16,6 +16,8 @@ data/processed/*
 artefacts/*
 !artefacts/.gitkeep
 reports/*
+data/datasets/*
+!data/datasets/.gitkeep
 !reports/.gitkeep
 mlruns/
 mlflow.db

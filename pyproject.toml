@@ -57,6 +57,10 @@ extend-exclude = ["data", "artefacts", "reports"]
 select = ["E", "F", "I", "B", "UP"]
 ignore = ["B008"]
 
+[tool.ruff.lint.per-file-ignores]
+# The data card written by `bluff export` holds wide markdown tables.
+"src/bluff/pipeline/export.py" = ["E501"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

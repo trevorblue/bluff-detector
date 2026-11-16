@@ -19,7 +19,7 @@ from typing import Any
 from bluff.config import load_config
 
 STAGES = ["validate", "ingest", "audit", "generate", "label", "featurize", "train",
-          "evaluate", "register"]
+          "evaluate", "register", "export"]
 
 
 def _stage(name: str) -> Callable[[dict[str, Any]], Any]:
