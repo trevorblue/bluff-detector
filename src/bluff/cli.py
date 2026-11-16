@@ -38,6 +38,9 @@ def main(argv: list[str] | None = None) -> int:
     cp = sub.add_parser("compare", help="paired comparison of two variants (H3)")
     cp.add_argument("--config", required=True, help="variant A, e.g. the base model")
     cp.add_argument("--other", required=True, help="variant B, e.g. the fine-tuned model")
+    ip = sub.add_parser("import-sheet", help="students' .xlsx -> data/kenya/questions.jsonl")
+    ip.add_argument("--config", required=True)
+    ip.add_argument("--sheet", required=True, help="path to the downloaded Kenya Question Sheet")
     pp = sub.add_parser("promote", help="move a registry alias (also used for rollback)")
     pp.add_argument("--config", required=True)
     pp.add_argument("--version", type=int, required=True)
@@ -62,6 +65,10 @@ def main(argv: list[str] | None = None) -> int:
         from bluff.pipeline import compare
 
         result = compare.run(cfg, load_config(args.other))
+    elif args.cmd == "import-sheet":
+        from bluff import sheet_import
+
+        result = sheet_import.run(cfg, args.sheet)
     elif args.cmd == "promote":
         from bluff.pipeline import register
 

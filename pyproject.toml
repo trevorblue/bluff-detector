@@ -38,6 +38,8 @@ llm = ["torch>=2.2", "transformers>=4.44", "accelerate>=0.33"]
 qlora = ["peft>=0.12", "bitsandbytes>=0.43", "datasets>=2.20"]
 # Downloading TriviaQA / TruthfulQA from the Hugging Face Hub.
 data = ["datasets>=2.20"]
+# Reading the students' Kenya Question Sheet (.xlsx): `bluff import-sheet`.
+sheet = ["openpyxl>=3.1"]
 # Experiment tracking and the model registry.
 track = ["mlflow>=2.14"]
 dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.5"]

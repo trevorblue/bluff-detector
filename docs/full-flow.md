@@ -443,6 +443,33 @@ AUROC (0.827) was inflated by the broken marks. v2 was promoted on purpose with
       the students wrote twins.
 12. **You:** download again → **your final numbers**.
 
+#### The sheet importer (built 16 November): `bluff import-sheet`
+
+Code: `src/bluff/sheet_import.py`; tests: `tests/data/test_sheet_import.py`. In the VS Code
+terminal, inside `bluff-detector`:
+
+```
+.venv\Scripts\bluff import-sheet --config configs/variants/m0_base.yaml --sheet "..\Bluff Detector - Kenya Question Sheet.xlsx"
+```
+
+- **Reads** the tabs `Student A`–`Student D` and skips empty rows. **Type** decides the pool:
+  real → `kenya`, fake → `kenya_unanswerable` (no answer), twin → `western`, linked through
+  **Twin of** (the Kenya question's text, copied exactly) to that question's id.
+- **Answer + Other accepted answers** (split on `;`) become the accepted answers.
+- **Ids come from the question text** (e.g. `ke-civ-3f2a9c1b`), so importing again with more
+  rows keeps every earlier id, and the Colab resume asks only the new questions.
+- **A bad row is skipped, never fatal**, and listed in `data/kenya/import_report.md` with its
+  tab, row number and reason: no answer on a real question; a twin whose original isn't found; a
+  duplicate; Verified = yes without a source or a second-person reviewer (imported as
+  unverified). The report also counts real / fake / twin / verified questions per author.
+- **The 9 starter questions are kept** (their hand-numbered ids, e.g. `ke-civ-0001`).
+- Tried on the real template on 16 November (student tabs still empty): 0 rows, 9 starters kept.
+
+**Wednesday, step by step:** download the sheet as .xlsx into `Bluff_Detector` → Claude runs
+the command above, reads the report with you, and uploads `data/kenya/questions.jsonl` to GitHub
+→ you **Run All** in Colab with `m0_base.yaml` (it asks only the new questions) → download → run
+`notebooks/analysis.ipynb` for the final H1, H2, H5 and twins.
+
 ---
 
 ## PART E: Extras, only if A–D went smoothly (Wednesday 18 – Thursday 19)
