@@ -41,6 +41,9 @@ def main(argv: list[str] | None = None) -> int:
     ip = sub.add_parser("import-sheet", help="students' .xlsx -> data/kenya/questions.jsonl")
     ip.add_argument("--config", required=True)
     ip.add_argument("--sheet", required=True, help="path to the downloaded Kenya Question Sheet")
+    bp = sub.add_parser("build-corpus", help="download the Kenyan documents (sources.yaml)")
+    bp.add_argument("--config", required=True)
+    bp.add_argument("--sources", default="data/corpus/sources.yaml")
     mp = sub.add_parser("monitor", help="drift report: live requests vs the training data")
     mp.add_argument("--config", required=True)
     mp.add_argument("--log", default="logs/requests.jsonl", help="the API's request log")
@@ -72,6 +75,10 @@ def main(argv: list[str] | None = None) -> int:
         from bluff import sheet_import
 
         result = sheet_import.run(cfg, args.sheet)
+    elif args.cmd == "build-corpus":
+        from bluff import corpus
+
+        result = corpus.run(cfg, args.sources)
     elif args.cmd == "monitor":
         from bluff import monitoring
 

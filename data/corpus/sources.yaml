@@ -1,0 +1,92 @@
+# The Kenyan document collections: which public documents go where.
+#
+# `bluff build-corpus` downloads every source below and writes
+#   retrieval_chunks.jsonl  passages of ~300-800 tokens   (M1 RAG, M3)
+#   finetune_docs.jsonl     whole documents               (M2 QLoRA, M3)
+# A document goes to exactly one collection (`collection:`), never both (data/README.md).
+# Domains match the student question sheet. Edit this list and re-run to change the corpus.
+#
+# kind: wikisource = a page of the Constitution on en.wikisource.org (public legal text)
+#       wikipedia  = an English Wikipedia article (CC BY-SA 4.0; attribution in every line)
+
+constitution:
+  kind: wikisource
+  collection: retrieval
+  domain: civics_law
+  prefix: "Constitution of Kenya (2010)/"
+  parts: [Preamble, Chapter 1, Chapter 2, Chapter 3, Chapter 4, Chapter 5, Chapter 6, Chapter 7,
+          Chapter 8, Chapter 9, Chapter 10, Chapter 11, Chapter 12, Chapter 13, Chapter 14,
+          Chapter 15, Chapter 16, Chapter 17, Chapter 18, First Schedule, Second Schedule,
+          Third Schedule, Fourth Schedule, Fifth Schedule, Sixth Schedule]
+
+wikipedia:
+  # --- civics and law
+  - {title: Kenya, domain: civics_law, collection: retrieval}
+  - {title: Politics of Kenya, domain: civics_law, collection: retrieval}
+  - {title: Counties of Kenya, domain: civics_law, collection: retrieval}
+  - {title: Parliament of Kenya, domain: civics_law, collection: retrieval}
+  - {title: President of Kenya, domain: civics_law, collection: retrieval}
+  - {title: Judiciary of Kenya, domain: civics_law, collection: retrieval}
+  - {title: Elections in Kenya, domain: civics_law, collection: retrieval}
+  - {title: Independent Electoral and Boundaries Commission, domain: civics_law, collection: retrieval}
+  - {title: Constitution of Kenya, domain: civics_law, collection: finetune}
+  - {title: Senate of Kenya, domain: civics_law, collection: finetune}
+  - {title: National Assembly (Kenya), domain: civics_law, collection: finetune}
+  - {title: Supreme Court of Kenya, domain: civics_law, collection: finetune}
+  - {title: Deputy President of Kenya, domain: civics_law, collection: finetune}
+  - {title: Cabinet of Kenya, domain: civics_law, collection: finetune}
+  # --- geography, history and society
+  - {title: Geography of Kenya, domain: geography_society, collection: retrieval}
+  - {title: Nairobi, domain: geography_society, collection: retrieval}
+  - {title: Mombasa, domain: geography_society, collection: retrieval}
+  - {title: Kisumu, domain: geography_society, collection: retrieval}
+  - {title: History of Kenya, domain: geography_society, collection: retrieval}
+  - {title: Demographics of Kenya, domain: geography_society, collection: retrieval}
+  - {title: Mount Kenya, domain: geography_society, collection: retrieval}
+  - {title: Lake Victoria, domain: geography_society, collection: retrieval}
+  - {title: Culture of Kenya, domain: geography_society, collection: retrieval}
+  - {title: Education in Kenya, domain: geography_society, collection: retrieval}
+  - {title: Nakuru, domain: geography_society, collection: finetune}
+  - {title: Eldoret, domain: geography_society, collection: finetune}
+  - {title: Lake Turkana, domain: geography_society, collection: finetune}
+  - {title: Mau Mau rebellion, domain: geography_society, collection: finetune}
+  - {title: Kikuyu people, domain: geography_society, collection: finetune}  # replaced Religion in Kenya: it shares a TriviaQA question's wording (leakage audit)
+  - {title: Kenya Colony, domain: geography_society, collection: finetune}
+  - {title: Maasai Mara, domain: geography_society, collection: finetune}
+  - {title: Jomo Kenyatta, domain: geography_society, collection: retrieval}
+  - {title: Daniel arap Moi, domain: geography_society, collection: finetune}
+  - {title: Mwai Kibaki, domain: geography_society, collection: retrieval}
+  - {title: Wangari Maathai, domain: geography_society, collection: finetune}
+  - {title: Ngũgĩ wa Thiong'o, domain: geography_society, collection: retrieval}
+  # --- language
+  - {title: Swahili language, domain: language, collection: retrieval}
+  - {title: Languages of Kenya, domain: language, collection: retrieval}
+  - {title: Sheng slang, domain: language, collection: finetune}
+  # --- institutions and services
+  - {title: Central Bank of Kenya, domain: institutions_services, collection: retrieval}
+  - {title: Kenya Revenue Authority, domain: institutions_services, collection: retrieval}
+  - {title: Health in Kenya, domain: institutions_services, collection: retrieval}
+  - {title: National Police Service of Kenya, domain: institutions_services, collection: retrieval}
+  - {title: Kenya Defence Forces, domain: institutions_services, collection: finetune}
+  - {title: University of Nairobi, domain: institutions_services, collection: finetune}
+  - {title: Mombasa-Nairobi Standard Gauge Railway, domain: institutions_services, collection: finetune}
+  - {title: Kenya Airways, domain: institutions_services, collection: finetune}
+  - {title: Jomo Kenyatta International Airport, domain: institutions_services, collection: retrieval}
+  # --- money and livelihoods
+  - {title: Economy of Kenya, domain: money_livelihoods, collection: retrieval}
+  - {title: Kenyan shilling, domain: money_livelihoods, collection: retrieval}
+  - {title: M-Pesa, domain: money_livelihoods, collection: retrieval}
+  - {title: Safaricom, domain: money_livelihoods, collection: finetune}
+  - {title: Agriculture in Kenya, domain: money_livelihoods, collection: retrieval}
+  - {title: Tea production in Kenya, domain: money_livelihoods, collection: finetune}
+  - {title: Nairobi Securities Exchange, domain: money_livelihoods, collection: finetune}
+  - {title: Matatu, domain: money_livelihoods, collection: retrieval}
+  - {title: Harambee, domain: money_livelihoods, collection: finetune}
+  # --- facts where a Western default is a trap (time zone, traffic side, numbers, symbols)
+  - {title: Public holidays in Kenya, domain: western_default_traps, collection: retrieval}
+  - {title: Flag of Kenya, domain: western_default_traps, collection: retrieval}
+  - {title: Coat of arms of Kenya, domain: western_default_traps, collection: finetune}
+  - {title: Ee Mungu Nguvu Yetu, domain: western_default_traps, collection: retrieval}
+  - {title: Telephone numbers in Kenya, domain: western_default_traps, collection: retrieval}
+  - {title: East Africa Time, domain: western_default_traps, collection: finetune}
+  - {title: Transport in Kenya, domain: western_default_traps, collection: retrieval}

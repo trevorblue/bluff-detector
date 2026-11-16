@@ -1,0 +1,14 @@
+{
+  "documents": {
+    "retrieval": 63,
+    "finetune": 26
+  },
+  "retrieval_chunks": 441,
+  "chunk_words": {
+    "min": 22,
+    "max": 603,
+    "mean": 407
+  },
+  "finetune_words": 66130,
+  "failed": []
+}
