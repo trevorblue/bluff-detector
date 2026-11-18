@@ -212,8 +212,63 @@ Limits: BM25 matches exact words, so "devolved units" will not find "counties", 
 not match English. The upgrade is *dense retrieval* (meaning-based embeddings) plus a reranker.
 BM25 came first because it is fast, needs no GPU, is a strong baseline and is easy to explain.
 
-**Status:** code built and unit-tested; the document collections are not built yet; M1 has never
-run on real data.
+### How a run actually works: the notebook is the remote control
+
+The notebook (`notebooks/run_m1_rag.ipynb`) contains no RAG code. Its cells only run commands
+such as `bluff generate --config configs/variants/m1_rag.yaml`. `bluff` is the project's own
+program (`src/bluff/cli.py`): each command runs one file in `src/bluff/pipeline/`, which uses the
+helper files in `src/bluff/`. **The only difference between M0 and M1 is one switch** in
+`configs/variants/m1_rag.yaml`: `retrieval: enabled: true, top_k: 3`. Every file below then
+behaves accordingly.
+
+| Step | File | What it does |
+|---|---|---|
+| 1. The reading material (built once) | `src/bluff/corpus.py` + `data/corpus/sources.yaml` | `bluff build-corpus` downloads the documents and cuts them into passages → `data/corpus/retrieval_chunks.jsonl` |
+| 2. Load the search engine | `src/bluff/retrieval.py` | `build_retriever` reads the 441 passages and builds the BM25 index, once per run |
+| 3. Search | `src/bluff/retrieval.py` | `search(question, 3)`: scores every passage, returns the top 3 with their ids and scores |
+| 4. Build the prompt | `src/bluff/prompts.py` | `build_prompt(question, condition, wording, passages)`: "Use the context if it is relevant. Context: [1] … [2] … [3] …" then the usual question and instruction |
+| 5. Ask the model | `src/bluff/pipeline/generate.py` | For every question and all 4 wordings: search → prompt → the model answers → token probabilities, entropies and hidden states recorded, plus `retrieved_ids` and `retrieval_scores` |
+| 6. The extra signal | `src/bluff/signals.py` | `retrieval_top_score` (the best passage's BM25 score) becomes the 8th confidence number; in M0 it is always 0 |
+| 7. Everything after | `label`, `featurize`, `train`, `evaluate`, `register`, `export` | Exactly the same code as M0: M1 gets its own 4 detectors, metrics and registry entry (`bluff-detector-m1_rag`) |
+| 8. Compare (H4) | `src/bluff/pipeline/compare.py` | `bluff compare --config m0_base.yaml --other m1_rag.yaml`: paired comparison of the two versions on the same questions |
+
+### The document collection, as built (16 November)
+
+- **Sources** (listed in `data/corpus/sources.yaml`, editable): the **Constitution of Kenya 2010**
+  from Wikisource (25 parts: preamble, 18 chapters, 6 schedules) and **63 Kenya-related English
+  Wikipedia articles**, spread over the six question domains (civics and law, geography and
+  society, language, institutions and services, money and livelihoods, "Western default" traps).
+- **Cleaning:** reference-style sections (See also, References, External links, …) removed.
+- **Passages:** paragraphs grouped into chunks of about 300–780 tokens (mean ~407 words); a long
+  paragraph is split at sentence ends. Each chunk starts with its document's title. **441
+  passages from 63 documents.**
+- **Kept apart by document:** each document goes to exactly one collection, retrieval (M1) or
+  fine-tuning (M2, 26 documents, ~61,000 words). The builder refuses a document listed in both.
+  This caught "Ethnic groups in Kenya", a Wikipedia redirect to "Demographics of Kenya", which
+  would have put one article in both (swapped for "Kenya Colony").
+- **Leakage audit:** no test question's wording (8-word phrases) may appear in either collection.
+  It caught "Religion in Kenya", which shares a phrase with a TriviaQA question (swapped for
+  "Kikuyu people"). After that: 0 overlaps.
+- **Every passage records** its source URL and licence (Wikipedia: CC BY-SA 4.0).
+
+### A real example
+
+"What is the capital city of Kenya?" → BM25 returns *Kenya* (score 20.1), *Nairobi* (18.9) and
+*Health in Kenya* (18.2): the answer is in the second. "What is the name of King Lear's youngest
+daughter?" → only unrelated Kenyan passages (*Jomo Kenyatta*, *Kenya*, *Nairobi*), because the
+collection is about Kenya. **That is the H4 test:** does irrelevant reading material make the
+model answer more confidently anyway? An M1 prompt averages ~1,800 tokens (M0: ~50), so an M1
+run takes about 1–1.5 hours on the T4.
+
+A known gap: "Which public body replaced the NHIF?" finds nothing useful, because no article on
+the new Social Health Authority is in the list. BM25 also can't match synonyms ("devolved
+units" vs "counties") or Swahili against English.
+
+**Status (18 November):** code built and tested; document collection built and audited; the M1
+run is next (`notebooks/run_m1_rag.ipynb`, waiting for Colab's GPU quota).
+
+*Written with AI help (Claude): `retrieval.py`, `prompts.py`, `corpus.py`, `sources.yaml` and the
+notebooks; see `AI_USE.md`.*
 
 ## 4. Quantisation, LoRA and QLoRA (variant M2)
 
