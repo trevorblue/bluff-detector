@@ -109,6 +109,22 @@ Only one line changes between runs: `CONFIG` in cell 2.
 | Real run | `configs/variants/m0_base.yaml` | **The real results for the report** (~1 hour) |
 | Wednesday | `configs/variants/m0_base.yaml` again | Adds the students' Kenya questions |
 
+#### One notebook per version (18 November)
+
+So nothing has to be edited before a run, there is now one notebook per model version, each
+cloned from `colab_run.ipynb` (which stays as it is) by `scripts/make_run_notebooks.py`:
+
+| Notebook | Runs | Extra |
+|---|---|---|
+| `notebooks/run_m0_base.ipynb` | M0 (H1, H2, H5) | — |
+| `notebooks/run_m1_rag.ipynb` | M1, RAG (H4) | — |
+| `notebooks/run_m2_qlora.ipynb` | M2, QLoRA (H3) | Installs the fine-tuning libraries; trains the adapter **once** (after the leakage audit), saves it to Hugging Face, and reuses it on every later run |
+| `notebooks/run_m3_rag_qlora.ipynb` | M3 (cut) | Reuses M2's adapter; refuses to start if M2 hasn't been trained |
+
+Each: open → **Select Kernel → Colab → New Colab Server → GPU → T4** → **Run All** → paste the
+two tokens. **Never edit the `run_*` files by hand:** a fix goes into `colab_run.ipynb`, then
+`.venv\Scripts\python scripts\make_run_notebooks.py` rebuilds all four.
+
 ### M0: the model exactly as downloaded
 
 **M** = model version; **0** = nothing changed. The project planned four versions of the same
