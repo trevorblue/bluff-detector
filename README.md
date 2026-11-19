@@ -16,6 +16,7 @@
 <p align="center">
   <a href="#the-question">The question</a> ·
   <a href="#knowing-vs-saying">Knowing vs saying</a> ·
+  <a href="#results"><b>Results</b></a> ·
   <a href="#how-it-works">How it works</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#the-api">The API</a> ·
@@ -32,10 +33,12 @@
 <p align="center"><sub>DSA 8401 Applied Machine Learning · capstone · Trevor Anjeyo Vuhyah</sub></p>
 
 > [!NOTE]
-> **Status: Core-tier scaffold.** The whole system runs end to end today (every pipeline stage, the
-> detectors, the gated API, Docker and CI) on a deterministic fake model. The science comes next:
-> real runs on `Qwen/Qwen2.5-1.5B-Instruct` and the hand-built Kenya question set. See the
-> [roadmap](#roadmap).
+> **Status: results in (20 November 2026).** `Qwen/Qwen2.5-1.5B-Instruct` answered 1,448 TriviaQA
+> questions and 326 Kenya items (211 real Kenya questions written by four students and the author,
+> 82 questions about things that don't exist, 33 UK twins) as **M0** (base) and **M1** (RAG), on
+> free Kaggle and Colab T4 GPUs. **H1, H2 and H5 are supported; H4 is not.** See
+> [Results](#results) and [`notebooks/results.ipynb`](notebooks/results.ipynb). M2 (fine-tuning,
+> H3) was trained and is being evaluated; M3 is future work.
 
 ## The question
 
@@ -73,10 +76,47 @@ registers inside, and crossing the two places every answer in one of the four ce
 | | Hypothesis | Tested by |
 |---|---|---|
 | **H1** | **Silent knowing is common.** Many confidently delivered wrong answers carry an internal uncertainty signal the model does not voice. | Silent-knowing rate, with bootstrap CIs |
-| **H2** | **Kenya widens the gap.** Silent knowing is more frequent on Kenyan questions than on general knowledge. | Same metrics, Kenya vs TriviaQA, on one ruler; plus 60 matched UK twins of Kenya questions, compared pair by pair |
+| **H2** | **Kenya widens the gap.** The model is wrong more often, and silent knowing more frequent, on Kenyan questions than on general knowledge. | Same metrics, Kenya vs TriviaQA, on one ruler; plus 33 matched UK twins of Kenya questions, compared pair by pair |
 | **H3** | **Fine-tuning breaks saying, not knowing.** QLoRA reduces expressed abstention more than it reduces the information in hidden states. | `bluff compare` M0 vs M2: paired bootstrap on AUROC, exact McNemar on abstention, Holm correction |
 | **H4** | **Retrieval can manufacture confidence.** An irrelevant passage lowers internal uncertainty on answers that are still wrong. | M1 with deliberately irrelevant retrieval |
 | **H5** | **Detectors degrade out of distribution.** A detector trained on trivia loses accuracy on Kenya. | Train on trivia only; the *OOD drop* column of every report |
+
+## Results
+
+All numbers are on held-out questions the detectors never saw (trivia test split: 218; Kenya: 211
+real, 82 fake, 33 UK twins), with 95% bootstrap confidence intervals. Full analysis, charts and
+real examples: **[`notebooks/results.ipynb`](notebooks/results.ipynb)** (runs on a laptop, no GPU).
+
+| | Finding | Numbers | Verdict |
+|---|---|---|---|
+| **H1** | **The model knows more than it says**, on trivia and on Kenya | Verbalisation gap (internal − expressed AUROC): trivia **0.175** [0.104, 0.245], Kenya **0.124** [0.033, 0.209]. Of confident wrong answers, the probe flagged 34% (trivia) and 47% (Kenya) | ✅ Supported |
+| **H2** | **It is wrong more often on Kenya** | Wrong rate **73%** on Kenya vs **64%** on trivia (one-sided Fisher p = 0.026). Matched UK twins point the same way (64% vs 45%) but 33 pairs are too few (McNemar p = 0.21) | ✅ Supported |
+| **H5** | **A detector trained on trivia still works on Kenya** | Served linear probe AUROC **0.773** → **0.731** (drop 0.04); all four detectors drop ≤ 0.07 | ✅ Supported (the predicted degradation is small) |
+| **H4** | **Retrieval does not manufacture confidence** | With the answer in the 3 retrieved passages, errors fall **60% → 31%** (McNemar p = 1.5 × 10⁻⁵). Without it, accuracy and "I don't know" don't change significantly; on trivia (irrelevant passages) "I don't know" rises 35% → 88% | ❌ Not supported: RAG helps, without false confidence |
+| — | **Asked about things that don't exist, it invents an answer** | Asked normally it declines only **2%** of 82 fake questions; offered "I don't know", 57% | — |
+| **H3** | Fine-tuning breaks saying, not knowing | M2's QLoRA adapter is trained (42 steps on 26 Kenyan documents); evaluation in progress | ⏳ |
+
+<p align="center">
+  <img src="reports/results_figures/h1_knowing_vs_saying.png" width="49%" alt="H1: internal (probe) AUROC is higher than expressed (abstention) AUROC on both trivia and Kenya.">
+  <img src="reports/results_figures/h4_retrieval.png" width="49%" alt="H4: with retrieval, the wrong rate halves on Kenya questions whose answer is in the passages, and barely moves otherwise.">
+  <img src="reports/results_figures/h2_worse_on_kenya.png" width="49%" alt="H2: wrong rate 73% on Kenya vs 64% on trivia; 64% vs 45% on 33 matched UK twins.">
+  <img src="reports/results_figures/fakes_invented_answers.png" width="49%" alt="Fake questions: asked normally the model invents an answer 98% of the time; offered 'I don't know', 43%.">
+</p>
+
+**One question through the system.** *"What is the largest inland port city in Kenya?"* The model
+answers **"Mombasa"** (it is Kisumu). Its word probabilities look confident, so logistic regression
+on them gives P(wrong) 0.18; the linear probe reading the hidden state gives **1.00**, and the live
+guard withholds the answer.
+
+**The Kenya questions.** Four students wrote them to a student brief (75 real, 20 fake and 15 UK
+twins each, in four domains; see [docs/kenya-questions.md](docs/kenya-questions.md)). The sheets were cleaned with logged mechanical fixes, then, because
+of the deadline, reviewed and repaired with AI: 81 rows dropped (duplicates, yes/no or essay
+questions, wrong or disputed answers, reserved examples), answers corrected, and the 33 UK twins
+and 10 fakes written by the review. Every change is listed in
+[`data/kenya/repairs.yaml`](data/kenya/repairs.yaml) and declared in [`AI_USE.md`](AI_USE.md);
+without the AI-written or AI-edited items the conclusions are unchanged (Kenya wrong rate 75.5%,
+probe AUROC 0.736, gap 0.136). TruthfulQA was dropped after the analysis showed its automatic
+marking was broken (98% of answers marked wrong).
 
 ## How it works
 
@@ -91,7 +131,7 @@ flowchart LR
     A --> R[(Audit record)]
     X --> R
     subgraph MLOps
-      T[MLflow + DVC] --- Reg["Registry<br/>@champion / @challenger"] --- CI[CI · CT · CD] --- M["Drift monitor (planned)"]
+      T[MLflow + DVC] --- Reg["Registry<br/>@champion / @challenger"] --- CI[CI · CT · CD] --- M["Request log + drift report<br/>bluff monitor"]
     end
     classDef ok fill:#1a7f37,stroke:#1a7f37,color:#ffffff
     classDef stop fill:#cf222e,stroke:#cf222e,color:#ffffff
@@ -161,38 +201,58 @@ stage and explains what each file does.
 
 ## Quick start
 
-No GPU and no downloads. The `dev_fake` variant runs every stage on synthetic questions with a fake
-language model, so you can check the plumbing on a laptop in about 15 seconds. **Its numbers mean
-nothing scientifically.**
+**1. See the results (no GPU, about 2 minutes).** The trained detectors, metrics and per-question
+scores of the submitted run are in the repo (`artefacts/`, `reports/`).
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-make setup                                          # locked, hashed install + dev tools
-make test                                           # 44 unit, data, integration and API tests
-bluff all --config configs/variants/dev_fake.yaml   # every pipeline stage
-cat reports/dev_fake/summary.md                     # results table
-make serve                                          # API on http://localhost:8000/docs
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e ".[dev]" matplotlib ipykernel
+jupyter lab notebooks/results.ipynb                  # or open it in VS Code: already executed
 ```
+
+**2. Check the plumbing (no GPU, about 15 seconds).** The `dev_fake` variant runs every stage on
+synthetic questions with a fake language model. **Its numbers mean nothing scientifically.**
+
+```bash
+make test                                            # 70 unit, data, integration and API tests
+bluff all --config configs/variants/dev_fake.yaml    # every pipeline stage
+cat reports/dev_fake/summary.md
+```
+
+**3. Reproduce the real runs on a free GPU.** One notebook per model version, each a thin runner
+for the same pipeline: [`notebooks/run_m0_base.ipynb`](notebooks/run_m0_base.ipynb),
+[`run_m1_rag`](notebooks/run_m1_rag.ipynb), [`run_m2_qlora`](notebooks/run_m2_qlora.ipynb),
+[`run_m3_rag_qlora`](notebooks/run_m3_rag_qlora.ipynb). Open one on **Kaggle** (GPU T4 x2,
+Internet on, Secrets `GH_TOKEN` and `HF_TOKEN`; Save & Run All) or on **Colab from VS Code**. It
+installs the project, runs `validate → ingest → audit → generate → label → featurize → train →
+evaluate → register → export`, saves progress to a Hugging Face dataset repo every 10 minutes
+and resumes after a disconnect (only unanswered questions are asked again). M0 takes about an hour
+on a T4; M1 (three ~600-token passages per prompt) about six. Pinned model revision
+`989aa79…`, float16, one T4 for every run; each run records its GPU, dtype and library versions
+in `run_info.json`. Step-by-step: [docs/full-flow.md](docs/full-flow.md).
+
+**4. Rebuild the Kenya question set** from the students' spreadsheets:
+[`notebooks/kenya_questions.ipynb`](notebooks/kenya_questions.ipynb) runs `bluff clean-sheets`
+(mechanical fixes and the repairs, every change logged) and `bluff import-sheet`, then validates
+and audits. Explained in [docs/kenya-questions.md](docs/kenya-questions.md).
+
+**5. The live guard on a laptop** (CPU, 7.7 GB RAM is enough; about 20–40 s per question):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1   # then http://127.0.0.1:8000
+```
+
+The demo page shows the verdict in plain words, all four detectors' P(wrong) ("inside" vs
+"outside"), the answer word by word with its probabilities, the confidence signals against
+typical right and wrong answers, and the detector's test metrics. Every request is logged;
+`bluff monitor --config configs/variants/m0_base.yaml` writes a drift report.
+
+**6. In a container:** `docker compose up --build` serves the API (the image runs the fake backend
+unless given a real model), and `docker compose --profile tracking up` adds MLflow on `:5000`.
 
 > [!TIP]
-> The hashed lock targets Linux, which is what CI and Docker use. On Windows, install with
-> `pip install -e ".[dev]"` instead of `make setup`.
-
-**With a real model (M0):**
-
-```bash
-pip install -e ".[llm,data]"                       # torch, transformers, datasets
-bluff all --config configs/variants/m0_base.yaml
-```
-
-- The default model is `Qwen/Qwen2.5-1.5B-Instruct` (set `model.name` in `configs/base.yaml`). It
-  must be open-weights, because hosted APIs do not expose hidden states.
-- About 6,000 questions × 4 generations each. On a free Colab T4 expect a few hours; set
-  `generation.limit: 200` for a first pass.
-- Pre-register `model.layers` and `detectors.probe_layer` before scoring the Kenya set.
-
-**Or in a container:** `docker compose up --build` serves the API, and
-`docker compose --profile tracking up` adds an MLflow server on `:5000`.
+> The hashed lock (`make setup`) targets Linux, which is what CI and Docker use. On Windows,
+> install with `pip install -e ".[dev]"`; pandas also needs `pip install tzdata`.
 
 ## The API
 
@@ -222,7 +282,9 @@ answer text is a placeholder:
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /v1/ask` | Question in → the model answers → the detector scores it from the model's own internals → `answer`, `answer_with_citation` or `abstain` |
+| `GET /` | The demo page: a question box over `/v1/ask` |
+| `POST /v1/ask` | Question in → the model answers → the detector scores it from the model's own internals → `answer`, `answer_with_citation` or `abstain`; also returns every detector's P(wrong), the confidence signals and the answer token by token |
+| `GET /v1/model-card` | The live detector's test metrics and the typical signals of right and wrong training answers |
 | `GET /health` | Liveness: the process is up |
 | `GET /ready` | Readiness: `503` until the generator and detector are loaded |
 | `GET /metadata` | Provenance of the live detector: git SHA, data sha256, config, seed, threshold, validation metrics |
@@ -248,9 +310,12 @@ to it. The threshold travels inside the artefact, so the API never re-implements
 | `train` | features (trivia train split only) | `artefacts/<variant>/<detector>/`, `serving/` |
 | `evaluate` | artefacts + features | `reports/<variant>/metrics.json`, `scores.parquet`, `summary.md` |
 | `register` | metrics | `artefacts/registry/` with `@champion` / `@challenger` |
+| `export` | everything above | `data/datasets/<variant>/`: one CSV row per question (answers, labels, signals, every detector's score) and the hidden states as named `.npy` files, with a data card |
 
-Extra commands: `bluff compare --config A --other B` (the H3 test), `bluff promote --config X
---version N` (promotion and rollback), and `bluff finetune_qlora` / `bluff semantic_entropy` (templates).
+Extra commands: `bluff compare --config A --other B` (paired variant comparison: H3, H4),
+`bluff promote --config X --version N` (promotion and rollback), `bluff finetune_qlora` (the M2
+adapter), `bluff build-corpus` (the Kenyan document collections), `bluff clean-sheets` and
+`bluff import-sheet` (the students' question sheets), and `bluff monitor` (drift report).
 
 <details>
 <summary><b>What a <code>dev_fake</code> run reports</b> (synthetic data and a fake model: this checks the plumbing, not the science)</summary>
@@ -303,7 +368,8 @@ questions. Layers, token positions and the probe threshold are fixed on a valida
 
 | Requirement | Where it lives |
 |---|---|
-| Reproducible scripted pipeline, no notebooks | `src/bluff/pipeline/`, `bluff all` |
+| Reproducible scripted pipeline; notebooks only run it or read its outputs | `src/bluff/pipeline/`, `bluff all`; `notebooks/run_*.ipynb` (generated from one template by `scripts/make_run_notebooks.py`) |
+| Resumable GPU runs on free hardware | `generate` checkpoints every 50 questions, refuses to mix GPUs or dtypes, recovers from half-uploaded saves |
 | Model = f(code, data, config, env, seed) | git SHA + data sha256 in every artefact; `configs/`; `requirements.lock`; `seed` |
 | Artefact carries preprocessing, threshold, metadata | `artefacts/<variant>/serving/` (`detector.joblib` + `metadata.json`) |
 | No training-serving skew | `signals.py` and `Detector.inputs()` shared by the pipeline and the API |
@@ -314,15 +380,21 @@ questions. Layers, token positions and the probe threshold are fixed on a valida
 | FastAPI: typed contract, lifespan load, `def` endpoint, health / ready / metadata | `app/main.py`, `app/schemas.py` |
 | Docker: multi-stage, non-root, healthcheck, hashed lock, read-only FS | `Dockerfile`, `docker-compose.yml` |
 | CI · CT · CD | `.github/workflows/`: merge gate · retrain on a GPU runner · build, Trivy scan, push to GHCR |
-| Data versioning | `dvc.yaml` |
+| Data versioning | `dvc.yaml`; run outputs in a Hugging Face dataset repo |
+| Monitoring | every API request appended to `logs/requests.jsonl`; `bluff monitor`: PSI and KS drift checks of the live signals and P(wrong) against training and validation |
 
 <details>
 <summary><b>Repository layout</b></summary>
 
 ```
 configs/            base.yaml + one file per variant (m0_base, m1_rag, m2_qlora, m3_rag_qlora, dev_fake)
-data/kenya/         the hand-built Kenya question set (questions.jsonl), see data/README.md
-data/corpus/        retrieval and fine-tuning corpora (disjoint by document)
+data/kenya/         the Kenya question set (questions.jsonl), the student-file map, the repairs and
+                    every change (cleaned/changes.csv); see docs/kenya-questions.md
+data/corpus/        retrieval and fine-tuning corpora (disjoint by document) and sources.yaml
+notebooks/          results.ipynb, analysis.ipynb, kenya_questions.ipynb, run_*.ipynb (GPU runners)
+artefacts/          the submitted run's trained detectors (m0_base, m1_rag) and the registry
+reports/            metrics, per-question scores, summaries, comparisons and charts
+scripts/            laptop serving, notebook generators
 src/bluff/
   backends.py       the LLM under test: HFBackend (real) and FakeBackend (test double)
   signals.py        feature extraction, ONE implementation shared by training and the API
@@ -349,29 +421,41 @@ dvc.yaml            the pipeline as DVC stages, for content-hashed data versioni
 Dates, owners and scope cuts are in the [build plan](docs/plan.md).
 
 - [x] Scaffold: pipeline, detectors, metrics, API, Docker, CI, tests
-- [ ] Novelty check against recent work on probes and abstention
-- [ ] Kenya question set: 300–500 verified items + ~100 unanswerable, second-person review
-- [ ] M0 on trivia: get the linear probe working in-distribution
-- [ ] Both prompt conditions on M0; read the four cells and the verbalisation gap
-- [ ] LLM judge in `pipeline/label.py`; manual adjudication of `review_sample.jsonl`
-- [ ] Fine-tuning corpus + `bluff audit`, then `bluff finetune_qlora` → M2 → `bluff compare` (H3)
-- [ ] Retrieval corpus → M1
-- [ ] Stretch: probe transfer across variants, LSTM over entropy, MLP layer sweep, semantic entropy
-- [ ] If time allows: M3, the irrelevant-retrieval experiment (H4)
+- [x] M0 on trivia (TriviaQA; TruthfulQA dropped after its marking proved broken)
+- [x] Kenya question set: 211 real + 82 fake + 33 UK twins, cleaned and AI-repaired with every change logged
+- [x] Both prompt conditions on M0; the four cells and the verbalisation gap (H1, H2, H5)
+- [x] Retrieval corpus (Constitution + 63 Wikipedia articles) → M1 → `bluff compare` (H4)
+- [x] Live guard demo page, laptop serving, request log and drift report
+- [x] Fine-tuning corpus + audit → `bluff finetune_qlora` (M2 adapter trained)
+- [ ] M2 evaluation → `bluff compare` M0 vs M2 (H3)
+- [ ] A second-person human review of the Kenya set, and official sources for every question
+- [ ] LLM judge in `pipeline/label.py`; manual adjudication of `review_sample.jsonl` (label-noise rate)
+- [ ] M3; probe transfer across variants; LSTM over entropy; semantic entropy
 
 ## Known limitations
 
-- The fake backend proves the system works, not that the science does.
-- Alias matching is noisy, especially on TruthfulQA's long answers; the judge and manual review exist
-  to measure that noise.
-- A probe is tied to one base model and one layer. Swapping the generator forces a retrain, which is
-  the drift scenario the system is built to handle.
-- The Kenya set is self-authored, a limitation stated rather than hidden. Some items may also sit in
-  pretraining data; the plan is to test for verbatim recall and exclude contaminated items.
-- `finetune_qlora.py` and the HF backend are not run in CI; test them on a GPU before relying on them.
+- **One small model** (1.5B parameters), wrong on about two thirds of the questions; a larger model
+  may behave differently.
+- **Automatic marking** compares words, so a right answer worded differently can be marked wrong
+  (why TruthfulQA was dropped). The label-noise rate from a manual check is not yet measured.
+- **The Kenya set:** written by four students and the author, but the planned second-person
+  review was not done; it was reviewed and repaired with AI instead (declared, and the main
+  results are reported without the AI-written items too). Many B and D questions cite unofficial
+  sources. Only 33 of the planned 60 UK twins exist, all AI-written, so the paired comparison is
+  underpowered.
+- **The document collection** covers about half the Kenya questions (103 of 211 have their answer
+  in the retrieved passages).
+- **Free GPUs:** runs moved between Colab and Kaggle (same T4 and float16; library versions differ
+  slightly, recorded in `run_info.json`). On a laptop CPU the demo takes 20–40 s per question and
+  computes hidden states in bfloat16, so its scores can differ slightly from the T4's.
+- A probe is tied to one base model and one layer: swapping the generator forces a retrain, the
+  drift scenario the system is built to handle.
 
 ## Further reading
 
+- [Results notebook](notebooks/results.ipynb): every hypothesis with its numbers, charts and real examples
+- [Full flow](docs/full-flow.md): every step from setup to submission, as it actually happened
+- [The Kenya questions](docs/kenya-questions.md): from the students' sheets to the test set, with the AI repairs
 - [Architecture guide](docs/architecture.md): how the system works, one question at a time, and what every file is
 - [Concepts](docs/concepts.md): every idea explained, from the models and metrics to Docker, CI/CD and monitoring
 - [Build plan](docs/plan.md): the build steps, the day-by-day schedule and the plug-in-day checklist
@@ -379,6 +463,13 @@ Dates, owners and scope cuts are in the [build plan](docs/plan.md).
 - [Research proposal](docs/proposal.md): the full design, including prior work, serving and phasing
 - [Data contract](data/README.md): the four pools, the question schema and the authoring rules
 - [AI use disclosure](AI_USE.md)
+
+## Acknowledgements
+
+The Kenya questions were written by four students: **James Gosha** (civics and law), **Michael**
+(institutions, services and money), and the authors of the geography, society and language set
+and of the Western-default-traps set. Built with AI assistance as declared in
+[AI_USE.md](AI_USE.md).
 
 ## Citation
 
