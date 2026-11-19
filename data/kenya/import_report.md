@@ -1,6 +1,6 @@
 # Kenya question import report
 
-Imported 2026-11-19 12:39 from `cleaned_questions.xlsx`: 352 filled rows; the question file now holds 361 questions (it held 364).
+Imported 2026-11-19 12:45 from `cleaned_questions.xlsx`: 352 filled rows; the question file now holds 361 questions (it held 361).
 
 ## Questions per author
 

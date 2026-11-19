@@ -1,6 +1,6 @@
 # Kenya questions: cleaning report
 
-Made by `bluff clean-sheets` on 2026-11-19 12:39. Every change is listed row by row in `cleaned/changes.csv` and in the **Changes** tab of `cleaned/cleaned_questions.xlsx`; the cleaned questions are in that workbook's student tabs. Nothing is imported until you run `bluff import-sheet`.
+Made by `bluff clean-sheets` on 2026-11-19 12:45. Every change is listed row by row in `cleaned/changes.csv` and in the **Changes** tab of `cleaned/cleaned_questions.xlsx`; the cleaned questions are in that workbook's student tabs. Nothing is imported until you run `bluff import-sheet`.
 
 ## Sources
 
