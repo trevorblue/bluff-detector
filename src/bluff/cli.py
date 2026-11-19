@@ -38,6 +38,9 @@ def main(argv: list[str] | None = None) -> int:
     cp = sub.add_parser("compare", help="paired comparison of two variants (H3)")
     cp.add_argument("--config", required=True, help="variant A, e.g. the base model")
     cp.add_argument("--other", required=True, help="variant B, e.g. the fine-tuned model")
+    cs = sub.add_parser("clean-sheets", help="fix the students' sheets, logging every change")
+    cs.add_argument("--config", required=True)
+    cs.add_argument("--files", default="data/kenya/student_files.yaml")
     ip = sub.add_parser("import-sheet", help="students' .xlsx -> data/kenya/questions.jsonl")
     ip.add_argument("--config", required=True)
     ip.add_argument("--sheet", required=True, help="path to the downloaded Kenya Question Sheet")
@@ -71,6 +74,10 @@ def main(argv: list[str] | None = None) -> int:
         from bluff.pipeline import compare
 
         result = compare.run(cfg, load_config(args.other))
+    elif args.cmd == "clean-sheets":
+        from bluff import sheet_clean
+
+        result = sheet_clean.run(cfg, args.files)
     elif args.cmd == "import-sheet":
         from bluff import sheet_import
 

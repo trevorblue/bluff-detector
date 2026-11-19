@@ -1,0 +1,41 @@
+# Which spreadsheet holds which student's questions (letters and domains: the Student Brief).
+# Read by `bluff clean-sheets`. Paths are relative to the bluff-detector folder ("../" = the
+# Bluff_Detector folder, where the downloaded sheets are). Edit this when a student sends an
+# updated file, or when a name is known, then run `bluff clean-sheets` again.
+#
+# file    the downloaded .xlsx
+# tab     the tab inside it that holds this student's rows
+# student the letter in the brief (A-D)
+# author  written into every row's Author column when the student left it blank
+# domain  the brief's domain for this student, used when a row's Domain is missing or not one of
+#         the six sheet values
+# exclude optional: {row number: reason} for rows left out on purpose (e.g. failed the leakage
+#         audit). Each one appears in the change list with its reason.
+
+- file: "../Bluff Detector - Kenya Question Sheet student b.xlsx"
+  tab: Student B          # James typed in the "Student B" tab, but his set is A's civics set
+  student: A
+  author: James Gosha
+  domain: civics_law
+  exclude:                # rows left out on purpose; each is logged in the change list
+    7: "copies the Constitution's wording (Chapter 7): leakage audit; rewrite in own words"
+    16: "copies the Constitution's wording (Chapter 5): leakage audit; rewrite in own words"
+    75: "copies the Constitution's wording (Chapter 9): leakage audit; rewrite in own words"
+
+- file: "../Geography_Questions.xlsx"
+  tab: Sheet1
+  student: B
+  author: Student B       # name not given yet
+  domain: geography_society
+
+- file: "../Bluff Detector - Kenya Question Sheet 1.xlsx"
+  tab: Student C
+  student: C
+  author: Michael
+  domain: institutions_services
+
+- file: "../project 2.xlsx"
+  tab: Student D          # this file's "Student A" tab is an earlier draft of the same questions
+  student: D
+  author: Student D       # name not given yet
+  domain: western_default_traps

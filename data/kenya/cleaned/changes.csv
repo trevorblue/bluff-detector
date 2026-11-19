@@ -1,0 +1,491 @@
+﻿student,row,column,before,after,why
+Student A,2,Question,Who is incharge of the registration of candidates for election?,"In Kenya, who is incharge of the registration of candidates for election?","added 'In Kenya, '"
+Student A,2,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,3,Question,Who is in charge of the settlement of electoral disputes?,"In Kenya, who is in charge of the settlement of electoral disputes?","added 'In Kenya, '"
+Student A,3,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,4,Question,Who is in charge of voter education?,"In Kenya, who is in charge of voter education?","added 'In Kenya, '"
+Student A,4,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,5,Question,Who is in charge of the delimitation of constituencies and wards?,"In Kenya, who is in charge of the delimitation of constituencies and wards?","added 'In Kenya, '"
+Student A,5,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,6,Question,"Who is in charge of facilitating the observation, monitoring and evaluation of elections?","In Kenya, who is in charge of facilitating the observation, monitoring and evaluation of elections?","added 'In Kenya, '"
+Student A,6,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,7,row,Who is in charge of developing a code of conduct for candidates and parties?,,excluded in student_files.yaml: copies the Constitution's wording (Chapter 7): leakage audit; rewrite in own words
+Student A,8,Question,Who is in charge of the continuous registration of voters and the revision of the voters’ roll?,"In Kenya, who is in charge of the continuous registration of voters and the revision of the voters’ roll?","added 'In Kenya, '"
+Student A,8,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,9,Question,Who is in charge of monitoring compliance with the legislation on the nomination of candidates by parties?,"In Kenya, who is in charge of monitoring compliance with the legislation on the nomination of candidates by parties?","added 'In Kenya, '"
+Student A,9,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,10,Question,who is the administrative head of the national assembly?,"In Kenya, who is the administrative head of the national assembly?","added 'In Kenya, '"
+Student A,10,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,11,Question,who is incharge of management of parliamentary internship programmes?,"In Kenya, who is incharge of management of parliamentary internship programmes?","added 'In Kenya, '"
+Student A,11,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,12,Question,who maintains custody of the mace in parliament?,"In Kenya, who maintains custody of the mace in parliament?","added 'In Kenya, '"
+Student A,12,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,13,Question,who is incharge of crowd management in parliament?,"In Kenya, who is incharge of crowd management in parliament?","added 'In Kenya, '"
+Student A,13,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,14,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,15,Question,what does chapter 3 of the constitution entail?,"In Kenya, what does chapter 3 of the constitution entail?","added 'In Kenya, '"
+Student A,15,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,16,row,who manages land on behalf of the national and county governments?,,excluded in student_files.yaml: copies the Constitution's wording (Chapter 5): leakage audit; rewrite in own words
+Student A,17,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,18,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,19,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,20,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,21,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,22,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,23,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,24,Answer,2010-08-27 00:00:00,27 August 2010,Excel value shown as typed
+Student A,24,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,25,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,26,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,27,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,28,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,35,Answer,2026-06-01 00:00:00,1 June,Excel value shown as typed
+Student A,36,Answer,2026-10-20 00:00:00,20 October,Excel value shown as typed
+Student A,37,Answer,2026-12-12 00:00:00,12 December,Excel value shown as typed
+Student A,56,Question,Which government platform lets citizens apply for many government services online?,"In Kenya, which government platform lets citizens apply for many government services online?","added 'In Kenya, '"
+Student A,63,Answer,0.16,16%,Excel value shown as typed
+Student A,64,Answer,2026-06-30 00:00:00,30 June,Excel value shown as typed
+Student A,66,Answer,0.0275,2.75%,Excel value shown as typed
+Student A,66,Question,What percentage of gross salary does a salaried employee contribute to the Social Health Authority?,"In Kenya, what percentage of gross salary does a salaried employee contribute to the Social Health Authority?","added 'In Kenya, '"
+Student A,68,Answer,0.015,1.5%,Excel value shown as typed
+Student A,68,Question,At what percentage of gross salary is the Affordable Housing Levy deducted from an employee?,"In Kenya, at what percentage of gross salary is the Affordable Housing Levy deducted from an employee?","added 'In Kenya, '"
+Student A,69,Answer,0.3,30%,Excel value shown as typed
+Student A,75,row,Who is the Commander-in-Chief of the Kenya Defence Forces under the Constitution?,,excluded in student_files.yaml: copies the Constitution's wording (Chapter 9): leakage audit; rewrite in own words
+Student A,76,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,77,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,78,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,79,Question,Who was the first Vice-President elected under the 2010 Constitution?,"In Kenya, who was the first Vice-President elected under the 2010 Constitution?","added 'In Kenya, '"
+Student A,79,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,80,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,81,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,82,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,83,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,84,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,85,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,86,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,87,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,88,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,89,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,90,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,91,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,92,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,93,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,94,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,95,Domain,unanswerable,civics_law,domain mapped to the brief's six
+Student A,96,row,twin,,skipped: no question text
+Student A,97,row,twin,,skipped: no question text
+Student A,98,row,twin,,skipped: no question text
+Student A,99,row,twin,,skipped: no question text
+Student A,100,row,twin,,skipped: no question text
+Student A,101,row,twin,,skipped: no question text
+Student A,102,row,twin,,skipped: no question text
+Student A,103,row,twin,,skipped: no question text
+Student A,104,row,twin,,skipped: no question text
+Student A,105,row,twin,,skipped: no question text
+Student A,106,row,twin,,skipped: no question text
+Student A,107,row,twin,,skipped: no question text
+Student A,108,row,twin,,skipped: no question text
+Student A,109,row,twin,,skipped: no question text
+Student A,110,row,twin,,skipped: no question text
+Student B,3,Question,Is lake Bogoria saline or alkaline ?,"In Kenya, is lake Bogoria saline or alkaline ?","added 'In Kenya, '"
+Student B,10,Question,Which river is famous for the annual wildebeest migration crossing?,"In Kenya, which river is famous for the annual wildebeest migration crossing?","added 'In Kenya, '"
+Student B,13,row,CITIES AND TOWNS,,skipped: no Type (a heading or unfinished row)
+Student B,14,row,What is the capital city of Kenya?,,skipped: repeats an earlier question or a starter
+Student B,15,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
+Student B,16,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
+Student B,17,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
+Student B,18,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
+Student B,19,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
+Student B,20,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
+Student B,21,Question,which town is associated with the industrial mining of soda ash from Lake Magadi?,"In Kenya, which town is associated with the industrial mining of soda ash from Lake Magadi?","added 'In Kenya, '"
+Student B,21,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
+Student B,22,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
+Student B,23,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
+Student B,25,row,CENSUS AND POPULATION FIGURES,,skipped: no answer (a real or twin question)
+Student B,26,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,27,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,28,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,29,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,30,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,31,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,32,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,33,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,34,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,35,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,36,Answer,0.75,75%,Excel value shown as typed
+Student B,36,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,37,Answer,0.8154,81.54%,Excel value shown as typed
+Student B,37,Question,What was the literacy rate for the population aged 15 years and above as reported in the 2019 Census?,"In Kenya, what was the literacy rate for the population aged 15 years and above as reported in the 2019 Census?","added 'In Kenya, '"
+Student B,37,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,38,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,39,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,41,row,COMMUNITIES AND CULTURE,,skipped: no Type (a heading or unfinished row)
+Student B,42,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,43,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,44,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,45,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,46,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,47,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,48,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,49,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,50,Question,Which community is traditionally associated with the pastoral lifestyle in Samburu region?,"In Kenya, which community is traditionally associated with the pastoral lifestyle in Samburu region?","added 'In Kenya, '"
+Student B,50,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,51,Question,Which community is traditionally associated with fishing around Lake Victoria?,"In Kenya, which community is traditionally associated with fishing around Lake Victoria?","added 'In Kenya, '"
+Student B,51,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,52,Question,What are the three categories of the Nilotic language group?,"In Kenya, what are the three categories of the Nilotic language group?","added 'In Kenya, '"
+Student B,52,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,54,row,NATIONAL SYMBOLS OF KENYA,,skipped: no Type (a heading or unfinished row)
+Student B,55,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,56,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,57,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,58,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,59,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,60,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,61,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,62,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,63,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,64,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,66,row,KISWAHILI WORDS AND THEIR MEANINGS,,skipped: no Type (a heading or unfinished row)
+Student B,67,Domain,Language,language,domain mapped to the brief's six
+Student B,68,Question,"What does ""Hakuna matata"" translate to?","In Kenya, what does ""Hakuna matata"" translate to?","added 'In Kenya, '"
+Student B,68,Domain,Language,language,domain mapped to the brief's six
+Student B,69,Domain,Language,language,domain mapped to the brief's six
+Student B,70,Question,"What does ""Simba""translate to?","In Kenya, what does ""Simba""translate to?","added 'In Kenya, '"
+Student B,70,Domain,Language,language,domain mapped to the brief's six
+Student B,71,Domain,Language,language,domain mapped to the brief's six
+Student B,73,row,METHALI AND THEIR MEANINGS,,skipped: no Type (a heading or unfinished row)
+Student B,74,Domain,Language,language,domain mapped to the brief's six
+Student B,75,Domain,Language,language,domain mapped to the brief's six
+Student B,76,Domain,Language,language,domain mapped to the brief's six
+Student B,77,Domain,Language,language,domain mapped to the brief's six
+Student B,78,Domain,Language,language,domain mapped to the brief's six
+Student B,80,row,OTHER LANGUAGES,,skipped: no Type (a heading or unfinished row)
+Student B,81,Domain,Language,language,domain mapped to the brief's six
+Student B,82,Domain,Language,language,domain mapped to the brief's six
+Student B,83,Question,Which language is commonly known as the urban youth slang?,"In Kenya, which language is commonly known as the urban youth slang?","added 'In Kenya, '"
+Student B,83,Domain,Language,language,domain mapped to the brief's six
+Student B,84,Domain,Language,language,domain mapped to the brief's six
+Student B,85,Domain,Language,language,domain mapped to the brief's six
+Student B,86,Domain,Language,language,domain mapped to the brief's six
+Student B,87,Question,"What is the meaning of the word""Kalenjin""?","In Kenya, what is the meaning of the word""Kalenjin""?","added 'In Kenya, '"
+Student B,87,Domain,Language,language,domain mapped to the brief's six
+Student B,88,Domain,Language,language,domain mapped to the brief's six
+Student B,89,Domain,Language,language,domain mapped to the brief's six
+Student B,90,row,what is the most common writing system in coastal areas in kenya?,,skipped: no Type (a heading or unfinished row)
+Student B,92,row,FALSE QUESTIONS,,skipped: no Type (a heading or unfinished row)
+Student B,93,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,94,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,95,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,96,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,97,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,98,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,99,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,100,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,101,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,102,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,103,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,104,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,105,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,106,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,107,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,108,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,109,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,110,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,111,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student B,112,Domain,Unanswerable,geography_society,domain mapped to the brief's six
+Student C,2,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,3,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,4,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,5,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,6,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,7,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,8,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,9,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,10,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,11,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,12,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,13,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,14,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,15,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,16,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,17,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,18,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,19,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,20,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,21,row,when was the establishment of NTSA?,,skipped: no answer (a real or twin question)
+Student C,22,Other accepted answers,1995-06-01 00:00:00,1 June 1995,Excel value shown as typed
+Student C,22,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,23,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,24,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,25,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,26,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,27,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,28,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,29,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,30,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,31,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,32,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,33,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,34,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,35,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,36,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,37,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,38,Question,Which body regulates public service vehicles?,"In Kenya, which body regulates public service vehicles?","added 'In Kenya, '"
+Student C,38,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,39,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,40,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,41,Question,Which document is required to prove age for first ID / passport?,"In Kenya, which document is required to prove age for first ID / passport?","added 'In Kenya, '"
+Student C,41,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,42,row,Which department issues Kenyan passports?,,skipped: repeats an earlier question or a starter
+Student C,43,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,44,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,45,Question,Which police agency issues the Certificate of Good Conduct?,"In Kenya, which police agency issues the Certificate of Good Conduct?","added 'In Kenya, '"
+Student C,45,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,46,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,47,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,48,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,49,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,50,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,51,Question,Which agency certifies horticultural exports for phytosanitary compliance?,"In Kenya, which agency certifies horticultural exports for phytosanitary compliance?","added 'In Kenya, '"
+Student C,51,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,52,Question,what role does AFA play in licenseing coffee?,"In Kenya, what role does AFA play in licenseing coffee?","added 'In Kenya, '"
+Student C,52,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,53,Question,what role does AFA play in licenseing tea?,"In Kenya, what role does AFA play in licenseing tea?","added 'In Kenya, '"
+Student C,53,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,54,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,55,Question,Which body sets minimum guaranteed prices for tea and how does that affect smallholder earnings?,"In Kenya, which body sets minimum guaranteed prices for tea and how does that affect smallholder earnings?","added 'In Kenya, '"
+Student C,55,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,56,row,Which agency certifies horticultural exports for phytosanitary compliance?,,skipped: repeats an earlier question or a starter
+Student C,57,Question,What is Kenya's leading foreign-exchange-earning agricultural export,What is Kenya's leading foreign-exchange-earning agricultural export?,added '?'
+Student C,57,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,58,Question,Which regulator licenses the NSE,Which regulator licenses the NSE?,added '?'
+Student C,58,Question,Which regulator licenses the NSE?,"In Kenya, which regulator licenses the NSE?","added 'In Kenya, '"
+Student C,58,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,59,Question,Who is the regulator of the brokers for nse?,"In Kenya, who is the regulator of the brokers for nse?","added 'In Kenya, '"
+Student C,59,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,60,Question,"Which regulator licenses the NSE and its brokers, and under which Act?","In Kenya, which regulator licenses the NSE and its brokers, and under which Act?","added 'In Kenya, '"
+Student C,60,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,61,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,62,Question,Does a mobile-money account need a national ID to be registered?,"In Kenya, does a mobile-money account need a national ID to be registered?","added 'In Kenya, '"
+Student C,62,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,63,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,64,Question,What is the most used form of transaction ?,"In Kenya, what is the most used form of transaction ?","added 'In Kenya, '"
+Student C,64,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,65,Question,Must providers get approval before changing transaction fees?,"In Kenya, must providers get approval before changing transaction fees?","added 'In Kenya, '"
+Student C,65,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,66,Question,Which Act of Parliament established the capital markets authority,Which Act of Parliament established the capital markets authority?,added '?'
+Student C,66,Question,Which Act of Parliament established the capital markets authority?,"In Kenya, which Act of Parliament established the capital markets authority?","added 'In Kenya, '"
+Student C,66,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,67,Question,Which agency ensurers proper conduct of all licensed persons and market institutions.,Which agency ensurers proper conduct of all licensed persons and market institutions?,added '?'
+Student C,67,Question,Which agency ensurers proper conduct of all licensed persons and market institutions?,"In Kenya, which agency ensurers proper conduct of all licensed persons and market institutions?","added 'In Kenya, '"
+Student C,67,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,68,Question,How heads Capital Markets Authority,How heads Capital Markets Authority?,added '?'
+Student C,68,Question,How heads Capital Markets Authority?,"In Kenya, how heads Capital Markets Authority?","added 'In Kenya, '"
+Student C,68,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,69,Question,A Chairman appointed by?,"In Kenya, A Chairman appointed by?","added 'In Kenya, '"
+Student C,69,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,70,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,71,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,72,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,73,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,74,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,75,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,76,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,77,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,78,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,79,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,80,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,81,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,82,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,83,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,84,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,85,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,86,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,87,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,88,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,89,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,90,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student D,2,Question,which units is used for road distances in kenya,which units is used for road distances in kenya?,added '?'
+Student D,2,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,3,Question,what is the Kenya's total population,what is the Kenya's total population?,added '?'
+Student D,3,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,4,Question,what is Kenya's total GDP,what is Kenya's total GDP?,added '?'
+Student D,4,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,5,Question,what is the total area of kenya,what is the total area of kenya?,added '?'
+Student D,5,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,6,Question,what is the tallest mountain in kenya,what is the tallest mountain in kenya?,added '?'
+Student D,6,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,7,Question,what is Kenya's main tourist attraction,what is Kenya's main tourist attraction?,added '?'
+Student D,7,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,8,Question,which continet is Kenya located,which continet is Kenya located?,added '?'
+Student D,8,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,9,Question,which ocean borders Kenya,which ocean borders Kenya?,added '?'
+Student D,9,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,10,row,what is the national language of Kenya,,skipped: repeats an earlier question or a starter
+Student D,11,Question,what is the supreme law of Kenya,what is the supreme law of Kenya?,added '?'
+Student D,11,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,12,Question,How many national holidays does Kenya have,How many national holidays does Kenya have?,added '?'
+Student D,12,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,13,Question,when did kenya gained its independence,when did kenya gained its independence?,added '?'
+Student D,13,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,14,Question,what the kenya's most expoerted crop,what the kenya's most expoerted crop?,added '?'
+Student D,14,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,15,Question,how many presidents does Kenya have,how many presidents does Kenya have?,added '?'
+Student D,15,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,16,Question,who was the first president of Kenya,who was the first president of Kenya?,added '?'
+Student D,16,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,17,Question,who collects taxes in Kenya,who collects taxes in Kenya?,added '?'
+Student D,17,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,18,Question,when is census held in Kenya,when is census held in Kenya?,added '?'
+Student D,18,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,19,Question,how many type army forces are in kenya,how many type army forces are in kenya?,added '?'
+Student D,19,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,20,Question,how many counties does Kenya has,how many counties does Kenya has?,added '?'
+Student D,20,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,21,Question,what is the largets airport in Kenya,what is the largets airport in Kenya?,added '?'
+Student D,21,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,22,Question,how many airstrips does kenya has,how many airstrips does kenya has?,added '?'
+Student D,22,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,23,Question,what is the kenya Natioanal Football team called,what is the kenya Natioanal Football team called?,added '?'
+Student D,23,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,24,Question,what is the stable food in kenya,what is the stable food in kenya?,added '?'
+Student D,24,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,25,Question,How many languages is spoken in Kenya,How many languages is spoken in Kenya?,added '?'
+Student D,25,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,26,Question,how many cities does Kenya has,how many cities does Kenya has?,added '?'
+Student D,26,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,27,Question,what sport is kenya known for internatonally,what sport is kenya known for internatonally?,added '?'
+Student D,27,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,28,Question,what is kenya's telephone country code,what is kenya's telephone country code?,added '?'
+Student D,28,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,29,Question,how many banks does kenya has,how many banks does kenya has?,added '?'
+Student D,29,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,30,Question,what the largest service that provide telecommunication and inetrnet in kenya,what the largest service that provide telecommunication and inetrnet in kenya?,added '?'
+Student D,30,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,31,Question,how many colours does the kenyan flag have,how many colours does the kenyan flag have?,added '?'
+Student D,31,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,32,Question,what is the life expectancy in kenya today,what is the life expectancy in kenya today?,added '?'
+Student D,32,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,33,Question,what is the required age to vote in Kenya,what is the required age to vote in Kenya?,added '?'
+Student D,33,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,34,Question,how long does it take for election to happen in Kenya,how long does it take for election to happen in Kenya?,added '?'
+Student D,34,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,35,Question,what instituition issues currencies in Kenya,what instituition issues currencies in Kenya?,added '?'
+Student D,35,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,36,Question,which organization handles health matters in kenya,which organization handles health matters in kenya?,added '?'
+Student D,36,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,37,Question,The largest stadium in kenya,The largest stadium in kenya?,added '?'
+Student D,37,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,38,Question,which is the tallest building in kenya,which is the tallest building in kenya?,added '?'
+Student D,38,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,39,Question,which service is responsible for criminal ivestigations,which service is responsible for criminal ivestigations?,added '?'
+Student D,39,Question,which service is responsible for criminal ivestigations?,"In Kenya, which service is responsible for criminal ivestigations?","added 'In Kenya, '"
+Student D,39,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,40,Question,The first woman to win a nobel prize in Kenya,The first woman to win a nobel prize in Kenya?,added '?'
+Student D,40,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,41,Question,which Animals support the shield on kenya's coat of arms,which Animals support the shield on kenya's coat of arms?,added '?'
+Student D,41,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,42,Answer,2026-10-20 00:00:00,20 October,Excel value shown as typed
+Student D,42,Question,on which day does kenyaa celebrate mashujaa day,on which day does kenyaa celebrate mashujaa day?,added '?'
+Student D,42,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,43,Question,which is responsible for motor vehicle and road transport safety in kenya,which is responsible for motor vehicle and road transport safety in kenya?,added '?'
+Student D,43,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,44,Question,what is kenya's largest harbour,what is kenya's largest harbour?,added '?'
+Student D,44,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,45,Question,The education and student loan instituition in kenya,The education and student loan instituition in kenya?,added '?'
+Student D,45,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,46,Question,how many rights was passed in kenya,how many rights was passed in kenya?,added '?'
+Student D,46,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,47,Question,In kenya which is the upper house in the Parlianment,In kenya which is the upper house in the Parlianment?,added '?'
+Student D,47,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,48,row,How many levels of government are there in Kenya,,skipped: no Type (a heading or unfinished row)
+Student D,49,Question,Types of levels of government in Kenya,Types of levels of government in Kenya?,added '?'
+Student D,49,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,49,Other accepted answers,,National government; County government,split '/' or 'or' answer into accepted answers
+Student D,50,Question,The fastest means of train Transport in Kenya,The fastest means of train Transport in Kenya?,added '?'
+Student D,50,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,51,Question,which symbol is displayed on Kenya's flag,which symbol is displayed on Kenya's flag?,added '?'
+Student D,51,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,51,Other accepted answers,Mkuki,Mkuki; Shield; Spears,split '/' or 'or' answer into accepted answers
+Student D,52,Question,What is the main exam that that highschool students do,What is the main exam that that highschool students do?,added '?'
+Student D,52,Question,What is the main exam that that highschool students do?,"In Kenya, what is the main exam that that highschool students do?","added 'In Kenya, '"
+Student D,52,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,53,Question,which language is used for teaching students in kenya,which language is used for teaching students in kenya?,added '?'
+Student D,53,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,53,Other accepted answers,swahili/kiingeereza,swahili/kiingeereza; English; Kiswahili,split '/' or 'or' answer into accepted answers
+Student D,54,Question,which is the largest lake in Kenya,which is the largest lake in Kenya?,added '?'
+Student D,54,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,55,Question,what is the new current Education system in Kenya,what is the new current Education system in Kenya?,added '?'
+Student D,55,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,56,Question,which instituion conducts national examination in Kenya,which instituion conducts national examination in Kenya?,added '?'
+Student D,56,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,57,Question,how tall is Mount Kenya,how tall is Mount Kenya?,added '?'
+Student D,57,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,58,Question,which authority conducts and manage the Kenya's wildlife services,which authority conducts and manage the Kenya's wildlife services?,added '?'
+Student D,58,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,59,Question,what items are mostly imported to Kenya,what items are mostly imported to Kenya?,added '?'
+Student D,59,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,60,Question,Maximum terms the presidents serve for in Kenya,Maximum terms the presidents serve for in Kenya?,added '?'
+Student D,60,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,61,Question,the required age for presidency in kenya,the required age for presidency in kenya?,added '?'
+Student D,61,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,62,Question,what is the Kenya's top Campanies,what is the Kenya's top Campanies?,added '?'
+Student D,62,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,63,Question,which is the most prestigious university in Kenya,which is the most prestigious university in Kenya?,added '?'
+Student D,63,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,64,Question,what is the legal age for driving a vehicle in Kenya,what is the legal age for driving a vehicle in Kenya?,added '?'
+Student D,64,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,65,Question,which national park is located in the capital City of Kenya,which national park is located in the capital City of Kenya?,added '?'
+Student D,65,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,66,Question,The nationa legislature of kenya,The nationa legislature of kenya?,added '?'
+Student D,66,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,67,Question,what is the name of the lower Chamber of kenya's parlianment,what is the name of the lower Chamber of kenya's parlianment?,added '?'
+Student D,67,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,68,Question,what is the official name of Kenya,what is the official name of Kenya?,added '?'
+Student D,68,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,69,Question,what is the smallest unit of the Kenyan Currency,what is the smallest unit of the Kenyan Currency?,added '?'
+Student D,69,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,70,Question,Which KDF branch is responsible for protecting Kenya's Airspace,Which KDF branch is responsible for protecting Kenya's Airspace?,added '?'
+Student D,70,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,71,Question,The largest forest in Kenya,The largest forest in Kenya?,added '?'
+Student D,71,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,72,Question,The largest National park in Kenya,The largest National park in Kenya?,added '?'
+Student D,72,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,73,Question,Which Lake has the hottest springs in Kenya,Which Lake has the hottest springs in Kenya?,added '?'
+Student D,73,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,74,Question,Which is the oldest museum in Kenya,Which is the oldest museum in Kenya?,added '?'
+Student D,74,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,75,Question,How many national parks are in kenya,How many national parks are in kenya?,added '?'
+Student D,75,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,77,Question,who was the seventh president in kenya,who was the seventh president in kenya?,added '?'
+Student D,77,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,78,Question,which year did kenya deploy its first rocket,which year did kenya deploy its first rocket?,added '?'
+Student D,78,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,79,Question,how many kangaroos do kenya have,how many kangaroos do kenya have?,added '?'
+Student D,79,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,80,Question,when was the bill of rights changed,when was the bill of rights changed?,added '?'
+Student D,80,Question,when was the bill of rights changed?,"In Kenya, when was the bill of rights changed?","added 'In Kenya, '"
+Student D,80,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,81,Question,what does the kenya's anthem seventh stanza says,what does the kenya's anthem seventh stanza says?,added '?'
+Student D,81,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,82,row,what is the tallest mountain in the UK,,"skipped: about another country, not Kenya"
+Student D,83,row,who was the fifth president of the UK,,"skipped: about another country, not Kenya"
+Student D,84,row,how how often do they celebrate labour day in germany,,"skipped: about another country, not Kenya"
+Student D,85,row,which is the biggest national park in iceland,,"skipped: about another country, not Kenya"
+Student D,86,row,what is the the fifth colour in poland's flag,,"skipped: about another country, not Kenya"
+Student D,87,row,what is the largest county in switzerland,,"skipped: about another country, not Kenya"
+Student D,88,Question,what is the Kenya's second train subway,what is the Kenya's second train subway?,added '?'
+Student D,88,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,89,row,how long does it take for election to happen in spain,,"skipped: about another country, not Kenya"
+Student D,90,row,what is the required age for a senate run in greece,,"skipped: about another country, not Kenya"
+Student D,91,Question,which date is oktoberfest held in Kenya,which date is oktoberfest held in Kenya?,added '?'
+Student D,91,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,92,row,how many hot springs do iceland has,,"skipped: about another country, not Kenya"
+Student D,93,row,what is the third national language in UK,,"skipped: about another country, not Kenya"
+Student D,94,Question,when was the lgtbq law passed in kenya,when was the lgtbq law passed in kenya?,added '?'
+Student D,94,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,95,Question,who discovered the law of motion in Kenya,who discovered the law of motion in Kenya?,added '?'
+Student D,95,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,96,Question,when was the Kenyan Embassy bombed in UK,when was the Kenyan Embassy bombed in UK?,added '?'
+Student D,96,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,97,row,fake,,skipped: no question text
