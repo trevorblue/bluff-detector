@@ -1,0 +1,94 @@
+{
+  "variant": "m0_base",
+  "detector": "probe_linear",
+  "model_version": "0.1.0+cf9e27e",
+  "generated": "2026-11-16T20:46:54",
+  "live_requests": 5,
+  "enough_to_judge": false,
+  "first_request": "2026-11-16T17:43:20.293936+00:00",
+  "last_request": "2026-11-16T17:46:33.185690+00:00",
+  "block_rate": {
+    "validation": 0.7926267281105991,
+    "live": 0.8
+  },
+  "latency_ms": {
+    "p50": 26218.004599999404,
+    "p95": 39382.35235998873,
+    "p99": 41235.13815199025
+  },
+  "checks": [
+    {
+      "check": "mean_logprob",
+      "kind": "data",
+      "psi": 6.825955972067856,
+      "ks_p": 3.878752866214162e-05,
+      "status": "DRIFT",
+      "reference_mean": -0.5200736875544061,
+      "live_mean": -0.024915080128074925
+    },
+    {
+      "check": "min_logprob",
+      "kind": "data",
+      "psi": 6.825955972067856,
+      "ks_p": 6.345719307344453e-05,
+      "status": "DRIFT",
+      "reference_mean": -1.0270218368714021,
+      "live_mean": -0.058763164196119766
+    },
+    {
+      "check": "mean_entropy",
+      "kind": "data",
+      "psi": 6.825955972067856,
+      "ks_p": 3.4024025576732645e-05,
+      "status": "DRIFT",
+      "reference_mean": 1.3052228676617266,
+      "live_mean": 0.12421244388679042
+    },
+    {
+      "check": "max_entropy",
+      "kind": "data",
+      "psi": 6.825955972067856,
+      "ks_p": 2.5899582002732172e-05,
+      "status": "DRIFT",
+      "reference_mean": 2.3770084409297167,
+      "live_mean": 0.2474571406841278
+    },
+    {
+      "check": "last_entropy",
+      "kind": "data",
+      "psi": 7.044017080026881,
+      "ks_p": 0.00450488633730036,
+      "status": "DRIFT",
+      "reference_mean": 0.7774905963175333,
+      "live_mean": 0.008378379908390344
+    },
+    {
+      "check": "n_tokens",
+      "kind": "data",
+      "psi": 3.6914834697101195,
+      "ks_p": 0.39477828589768105,
+      "status": "DRIFT",
+      "reference_mean": 3.6090819348469894,
+      "live_mean": 2.4
+    },
+    {
+      "check": "frac_low_prob",
+      "kind": "data",
+      "psi": 4.88608842549251,
+      "ks_p": 0.028605895632194928,
+      "status": "DRIFT",
+      "reference_mean": 0.2999679018842931,
+      "live_mean": 0.0
+    },
+    {
+      "check": "bluff_score (P(wrong))",
+      "kind": "prediction",
+      "psi": 5.741566900134327,
+      "ks_p": 0.5172028239175924,
+      "status": "DRIFT",
+      "reference_mean": 0.6580549478530884,
+      "live_mean": 0.6541236821009079
+    }
+  ],
+  "overall": "TOO EARLY"
+}

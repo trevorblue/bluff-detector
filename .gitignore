@@ -15,10 +15,22 @@ data/processed/*
 !data/**/.gitkeep
 artefacts/*
 !artefacts/.gitkeep
+# The submitted run's trained detectors and registry are kept in git (small, ~6 MB). The M2
+# adapter (~70 MB) and other runs stay out; they are in the Hugging Face dataset repo.
+!artefacts/m0_base/
+!artefacts/m1_rag/
+!artefacts/m2_qlora/
+!artefacts/registry/
 reports/*
 data/datasets/*
 !data/datasets/.gitkeep
 !reports/.gitkeep
+# The submitted results: metrics, per-question scores, summaries and charts.
+!reports/m0_base/
+!reports/m1_rag/
+!reports/m2_qlora/
+!reports/compare/
+!reports/results_figures/
 mlruns/
 logs/
 mlflow.db

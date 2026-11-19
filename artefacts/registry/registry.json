@@ -1,0 +1,120 @@
+{
+  "models": {
+    "bluff-detector-m0_base": {
+      "versions": [
+        {
+          "version": 1,
+          "path": "artefacts/registry/bluff-detector-m0_base/v1",
+          "registered_at": 1794823593.4420302,
+          "summary": {
+            "auroc": 0.8267344390939897,
+            "ece": 0.10860931290050825,
+            "pool_gap": -0.1732655609060103
+          },
+          "gates": {
+            "passed": true,
+            "checks": {
+              "pool_gap": true
+            }
+          },
+          "git_sha": "cf9e27e",
+          "data_sha256": "247ba0a08a19a1b64d165b69a86ec858abdc6303f203155243df399577bb1d8b",
+          "detector": "probe_linear"
+        },
+        {
+          "version": 2,
+          "path": "artefacts\\registry\\bluff-detector-m0_base\\v2",
+          "registered_at": 1794845655.5544176,
+          "summary": {
+            "auroc": 0.7728804298333486,
+            "ece": 0.13819786272526488,
+            "pool_gap": -0.2271195701666514
+          },
+          "gates": {
+            "passed": false,
+            "checks": {
+              "pool_gap": true,
+              "auroc": false,
+              "ece": false
+            }
+          },
+          "git_sha": "cf9e27e",
+          "data_sha256": "8d66bb8bc0ac6dc5e97fb4e63bb32dcfd12275b5a18df3a85e9ac56d74894b3e",
+          "detector": "probe_linear"
+        },
+        {
+          "version": 3,
+          "path": "artefacts/registry/bluff-detector-m0_base/v3",
+          "registered_at": 1795122402.7913806,
+          "summary": {
+            "auroc": 0.772971496220745,
+            "ece": 0.13820678149203192,
+            "pool_gap": 0.041711528118671626
+          },
+          "gates": {
+            "passed": false,
+            "checks": {
+              "pool_gap": true,
+              "auroc": true,
+              "ece": false
+            }
+          },
+          "git_sha": "f8db4fc",
+          "data_sha256": "3f17c98dc72c63828999f0a1c1ba5f23342177fe759cfcbed3a50b6b51e50379",
+          "detector": "probe_linear"
+        }
+      ],
+      "aliases": {
+        "champion": 2
+      }
+    },
+    "bluff-detector-m1_rag": {
+      "versions": [
+        {
+          "version": 1,
+          "path": "artefacts/registry/bluff-detector-m1_rag/v1",
+          "registered_at": 1795084460.3488848,
+          "summary": {
+            "auroc": 0.8055882352941177,
+            "ece": 0.11960004836679744,
+            "pool_gap": 0.1389215686274511
+          },
+          "gates": {
+            "passed": true,
+            "checks": {
+              "pool_gap": true
+            }
+          },
+          "git_sha": "a2f6d72",
+          "data_sha256": "a9d02abe720499a432c7d49cd051e74aed2351e3292ce62f1135f9fae70c7f9f",
+          "detector": "probe_linear"
+        },
+        {
+          "version": 2,
+          "path": "artefacts/registry/bluff-detector-m1_rag/v2",
+          "registered_at": 1795125331.4590564,
+          "summary": {
+            "auroc": 0.8055882352941177,
+            "ece": 0.11960004836679744,
+            "pool_gap": 0.12228670857656054
+          },
+          "gates": {
+            "passed": true,
+            "checks": {
+              "pool_gap": true,
+              "auroc": true,
+              "ece": true
+            }
+          },
+          "git_sha": "3037db6",
+          "data_sha256": "3f17c98dc72c63828999f0a1c1ba5f23342177fe759cfcbed3a50b6b51e50379",
+          "detector": "probe_linear"
+        }
+      ],
+      "aliases": {
+        "champion": 1,
+        "challenger": 2
+      }
+    }
+  }
+}

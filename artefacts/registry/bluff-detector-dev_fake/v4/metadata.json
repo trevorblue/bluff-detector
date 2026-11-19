@@ -1,0 +1,40 @@
+{
+  "variant": "dev_fake",
+  "base_model": "fake-llm",
+  "adapter": null,
+  "backend": "fake",
+  "layers": [
+    -2,
+    -1
+  ],
+  "positions": [
+    "last_answer",
+    "mean_answer"
+  ],
+  "retrieval": false,
+  "t_abstain": 0.25,
+  "cost_matrix": {
+    "cost_confident_wrong": 3.0,
+    "cost_needless_abstain": 1.0
+  },
+  "git_sha": "6a4b8d1",
+  "data_sha256": "99ea91e63efea9c5669b3d85a9f5222ffd3f10b7be620431cec06ef89cb52946",
+  "config": "configs/variants/dev_fake.yaml",
+  "seed": 42,
+  "version": "0.1.0+6a4b8d1",
+  "detector": "probe_linear",
+  "input": "hidden",
+  "probe_layer": -1,
+  "probe_position": "last_answer",
+  "tau_flag": 0.376726558804512,
+  "val": {
+    "auroc": 0.9484126984126984,
+    "pr_auc": 0.9094735602088544,
+    "ece": 0.0873224004986696,
+    "aurc": 0.06957322539286123
+  },
+  "n_train": 280,
+  "n_val": 60,
+  "fit_seconds": 0.016,
+  "trained_at": "2026-11-15T14:14:30"
+}

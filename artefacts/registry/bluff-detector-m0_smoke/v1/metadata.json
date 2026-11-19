@@ -1,0 +1,40 @@
+{
+  "variant": "m0_smoke",
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": null,
+  "backend": "hf",
+  "layers": [
+    -8,
+    -4
+  ],
+  "positions": [
+    "last_answer",
+    "mean_answer"
+  ],
+  "retrieval": false,
+  "t_abstain": 0.25,
+  "cost_matrix": {
+    "cost_confident_wrong": 3.0,
+    "cost_needless_abstain": 1.0
+  },
+  "git_sha": "0eff75a",
+  "data_sha256": "247ba0a08a19a1b64d165b69a86ec858abdc6303f203155243df399577bb1d8b",
+  "config": "configs/variants/m0_smoke.yaml",
+  "seed": 42,
+  "version": "0.1.0+0eff75a",
+  "detector": "probe_linear",
+  "input": "hidden",
+  "probe_layer": -8,
+  "probe_position": "last_answer",
+  "tau_flag": 0.967990373603008,
+  "val": {
+    "auroc": 0.6666666666666666,
+    "pr_auc": 0.770439084724799,
+    "ece": 0.3943990181692121,
+    "aurc": 0.43392483584791275
+  },
+  "n_train": 89,
+  "n_val": 13,
+  "fit_seconds": 0.018,
+  "trained_at": "2026-11-15T14:01:33"
+}

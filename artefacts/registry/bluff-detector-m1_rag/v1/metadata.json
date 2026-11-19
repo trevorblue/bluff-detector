@@ -1,0 +1,40 @@
+{
+  "variant": "m1_rag",
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": null,
+  "backend": "hf",
+  "layers": [
+    -8,
+    -4
+  ],
+  "positions": [
+    "last_answer",
+    "mean_answer"
+  ],
+  "retrieval": true,
+  "t_abstain": 0.25,
+  "cost_matrix": {
+    "cost_confident_wrong": 3.0,
+    "cost_needless_abstain": 1.0
+  },
+  "git_sha": "a2f6d72",
+  "data_sha256": "a9d02abe720499a432c7d49cd051e74aed2351e3292ce62f1135f9fae70c7f9f",
+  "config": "configs/variants/m1_rag.yaml",
+  "seed": 42,
+  "version": "0.1.0+a2f6d72",
+  "detector": "probe_linear",
+  "input": "hidden",
+  "probe_layer": -8,
+  "probe_position": "last_answer",
+  "tau_flag": 0.988229041822838,
+  "val": {
+    "auroc": 0.7949346405228759,
+    "pr_auc": 0.9015732674153336,
+    "ece": 0.15315595394728027,
+    "aurc": 0.48145344402839685
+  },
+  "n_train": 1013,
+  "n_val": 217,
+  "fit_seconds": 0.549,
+  "trained_at": "2026-11-19T10:33:41"
+}
