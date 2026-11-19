@@ -17,10 +17,7 @@
   student: A
   author: James Gosha
   domain: civics_law
-  exclude:                # rows left out on purpose; each is logged in the change list
-    7: "copies the Constitution's wording (Chapter 7): leakage audit; rewrite in own words"
-    16: "copies the Constitution's wording (Chapter 5): leakage audit; rewrite in own words"
-    75: "copies the Constitution's wording (Chapter 9): leakage audit; rewrite in own words"
+  # rows 7, 16 and 75 copied the Constitution's wording: reworded in repairs.yaml
 
 - file: "../Geography_Questions.xlsx"
   tab: Sheet1

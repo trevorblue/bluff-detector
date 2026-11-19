@@ -1,0 +1,252 @@
+# Repairs to the students' questions, made by an AI review (Claude), 19 November 2026.
+#
+# Trevor decided, given the deadline, to have the gaps the students left repaired with AI help
+# instead of waiting for the students. Everything here is applied by `bluff clean-sheets` and
+# logged row by row (data/kenya/cleaned/changes.csv). Provenance stays visible in the data:
+# every new row has Author = "Claude (AI)", and every edited row has Reviewer = "Claude (AI)",
+# so the results can be reported with and without AI-written items. Declared in AI_USE.md.
+#
+# Per student (A-D, as in student_files.yaml):
+#   drop: rows left out, with the reason          match: words from the student's question
+#   edit: changed cells (set), with the reason    (as they wrote it; must match exactly one row)
+#   twin: a UK twin of a kept Kenya question, with its answer and an official UK source
+#   add:  a new question (here: fake questions replacing D's fakes about other countries)
+
+A:
+  drop:
+    - {match: "What is the highest mountain in Kenya", why: "a reserved example from the Student Brief"}
+    - {match: "Which side of the road do vehicles drive", why: "a reserved example from the Student Brief"}
+    - {match: "who organizes the business of the House of the senate", why: "two possible answers (the Speaker, or the Senate Business Committee)"}
+  edit:
+    - match: "developing a code of conduct for candidates and parties"
+      why: "copied the Constitution's wording (leakage audit); reworded, same fact and answer"
+      set: {Question: "Which Kenyan body draws up the rules of behaviour that election candidates and political parties must follow?"}
+    - match: "manages land on behalf of the national and county"
+      why: "copied the Constitution's wording (leakage audit); reworded, same fact and answer"
+      set: {Question: "Which commission looks after public land for Kenya's national and county governments?", Answer: "National Land Commission", Other accepted answers: "NLC; the National Land Commission"}
+    - match: "Commander-in-Chief of the Kenya Defence Forces"
+      why: "copied the Constitution's wording (leakage audit); reworded, same fact and answer"
+      set: {Question: "Under Kenya's Constitution, which office holder is in overall command of the country's armed forces?"}
+    - match: "Which service places KCSE graduates"
+      why: "answer too long (rule 1): the short name is the answer, the full name an accepted answer"
+      set: {Answer: "KUCCPS", Other accepted answers: "Kenya Universities and Colleges Central Placement Service; the KUCCPS"}
+    - match: "How many members does Kenya's National Assembly have"
+      why: "the Speaker is an ex officio member (Article 97), so 350 is also correct"
+      set: {Other accepted answers: "three hundred and forty-nine; 349 members; 350"}
+  twin:
+    - {match: "What is the highest court in Kenya", question: "What is the highest court in the United Kingdom", answer: "The Supreme Court", others: "Supreme Court; Supreme Court of the United Kingdom; UK Supreme Court", source: "https://www.supremecourt.uk/about/", note: "The Supreme Court is the final court of appeal in the UK"}
+    - {match: "Head of State and Government", question: "Under the UK constitution, who is the head of government", answer: "The Prime Minister", others: "Prime Minister; PM", source: "https://www.gov.uk/government/ministers/prime-minister", note: "GOV.UK: Prime Minister, head of His Majesty's Government"}
+    - {match: "How many members does Kenya's National Assembly have", question: "How many members does the UK House of Commons have", answer: "650", others: "six hundred and fifty; 650 MPs; 650 members", source: "https://www.parliament.uk/about/mps-and-lords/members/", note: "650 constituencies, one MP each"}
+    - {match: "For how many years does a Kenyan President serve", question: "What is the maximum number of years a UK Parliament can last before a general election must be held", answer: "5", others: "five; 5 years; five years", source: "https://www.legislation.gov.uk/ukpga/2022/11/contents", note: "Dissolution and Calling of Parliament Act 2022, section 4"}
+    - {match: "national motto shown on the coat of arms", question: "What is the motto shown on the UK Royal Coat of Arms", answer: "Dieu et mon droit", others: "God and my right", source: "https://www.royal.uk/coats-arms", note: "royal.uk: the Royal Coat of Arms"}
+    - {match: "opening words of the Kenyan national anthem", question: "What are the opening words of the UK national anthem", answer: "God save our gracious King", others: "God save the King; God save our gracious Queen", source: "https://www.royal.uk/national-anthem", note: "royal.uk: the National Anthem"}
+    - {match: "Which board gives loans to students", question: "Which organisation gives loans to students in higher education in the United Kingdom", answer: "Student Loans Company", others: "SLC; the Student Loans Company; Student Finance", source: "https://www.gov.uk/government/organisations/student-loans-company", note: "GOV.UK: Student Loans Company"}
+    - {match: "Which agency conducts Kenya's national population census", question: "Which agency conducts the census in England and Wales", answer: "Office for National Statistics", others: "ONS; the ONS", source: "https://www.ons.gov.uk/census", note: "ONS runs the census in England and Wales"}
+    - {match: "What total population did Kenya's 2019 census record", question: "What total population did the 2021 census record for England and Wales", answer: "59,597,542", others: "59.6 million; 59597542; 59,597,542 people", source: "https://www.ons.gov.uk/census", note: "ONS, Census 2021: usual resident population of England and Wales"}
+    - {match: "lets citizens apply for many government services online", question: "In the United Kingdom, which government website lets citizens apply for many government services online", answer: "GOV.UK", others: "gov.uk; www.gov.uk", source: "https://www.gov.uk/", note: "GOV.UK, the UK government's services website"}
+    - {match: "Which department issues Kenyan passports", question: "Which government office issues British passports", answer: "HM Passport Office", others: "His Majesty's Passport Office; Her Majesty's Passport Office; HMPO; Passport Office", source: "https://www.gov.uk/government/organisations/hm-passport-office", note: "GOV.UK: HM Passport Office"}
+    - {match: "Which authority regulates telecommunications in Kenya", question: "Which authority regulates telecommunications in the United Kingdom", answer: "Ofcom", others: "Office of Communications; the Office of Communications", source: "https://www.ofcom.org.uk/about-ofcom", note: "Ofcom regulates communications services in the UK"}
+    - {match: "Which institution issues Kenya's currency", question: "Which institution issues banknotes in England and Wales", answer: "Bank of England", others: "the Bank of England; BoE", source: "https://www.bankofengland.co.uk/banknotes", note: "Bank of England: banknotes"}
+    - {match: "On which exchange are shares of listed Kenyan companies traded", question: "On which stock exchange are the shares of the largest listed UK companies traded", answer: "London Stock Exchange", others: "LSE; the London Stock Exchange", source: "https://www.londonstockexchange.com/", note: "London Stock Exchange: the UK's main market"}
+    - {match: "What is the standard VAT rate in Kenya", question: "What is the standard VAT rate in the United Kingdom", answer: "20%", others: "20 percent; 20 per cent; twenty percent", source: "https://www.gov.uk/vat-rates", note: "GOV.UK: VAT rates, standard rate 20%"}
+    - {match: "international telephone dialling code", question: "What is the United Kingdom's international telephone dialling code", answer: "44", others: "+44; 0044; plus 44", source: "https://www.ofcom.org.uk/", note: "UK country calling code +44"}
+
+B:
+  drop:
+    - {match: "Which lake in Kenya is the most saline", why: "answer disputed: Lake Magadi is far more saline than Lake Turkana"}
+    - {match: "How many major cities are there in Kenya", why: "'major' is ambiguous; Student D asks the same fact precisely"}
+    - {match: "What was the total population of Kenya in the 2019", why: "the same fact as a Student A question"}
+    - {match: "What is the national motto of Kenya", why: "the same fact as a Student A question"}
+    - {match: "When is Heroes day celebrated", why: "the same fact as Student A's Mashujaa Day question"}
+    - {match: "What is the most common Swahili greeting", why: "no single correct answer"}
+    - {match: "How does one say thank you in Swahili", why: "a reserved example from the Student Brief (asante)"}
+    - {match: "What are the national symbols of Kenya", why: "a list answer can't be marked right or wrong (rule 1)"}
+    - {match: "What is the importance of traditional dances", why: "an essay answer (rule 1)"}
+    - {match: "Name three communities belonging to the Nilotic", why: "several correct sets of three"}
+    - {match: "What are the three main language groups in Kenya", why: "repeats this student's own question on the three language groups"}
+    - {match: "traditionally associated with pastoralism", why: "several pastoral communities fit (Maasai, Samburu, Turkana...)"}
+    - {match: "What are the early schools in western Kenya", why: "a two-part answer"}
+  edit:
+    - match: "is lake Bogoria saline or alkaline"
+      why: "answer too long (rule 1)"
+      set: {Answer: "Both", Other accepted answers: "both saline and alkaline; saline and alkaline; both salty and alkaline"}
+    - match: "What does the red colour on the Kenyan national flag"
+      why: "answer too long (rule 1)"
+      set: {Answer: "Bloodshed", Other accepted answers: "blood shed; the blood shed during the struggle for independence; bloodshed during the fight for independence; blood"}
+    - match: "What does the green colour on the Kenyan national flag"
+      why: "answer too long (rule 1)"
+      set: {Answer: "Agriculture", Other accepted answers: "agricultural wealth; natural wealth; natural resources; the land"}
+    - match: "What was Kenya's original name"
+      why: "the official name was the East Africa Protectorate (1895-1920); the student's answer kept as accepted"
+      set: {Answer: "East Africa Protectorate", Other accepted answers: "British East Africa Protectorate; British East Africa"}
+    - match: "Haba na haba hujaza kibaba"
+      why: "answer too long (rule 1); key phrases kept as accepted answers"
+      set: {Answer: "Little by little fills the measure", Other accepted answers: "little by little; small efforts add up; small efforts accumulated over time"}
+    - match: "How many total living languages are there in Kenya"
+      why: "answer reduced to the number"
+      set: {Answer: "68", Other accepted answers: "sixty-eight; 68 languages"}
+    - match: "How many tribes are there in kenya"
+      why: "answer reduced to the number"
+      set: {Answer: "44", Other accepted answers: "forty-four; 44 tribes"}
+    - match: "How did the female population compare to the male population"
+      why: "made into a question with one short answer"
+      set: {Question: "In Kenya's 2019 census, were there more females or more males?", Answer: "Females", Other accepted answers: "more females; women; more women"}
+    - match: "Who are largest native speakers"
+      why: "unclear wording"
+      set: {Question: "Which language has the most native speakers in Kenya?", Answer: "Kikuyu", Other accepted answers: "Gikuyu; the Kikuyu language"}
+  twin:
+    - {match: "What is the largest freshwater lake in Kenya", question: "Which is the largest freshwater lake in the United Kingdom", answer: "Lough Neagh", others: "Loch Neagh", source: "https://www.daera-ni.gov.uk/articles/lough-neagh", note: "Largest freshwater lake in the UK by surface area"}
+    - {match: "elevation of the highest Mountain in", question: "What is the elevation of the highest mountain in the United Kingdom", answer: "1,345 metres", others: "1345 m; 1,345 m; 1345 metres; 4,413 feet", source: "https://www.ordnancesurvey.co.uk/", note: "Ben Nevis, 1,345 m (Ordnance Survey)"}
+    - {match: "How many national parks are there in Kenya", question: "How many national parks are there in the United Kingdom", answer: "15", others: "fifteen", source: "https://www.nationalparks.uk/", note: "10 in England, 3 in Wales, 2 in Scotland"}
+    - {match: "What is the longest river in Kenya", question: "What is the longest river in the United Kingdom", answer: "River Severn", others: "Severn; the Severn; the River Severn", source: "https://www.ordnancesurvey.co.uk/", note: "The Severn, about 354 km"}
+    - {match: "When was the last census conducted in Kenya", question: "In which year was the last census conducted in England and Wales", answer: "2021", others: "twenty twenty-one", source: "https://www.ons.gov.uk/census", note: "ONS: Census 2021"}
+    - {match: "After how long is a population and housing census", question: "How often is the census taken in England and Wales", answer: "every 10 years", others: "10 years; ten years; every ten years", source: "https://www.ons.gov.uk/census", note: "ONS: a census every ten years"}
+    - {match: "Which animals appear on Kenya's coat of arms", question: "Which two animals support the shield on the UK Royal Coat of Arms", answer: "A lion and a unicorn", others: "lion and unicorn; the lion and the unicorn", source: "https://www.royal.uk/coats-arms", note: "royal.uk: the Royal Coat of Arms"}
+    - {match: "What is the national language of Kenya", question: "What is the main language of the United Kingdom", answer: "English", others: "the English language", source: "https://www.gov.uk/", note: "English is the de facto official language of the UK"}
+
+C:
+  drop:
+    - {match: "What public body in Kenya Collects taxes", why: "a reserved example from the Student Brief"}
+    - {match: "selects students for national polytechnics", why: "one of 10 questions with the same answer (KUCCPS): too repetitive (rule 8)"}
+    - {match: "selects students for Technical and Vocational", why: "one of 10 questions with the same answer (KUCCPS): too repetitive (rule 8)"}
+    - {match: "selects students for Kenya Utalii", why: "one of 10 questions with the same answer (KUCCPS): too repetitive (rule 8)"}
+    - {match: "collect and retain data relating to university", why: "one of 10 questions with the same answer (KUCCPS): too repetitive (rule 8)"}
+    - {match: "advise the government on matters relating", why: "one of 10 questions with the same answer (KUCCPS): too repetitive (rule 8)"}
+    - {match: "014 following the passage", why: "garbled year, and the same answer (KUCCPS) again"}
+    - {match: "when was the establishment of KUCCPS", why: "date ambiguous: the Act is from 2012 and the service began in 2013-14"}
+    - {match: "title of the section describing NTSA", why: "about a website's layout, not a fact"}
+    - {match: "How many responsibilities of NTSA are listed", why: "about a website's layout, not a fact"}
+    - {match: "NTSA was established through what", why: "too vague to mark"}
+    - {match: "Which body passed the Act that established NTSA", why: "too trivial (every Act is passed by Parliament)"}
+    - {match: "Who does NTSA advise", why: "too vague to mark"}
+    - {match: "What kind of policies does NTSA implement", why: "too vague to mark"}
+    - {match: "What does NTSA license", why: "repeats the registration and licensing questions"}
+    - {match: "activities does NTSA conduct", why: "a list answer"}
+    - {match: "responsible for registration and licensing of motor", why: "repeats the driving-licence and registration questions"}
+    - {match: "Name one payment method on eCitizen", why: "several correct answers"}
+    - {match: "What is Kenya's Central Bank", why: "the answer is in the question"}
+    - {match: "AFA play in licenseing coffee", why: "an essay answer (rule 1)"}
+    - {match: "AFA play in licenseing tea", why: "an essay answer (rule 1)"}
+    - {match: "what standards must a Kenyan avocado", why: "the answer (KEPHIS) doesn't answer the question"}
+    - {match: "sets minimum guaranteed prices for tea", why: "two questions in one, and the answer is disputed"}
+    - {match: "regulator of the brokers", why: "the same answer (CMA) as the NSE licensing question"}
+    - {match: "licenses the NSE and its brokers", why: "two questions in one, and the same answer (CMA) again"}
+    - {match: "ensurers proper conduct of all licensed", why: "the same answer (CMA) again"}
+    - {match: "Does the Central Bank of Kenya license mobile-money", why: "a yes/no question: a guess is right half the time"}
+    - {match: "does a mobile-money account need a national ID", why: "a yes/no question: a guess is right half the time"}
+    - {match: "send money between M-Pesa and Airtel", why: "a yes/no question: a guess is right half the time"}
+    - {match: "what is the most used form of transaction", why: "the answer 'yes' doesn't fit the question"}
+    - {match: "must providers get approval before changing transaction fees", why: "a yes/no question: a guess is right half the time"}
+    - {match: "Is NTSA responsible for animal registration", why: "a yes/no question: a guess is right half the time"}
+    - {match: "heads Capital Markets Authority", why: "unclear question and answer"}
+    - {match: "A Chairman appointed by", why: "unclear question"}
+  edit:
+    - match: "when was the establishment of KRA"
+      why: "an accepted answer ('1 June 1995') was wrong: KRA was established on 1 July 1995"
+      set: {Question: "When was the Kenya Revenue Authority established?", Other accepted answers: "1 July 1995; July 1, 1995; 1995"}
+    - match: "What is the Act Number that established NTSA"
+      why: "answer reduced to the number"
+      set: {Question: "What is the number of the Act of Parliament that established Kenya's NTSA?", Answer: "33 of 2012", Other accepted answers: "Act No. 33 of 2012; No. 33 of 2012; Act Number 33 of 2012"}
+    - match: "At what age is a Kenyan eligible for a National ID"
+      why: "accepted answers added"
+      set: {Other accepted answers: "18; eighteen; eighteen years"}
+    - match: "What is Huduma's contact"
+      why: "clearer wording"
+      set: {Question: "What is the helpline number of Huduma Kenya?"}
+  twin:
+    - {match: "What public body in Kenya issues Driving licenses", question: "Which public body issues driving licences in Great Britain", answer: "DVLA", others: "Driver and Vehicle Licensing Agency; the DVLA", source: "https://www.gov.uk/government/organisations/driver-and-vehicle-licensing-agency", note: "GOV.UK: DVLA"}
+    - {match: "issues motor vehicle registration", question: "Which public body registers motor vehicles in Great Britain", answer: "DVLA", others: "Driver and Vehicle Licensing Agency; the DVLA", source: "https://www.gov.uk/government/organisations/driver-and-vehicle-licensing-agency", note: "GOV.UK: DVLA keeps the register of vehicles"}
+    - {match: "What public body in Kenya handles logbook transfer", question: "Which public body handles the transfer of a vehicle logbook (V5C) in Great Britain", answer: "DVLA", others: "Driver and Vehicle Licensing Agency; the DVLA", source: "https://www.gov.uk/vehicle-log-book", note: "GOV.UK: vehicle log book (V5C)"}
+    - {match: "handles car inspection", question: "Which public body oversees MOT vehicle inspections in Great Britain", answer: "DVSA", others: "Driver and Vehicle Standards Agency; the DVSA", source: "https://www.gov.uk/government/organisations/driver-and-vehicle-standards-agency", note: "GOV.UK: DVSA approves and supervises MOT testing"}
+    - {match: "Which body regulates public service vehicles", question: "Which officials license and regulate bus and coach operators in Great Britain", answer: "Traffic Commissioners", others: "the traffic commissioners; Office of the Traffic Commissioner; traffic commissioner", source: "https://www.gov.uk/government/organisations/traffic-commissioners", note: "GOV.UK: traffic commissioners license public service vehicle operators"}
+
+D:
+  drop:
+    - {match: "what is the Kenya's total population", why: "a changing fact with no 'Valid until' (rule 4)"}
+    - {match: "what is Kenya's total GDP", why: "a changing fact with no 'Valid until' (rule 4)"}
+    - {match: "what is the tallest mountain in kenya", why: "a reserved example from the Student Brief"}
+    - {match: "what is Kenya's main tourist attraction", why: "an opinion: no single correct answer"}
+    - {match: "How many national holidays", why: "answer wrong (Kenya has about 11-12 public holidays, not 21), and the number changes"}
+    - {match: "when did kenya gained its independence", why: "repeats one of Trevor's starter questions"}
+    - {match: "who collects taxes in Kenya", why: "a reserved example from the Student Brief"}
+    - {match: "when is census held in Kenya", why: "the same fact as a Student B question"}
+    - {match: "how many counties does Kenya has", why: "repeats one of Trevor's starter questions"}
+    - {match: "how many airstrips does kenya has", why: "can't be checked against an official source"}
+    - {match: "what is the stable food in kenya", why: "the same fact as a Student B question"}
+    - {match: "How many languages is spoken in Kenya", why: "the same fact as a Student B question"}
+    - {match: "what is kenya's telephone country code", why: "the same fact as a Student A question"}
+    - {match: "how many banks does kenya has", why: "a changing fact with no 'Valid until' (rule 4)"}
+    - {match: "what is the life expectancy in kenya today", why: "a changing fact with no 'Valid until' (rule 4)"}
+    - {match: "what is the required age to vote in Kenya", why: "the same fact as a Student A question"}
+    - {match: "what instituition issues currencies in Kenya", why: "the same fact as a Student A question"}
+    - {match: "which Animals support the shield", why: "the same fact as a Student B question"}
+    - {match: "on which day does kenyaa celebrate mashujaa", why: "the same fact as a Student A question"}
+    - {match: "responsible for motor vehicle and road transport safety", why: "the same fact as Student A and C questions"}
+    - {match: "The education and student loan instituition", why: "the same fact as a Student A question (HELB)"}
+    - {match: "how many rights was passed in kenya", why: "unclear question"}
+    - {match: "Types of levels of government in Kenya", why: "the same fact as a Student A question"}
+    - {match: "which language is used for teaching students", why: "two correct answers"}
+    - {match: "which is the largest lake in Kenya", why: "the Student Brief's own example of a bad question (two possible answers)"}
+    - {match: "how tall is Mount Kenya", why: "the same fact as a Student B question"}
+    - {match: "Maximum terms the presidents serve", why: "the same fact as a Student A question"}
+    - {match: "what is the Kenya's top Campanies", why: "an opinion: no single correct answer"}
+    - {match: "which is the most prestigious university", why: "an opinion: no single correct answer"}
+    - {match: "How many national parks are in kenya", why: "conflicts with Student B's count (23); the number depends on the source"}
+    - {match: "the required age for presidency in kenya", why: "the Constitution sets qualifications, not a separate minimum age: answer uncertain"}
+  edit:
+    - {match: "which units is used for road distances", why: "spelling and wording", set: {Question: "Which unit is used for road distances in Kenya?", Answer: "Kilometres", Other accepted answers: "km; kilometers; kilometre"}}
+    - {match: "what is the total area of kenya", why: "wording and accepted answers", set: {Question: "What is the total area of Kenya?", Other accepted answers: "580,367 square kilometres; 580367; 580,367"}}
+    - {match: "which continet is Kenya located", why: "spelling and wording", set: {Question: "On which continent is Kenya located?"}}
+    - {match: "which ocean borders Kenya", why: "wording", set: {Question: "Which ocean borders Kenya?"}}
+    - {match: "what is the supreme law of Kenya", why: "spelling of the answer", set: {Question: "What is the supreme law of Kenya?", Answer: "Constitution of Kenya", Other accepted answers: "the Constitution; Constitution of Kenya 2010; constitution"}}
+    - {match: "what the kenya's most expoerted crop", why: "spelling and wording", set: {Question: "What is Kenya's most exported crop?", Other accepted answers: "tea leaves"}}
+    - {match: "how many presidents does Kenya have", why: "wording", set: {Question: "How many presidents has Kenya had?", Valid until: "the next president takes office"}}
+    - {match: "who was the first president of Kenya", why: "spelling of the answer", set: {Question: "Who was the first President of Kenya?", Answer: "Jomo Kenyatta", Other accepted answers: "Kenyatta; Mzee Jomo Kenyatta"}}
+    - {match: "how many type army forces are in kenya", why: "unclear wording", set: {Question: "How many service branches make up the Kenya Defence Forces?", Answer: "3", Other accepted answers: "three; Army, Air Force and Navy"}}
+    - {match: "what is the largets airport in Kenya", why: "spelling", set: {Question: "What is the largest airport in Kenya?", Answer: "Jomo Kenyatta International Airport", Other accepted answers: "JKIA; Jomo Kenyatta Airport"}}
+    - {match: "Natioanal Football team called", why: "spelling and wording", set: {Question: "What is the nickname of Kenya's national football team?", Answer: "Harambee Stars"}}
+    - {match: "how many cities does Kenya has", why: "grammar", set: {Question: "How many cities does Kenya have?", Valid until: "a new town is granted city status"}}
+    - {match: "what sport is kenya known for internatonally", why: "spelling and accepted answers", set: {Question: "Which sport is Kenya best known for internationally?", Other accepted answers: "running; long-distance running; distance running"}}
+    - {match: "largest service that provide telecommunication", why: "spelling and wording", set: {Question: "Which is the largest telecommunications company in Kenya?", Answer: "Safaricom", Other accepted answers: "Safaricom PLC"}}
+    - {match: "how many colours does the kenyan flag have", why: "wording", set: {Question: "How many colours does the Kenyan flag have?"}}
+    - {match: "how long does it take for election to happen in Kenya", why: "unclear wording", set: {Question: "How often are general elections held in Kenya?", Answer: "every 5 years", Other accepted answers: "5 years; five years; every five years"}}
+    - {match: "which organization handles health matters", why: "wording", set: {Question: "Which government ministry handles health matters in Kenya?", Other accepted answers: "MoH; the Ministry of Health"}}
+    - {match: "The largest stadium in kenya", why: "wording and accepted answers", set: {Question: "What is the largest stadium in Kenya?", Answer: "Moi International Sports Centre", Other accepted answers: "Kasarani; Kasarani Stadium; Moi Stadium"}}
+    - {match: "which is the tallest building in kenya", why: "wording", set: {Question: "What is the tallest building in Kenya?", Answer: "Britam Tower", Other accepted answers: "Britam"}}
+    - {match: "responsible for criminal ivestigations", why: "spelling", set: {Question: "Which service is responsible for criminal investigations in Kenya?", Other accepted answers: "Directorate of Criminal Investigations; the DCI"}}
+    - {match: "first woman to win a nobel prize", why: "wording and spelling of the answer", set: {Question: "Who was the first Kenyan woman to win a Nobel Prize?", Answer: "Wangari Maathai", Other accepted answers: "Maathai; Professor Wangari Maathai"}}
+    - {match: "what is kenya's largest harbour", why: "wording", set: {Question: "What is Kenya's largest harbour?", Other accepted answers: "Kilindini; Port of Mombasa"}}
+    - {match: "which is the upper house in the Parlianment", why: "spelling", set: {Question: "Which is the upper house of Kenya's Parliament?", Other accepted answers: "the Senate"}}
+    - {match: "fastest means of train Transport", why: "wording", set: {Question: "What is the fastest passenger train service in Kenya?", Answer: "Madaraka Express", Other accepted answers: "SGR; Standard Gauge Railway"}}
+    - {match: "which symbol is displayed on Kenya's flag", why: "wording", set: {Question: "What symbol is displayed in the centre of Kenya's flag?", Answer: "A shield and two spears", Other accepted answers: "shield and spears; Maasai shield; shield"}}
+    - {match: "main exam that that highschool students do", why: "wording", set: {Question: "Which national exam do Kenyan students sit at the end of secondary school?", Other accepted answers: "Kenya Certificate of Secondary Education"}}
+    - {match: "new current Education system in Kenya", why: "wording; the curriculum has two current names", set: {Question: "What is the name of the school curriculum Kenya introduced in 2017?", Answer: "Competency-Based Curriculum", Other accepted answers: "CBC; Competency Based Curriculum; Competency-Based Education; CBE"}}
+    - {match: "conducts national examination in Kenya", why: "spelling; wrong accepted answer removed", set: {Question: "Which body conducts national examinations in Kenya?", Other accepted answers: "Kenya National Examinations Council; the KNEC"}}
+    - {match: "manage the Kenya's wildlife services", why: "wording", set: {Question: "Which body manages wildlife in Kenya's national parks?", Other accepted answers: "Kenya Wildlife Service; the KWS"}}
+    - {match: "what items are mostly imported to Kenya", why: "wording", set: {Question: "What is Kenya's largest category of imports by value?", Answer: "Petroleum products", Other accepted answers: "mineral oils; petroleum; fuel; oil"}}
+    - {match: "legal age for driving a vehicle in Kenya", why: "wording", set: {Question: "What is the minimum age for a driving licence in Kenya?", Other accepted answers: "eighteen; 18 years"}}
+    - {match: "national park is located in the capital City", why: "spelling", set: {Question: "Which national park lies within Kenya's capital city?", Answer: "Nairobi National Park"}}
+    - {match: "The nationa legislature of kenya", why: "spelling", set: {Question: "What is Kenya's national legislature called?", Answer: "Parliament", Other accepted answers: "Parliament of Kenya; the Parliament"}}
+    - {match: "lower Chamber of kenya's parlianment", why: "spelling", set: {Question: "What is the lower house of Kenya's Parliament called?", Other accepted answers: "the National Assembly"}}
+    - {match: "smallest unit of the Kenyan Currency", why: "wording", set: {Question: "What is the smallest unit of the Kenyan currency?", Answer: "cent", Other accepted answers: "cents"}}
+    - {match: "The largest forest in Kenya", why: "wording", set: {Question: "What is the largest forest in Kenya?", Other accepted answers: "Mau; Mau Forest Complex"}}
+    - {match: "The largest National park in Kenya", why: "wording", set: {Question: "What is the largest national park in Kenya?", Other accepted answers: "Tsavo; Tsavo East; Tsavo East National Park"}}
+    - {match: "Which is the oldest museum in Kenya", why: "accepted answers", set: {Answer: "Nairobi National Museum", Other accepted answers: "National Museum of Kenya; National Museums of Kenya; National Museum"}}
+  twin:
+    - {match: "which units is used for road distances", question: "Which unit is used for road distances in the United Kingdom", answer: "Miles", others: "mile; miles", source: "https://www.gov.uk/guidance/the-highway-code", note: "The Highway Code: road signs show distances in miles"}
+    - {match: "which continet is Kenya located", question: "On which continent is the United Kingdom located", answer: "Europe", source: "https://www.gov.uk/", note: "The UK is in north-western Europe"}
+    - {match: "which ocean borders Kenya", question: "Which ocean lies to the west of the United Kingdom", answer: "Atlantic Ocean", others: "Atlantic; the Atlantic; North Atlantic", source: "https://www.ordnancesurvey.co.uk/", note: "The Atlantic lies west of Great Britain and Ireland"}
+    - {match: "who was the first president of Kenya", question: "Who was the first Prime Minister of Great Britain", answer: "Robert Walpole", others: "Walpole; Sir Robert Walpole", source: "https://www.gov.uk/government/history/past-prime-ministers/robert-walpole", note: "GOV.UK: past Prime Ministers, Sir Robert Walpole"}
+  add:
+    # Replace D's 10 fakes about other countries: fakes must be about Kenya (Student Brief).
+    # Each describes something that does not exist in Kenya, in D's domain (Western default traps).
+    - {type: fake, question: "On what date is Kenya's Uhuru Gardens Day public holiday observed", why: "no such public holiday (Public Holidays Act)", note: "Not in the Public Holidays Act (Cap. 110); checked by AI review"}
+    - {type: fake, question: "In which month does the fourth school term begin in Kenya", why: "Kenyan schools have three terms", note: "The Kenyan school year has three terms; checked by AI review"}
+    - {type: fake, question: "What are the duties of a Deputy MCA in a Kenyan county assembly", why: "no such office", note: "County assemblies have MCAs and a Speaker, no Deputy MCA; checked by AI review"}
+    - {type: fake, question: "How many members sit in Kenya's National Youth Senate", why: "no such body", note: "Youth are represented in the Senate (Article 98); there is no National Youth Senate; checked by AI review"}
+    - {type: fake, question: "In which year did Kenya move the start of its financial year to January", why: "never happened: Kenya's financial year starts on 1 July", note: "Public Finance Management Act: financial year starts 1 July; checked by AI review"}
+    - {type: fake, question: "What is the legal drinking age in Kenya's Coastal Special Alcohol Zone", why: "no such zone", note: "Alcoholic Drinks Control Act sets one national age (18), no special zones; checked by AI review"}
+    - {type: fake, question: "Which emergency number replaced 999 in Kenya in 2015", why: "never happened: 999 is still in use", note: "999 and 112 both work; 999 was not replaced; checked by AI review"}
+    - {type: fake, question: "What is the minimum age for a Class Z driving licence in Kenya", why: "no such licence class", note: "Kenyan licence classes run A to G; no Class Z; checked by AI review"}
+    - {type: fake, question: "In which year did Kenya switch to driving on the right-hand side of the road", why: "never happened: Kenya drives on the left", note: "Kenya drives on the left; checked by AI review"}
+    - {type: fake, question: "Who chairs the sub-county assembly in Kenya's sub-counties", why: "no such assembly", note: "Sub-counties have administrators, not assemblies; checked by AI review"}

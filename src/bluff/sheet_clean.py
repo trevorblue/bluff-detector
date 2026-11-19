@@ -148,22 +148,45 @@ def read_rows(path: Path, tab: str) -> list[dict[str, Any]]:
         h = str(c.value or "").replace("(reviewer)", "").strip()
         h = HEADER_ALIASES.get(h.lower(), next((x for x in COLUMNS if x.lower() == h.lower()), h))
         header.append(h or (COLUMNS[i] if i < len(COLUMNS) else ""))  # a blank header cell
-    return [{"row": r[0].row, **{h: excel_value(c) for h, c in zip(header, r, strict=False) if h},
-             "_raw": {h: c.value for h, c in zip(header, r, strict=False) if h}}
-            for r in rows[1:]]
+    out = [{"row": r[0].row, **{h: excel_value(c) for h, c in zip(header, r, strict=False) if h},
+            "_raw": {h: c.value for h, c in zip(header, r, strict=False) if h}}
+           for r in rows[1:]]
+    for r in out:
+        r["_orig"] = r.get("Question")  # repairs.yaml matches the question as the student wrote it
+    return out
 
 
-def clean_student(spec: dict[str, Any], rows: list[dict[str, Any]], seen: set[str]
+AI_AUTHOR = "Claude (AI)"  # author / reviewer of everything written or changed by repairs.yaml
+EDITABLE = ("Question", "Answer", "Other accepted answers", "Source link", "Source note",
+            "Valid until", "Type", "Language")
+
+
+def _find(rows: list[dict[str, Any]], match: str, who: str) -> dict[str, Any]:
+    """The one row whose question contains `match` (case and spacing ignored)."""
+    hits = [r for r in rows if r.get("_orig") and norm(match) in norm(r["_orig"])]
+    if len(hits) != 1:
+        raise ValueError(f"repairs.yaml, {who}: {match!r} matches {len(hits)} rows, "
+                         "needs exactly 1")
+    return hits[0]
+
+
+def clean_student(spec: dict[str, Any], rows: list[dict[str, Any]], seen: set[str],
+                  repairs: dict[str, Any] | None = None
                   ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], Counter]:
-    """Apply the fixes to one student's rows. Returns (kept rows, change log, counts)."""
+    """Apply the fixes, then this student's repairs (repairs.yaml), to one student's rows.
+    Returns (kept rows, change log, counts)."""
     kept, changes, counts = [], [], Counter()
     who = f"Student {spec['student']}"
+    repairs = repairs or {}
+    drops = {id(_find(rows, d["match"], who)): d["why"] for d in repairs.get("drop", [])}
+    edits = {id(_find(rows, e["match"], who)): e for e in repairs.get("edit", [])}
 
     def log_change(r, column, before, after, why):
         changes.append({"student": who, "row": r["row"], "column": column,
                         "before": before, "after": after, "why": why})
-        counts[why] += 1
+        counts[why if not why.startswith("AI ") else why.split(":")[0]] += 1
 
+    final_question: dict[int, str] = {}  # sheet row -> the question as kept, for twins
     for r in rows:
         q, kind = r.get("Question"), (r.get("Type") or "").strip().lower()
         if not q and not r.get("Answer") and not kind:
@@ -175,6 +198,19 @@ def clean_student(spec: dict[str, Any], rows: list[dict[str, Any]], seen: set[st
             reason = spec["exclude"][r["row"]]
             log_change(r, "row", q, "", f"excluded in student_files.yaml: {reason}")
             continue
+        if id(r) in drops:
+            log_change(r, "row", q, "", f"AI review, dropped: {drops[id(r)]}")
+            continue
+        if id(r) in edits:
+            e = edits[id(r)]
+            for column, value in e["set"].items():
+                if column not in EDITABLE:
+                    raise ValueError(f"repairs.yaml, {who}: can't edit column {column!r}")
+                if (r.get(column) or "") != (value or ""):
+                    log_change(r, column, r.get(column), value, f"AI review, edited: {e['why']}")
+                    r[column] = value
+            r["Reviewer"] = AI_AUTHOR
+            q, kind = r.get("Question"), (r.get("Type") or "").strip().lower()
         if kind not in {"real", "fake", "twin"}:
             log_change(r, "row", q, "", "skipped: no Type (a heading or unfinished row)")
             continue
@@ -214,11 +250,45 @@ def clean_student(spec: dict[str, Any], rows: list[dict[str, Any]], seen: set[st
                 log_change(r, "Other accepted answers", out.get("Other accepted answers"), others,
                            "split '/' or 'or' answer into accepted answers")
             out["Other accepted answers"] = others
+        if kind in {"real", "fake"} and out.get("Twin of"):
+            log_change(r, "Twin of", out["Twin of"], "",
+                       "removed: a twin written in the Kenya row (proper twins: repairs.yaml)")
+            out["Twin of"] = None
         if not out.get("Author"):
             out["Author"] = spec["author"]
             counts["Author filled from student_files.yaml"] += 1
         kept.append(out)
+        final_question[r["row"]] = out["Question"]
         counts[f"kept: {kind}"] += 1
+
+    # New rows written by the AI review: UK twins of kept Kenya questions, and replacement fakes.
+    today = datetime.now().strftime("%Y-%m-%d")
+    for t in repairs.get("twin", []):
+        kenya = _find(rows, t["match"], who)
+        if kenya["row"] not in final_question:
+            raise ValueError(f"repairs.yaml, {who}: twin of row {kenya['row']}, which isn't kept")
+        new = {"Question": question_mark(t["question"]), "Answer": t["answer"],
+               "Other accepted answers": t.get("others"), "Type": "twin",
+               "Twin of": final_question[kenya["row"]], "Domain": spec["domain"],
+               "Language": "en", "Source link": t.get("source"), "Source note": t.get("note"),
+               "Date checked": today, "Author": AI_AUTHOR}
+        kept.append(new)
+        seen.add(norm(new["Question"]))
+        changes.append({"student": who, "row": f"new (twin of row {kenya['row']})",
+                        "column": "row", "before": "", "after": new["Question"],
+                        "why": "AI-written UK twin"})
+        counts["AI-written UK twin"] += 1
+    for a in repairs.get("add", []):
+        if norm(a["question"]) in seen:
+            raise ValueError(f"repairs.yaml, {who}: added question repeats one already kept")
+        seen.add(norm(a["question"]))
+        new = {"Question": question_mark(a["question"]), "Answer": None, "Type": a["type"],
+               "Domain": spec["domain"], "Language": "en", "Source note": a.get("note"),
+               "Date checked": today, "Author": AI_AUTHOR}
+        kept.append(new)
+        changes.append({"student": who, "row": "new", "column": "row", "before": "",
+                        "after": new["Question"], "why": f"AI-written {a['type']}: {a['why']}"})
+        counts[f"AI-written {a['type']}"] += 1
     return kept, changes, counts
 
 
@@ -226,6 +296,9 @@ def run(cfg: dict[str, Any], files: str | Path = "data/kenya/student_files.yaml"
     from openpyxl import Workbook
 
     specs = yaml.safe_load(Path(files).read_text(encoding="utf-8"))
+    repairs_path = Path(files).parent / "repairs.yaml"
+    repairs = (yaml.safe_load(repairs_path.read_text(encoding="utf-8")) or {}
+               if repairs_path.exists() else {})
     out_dir = ensure_dir(Path(cfg["data"]["kenya_questions"]).parent / "cleaned")
     seen = {norm(s) for s in STARTERS}
     wb = Workbook()
@@ -233,7 +306,7 @@ def run(cfg: dict[str, Any], files: str | Path = "data/kenya/student_files.yaml"
     all_changes, summary = [], {}
     for spec in specs:
         rows = read_rows(Path(spec["file"]), spec["tab"])
-        kept, changes, counts = clean_student(spec, rows, seen)
+        kept, changes, counts = clean_student(spec, rows, seen, repairs.get(spec["student"]))
         ws = wb.create_sheet(f"Student {spec['student']}")
         ws.append(COLUMNS)
         for k in kept:

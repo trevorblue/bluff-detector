@@ -78,6 +78,28 @@ no answers, or empty), unofficial sources, over-long answers, changing facts wit
 until", reused brief examples, missing names, the review step. Row by row:
 `..\Kenya questions - fixes per student.md`.
 
+## 1b. The AI review and repairs (19 November): `data/kenya/repairs.yaml`
+
+Because of the deadline, Trevor had the gaps the students left repaired with AI (Claude) instead
+of waiting for the students. `bluff clean-sheets` applies `data/kenya/repairs.yaml` after the
+mechanical fixes and logs every repair. Per student: **drop** (a row left out, with the reason),
+**edit** (changed cells, with the reason), **twin** (a UK twin of a kept Kenya question, with its
+answer and an official UK source) and **add** (new questions). Each entry finds its row by words
+from the student's own question and must match exactly one row, or the step stops.
+
+| | A | B | C | D | Total |
+|---|---|---|---|---|---|
+| Dropped (duplicates across students, yes/no, essay or list answers, reserved brief examples, wrong or disputed answers, changing facts, unclear questions) | 3 | 13 | 34 | 31 | 81 |
+| Edited (reworded the 3 questions that copied the Constitution, shortened answers, corrected or added accepted answers, spelling) | yes | yes | yes | yes | |
+| UK twins written | 16 | 8 | 5 | 4 | 33 |
+| Fakes written (replacing D's fakes about other countries) | | | | 10 | 10 |
+
+**Result:** 326 items: 211 real Kenya questions, 82 fakes, 33 UK twins (including the 9
+starters). `validate` passes; the leakage audit finds 0 overlaps. Every new row has Author
+"Claude (AI)" and every edited row Reviewer "Claude (AI)", so results can be reported with and
+without AI-written items (declared in `AI_USE.md`). To undo a repair, delete its entry and
+re-run `notebooks/kenya_questions.ipynb`.
+
 ## 2. Import: `bluff import-sheet`
 
 ```

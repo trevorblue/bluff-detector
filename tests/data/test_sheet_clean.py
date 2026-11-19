@@ -98,3 +98,46 @@ def test_whole_sheet_is_cleaned_and_every_change_logged(tmp_path):
                      "skipped: no answer (a real or twin question)"]:
         assert expected in why
     assert (tmp_path / "kenya" / "cleaning_report.md").exists()
+
+
+def test_repairs_drop_edit_twin_add_and_label_ai(tmp_path):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Student A"
+    ws.append(sc.COLUMNS)
+    ws.append(["What is the highest court in Kenya?", "Supreme Court", None, "real", None,
+               "civics_law", "en", "https://judiciary.go.ke", None, None, None, "Amina"])
+    ws.append(["Is the sky green?", "no", None, "real", None, "civics_law", "en", None, None,
+               None, None, "Amina"])
+    ws.append(["Who copies the Constitution word for word?", "Nobody", None, "real", None,
+               "civics_law", "en", None, None, None, None, "Amina"])
+    wb.save(tmp_path / "s.xlsx")
+    (tmp_path / "files.yaml").write_text(
+        f"- {{file: '{(tmp_path / 's.xlsx').as_posix()}', tab: Student A, student: A, "
+        "author: Amina, domain: civics_law}\n", encoding="utf-8")
+    (tmp_path / "repairs.yaml").write_text("""
+A:
+  drop: [{match: "sky green", why: "a yes/no question"}]
+  edit: [{match: "copies the Constitution", why: "reworded", set: {Question: "Who rewrites Kenya's laws in plain words?"}}]
+  twin: [{match: "highest court in Kenya", question: "What is the highest court in the United Kingdom",
+          answer: "The Supreme Court", source: "https://www.supremecourt.uk/"}]
+  add: [{type: fake, question: "Who heads Kenya's sub-county assemblies", why: "no such body"}]
+""", encoding="utf-8")
+    cfg = {"data": {"kenya_questions": str(tmp_path / "kenya" / "questions.jsonl")}}
+    result = sc.run(cfg, tmp_path / "files.yaml")
+    rows = [dict(zip(sc.COLUMNS, r, strict=False)) for r in
+            openpyxl.load_workbook(result["cleaned"])["Student A"].iter_rows(min_row=2, values_only=True)]
+    by_q = {r["Question"]: r for r in rows}
+    assert "Is the sky green?" not in by_q
+    assert by_q["Who rewrites Kenya's laws in plain words?"]["Reviewer"] == sc.AI_AUTHOR
+    twin = by_q["What is the highest court in the United Kingdom?"]
+    assert twin["Type"] == "twin" and twin["Author"] == sc.AI_AUTHOR
+    assert twin["Twin of"] == "What is the highest court in Kenya?"
+    assert by_q["Who heads Kenya's sub-county assemblies?"]["Type"] == "fake"
+
+
+def test_a_repair_must_match_exactly_one_row():
+    rows = [{"row": 2, "_orig": "Which body issues licences?"},
+            {"row": 3, "_orig": "Is NTSA the body that issues licences?"}]
+    with pytest.raises(ValueError, match="matches 2 rows"):
+        sc._find(rows, "issues licences", "Student C")

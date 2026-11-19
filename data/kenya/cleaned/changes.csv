@@ -9,7 +9,8 @@ Student A,5,Question,Who is in charge of the delimitation of constituencies and 
 Student A,5,Domain,civis-law,civics_law,domain mapped to the brief's six
 Student A,6,Question,"Who is in charge of facilitating the observation, monitoring and evaluation of elections?","In Kenya, who is in charge of facilitating the observation, monitoring and evaluation of elections?","added 'In Kenya, '"
 Student A,6,Domain,civis-law,civics_law,domain mapped to the brief's six
-Student A,7,row,Who is in charge of developing a code of conduct for candidates and parties?,,excluded in student_files.yaml: copies the Constitution's wording (Chapter 7): leakage audit; rewrite in own words
+Student A,7,Question,Who is in charge of developing a code of conduct for candidates and parties?,Which Kenyan body draws up the rules of behaviour that election candidates and political parties must follow?,"AI review, edited: copied the Constitution's wording (leakage audit); reworded, same fact and answer"
+Student A,7,Domain,civis-law,civics_law,domain mapped to the brief's six
 Student A,8,Question,Who is in charge of the continuous registration of voters and the revision of the voters’ roll?,"In Kenya, who is in charge of the continuous registration of voters and the revision of the voters’ roll?","added 'In Kenya, '"
 Student A,8,Domain,civis-law,civics_law,domain mapped to the brief's six
 Student A,9,Question,Who is in charge of monitoring compliance with the legislation on the nomination of candidates by parties?,"In Kenya, who is in charge of monitoring compliance with the legislation on the nomination of candidates by parties?","added 'In Kenya, '"
@@ -22,10 +23,14 @@ Student A,12,Question,who maintains custody of the mace in parliament?,"In Kenya
 Student A,12,Domain,civis-law,civics_law,domain mapped to the brief's six
 Student A,13,Question,who is incharge of crowd management in parliament?,"In Kenya, who is incharge of crowd management in parliament?","added 'In Kenya, '"
 Student A,13,Domain,civis-law,civics_law,domain mapped to the brief's six
-Student A,14,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,14,row,who organizes the business of the House of the senate?,,"AI review, dropped: two possible answers (the Speaker, or the Senate Business Committee)"
 Student A,15,Question,what does chapter 3 of the constitution entail?,"In Kenya, what does chapter 3 of the constitution entail?","added 'In Kenya, '"
 Student A,15,Domain,civis-law,civics_law,domain mapped to the brief's six
-Student A,16,row,who manages land on behalf of the national and county governments?,,excluded in student_files.yaml: copies the Constitution's wording (Chapter 5): leakage audit; rewrite in own words
+Student A,16,Question,who manages land on behalf of the national and county governments?,Which commission looks after public land for Kenya's national and county governments?,"AI review, edited: copied the Constitution's wording (leakage audit); reworded, same fact and answer"
+Student A,16,Answer,national land commission,National Land Commission,"AI review, edited: copied the Constitution's wording (leakage audit); reworded, same fact and answer"
+Student A,16,Other accepted answers,,NLC; the National Land Commission,"AI review, edited: copied the Constitution's wording (leakage audit); reworded, same fact and answer"
+Student A,16,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,17,Other accepted answers,three hundred and forty-nine; 349 members,three hundred and forty-nine; 349 members; 350,"AI review, edited: the Speaker is an ex officio member (Article 97), so 350 is also correct"
 Student A,17,Domain,civis-law,civics_law,domain mapped to the brief's six
 Student A,18,Domain,civis-law,civics_law,domain mapped to the brief's six
 Student A,19,Domain,civis-law,civics_law,domain mapped to the brief's six
@@ -39,9 +44,12 @@ Student A,25,Domain,civis-law,civics_law,domain mapped to the brief's six
 Student A,26,Domain,civis-law,civics_law,domain mapped to the brief's six
 Student A,27,Domain,civis-law,civics_law,domain mapped to the brief's six
 Student A,28,Domain,civis-law,civics_law,domain mapped to the brief's six
+Student A,29,row,What is the highest mountain in Kenya?,,"AI review, dropped: a reserved example from the Student Brief"
 Student A,35,Answer,2026-06-01 00:00:00,1 June,Excel value shown as typed
 Student A,36,Answer,2026-10-20 00:00:00,20 October,Excel value shown as typed
 Student A,37,Answer,2026-12-12 00:00:00,12 December,Excel value shown as typed
+Student A,50,Answer,Kenya Universities and Colleges Central Placement Service,KUCCPS,"AI review, edited: answer too long (rule 1): the short name is the answer, the full name an accepted answer"
+Student A,50,Other accepted answers,KUCCPS; the KUCCPS,Kenya Universities and Colleges Central Placement Service; the KUCCPS,"AI review, edited: answer too long (rule 1): the short name is the answer, the full name an accepted answer"
 Student A,56,Question,Which government platform lets citizens apply for many government services online?,"In Kenya, which government platform lets citizens apply for many government services online?","added 'In Kenya, '"
 Student A,63,Answer,0.16,16%,Excel value shown as typed
 Student A,64,Answer,2026-06-30 00:00:00,30 June,Excel value shown as typed
@@ -50,7 +58,8 @@ Student A,66,Question,What percentage of gross salary does a salaried employee c
 Student A,68,Answer,0.015,1.5%,Excel value shown as typed
 Student A,68,Question,At what percentage of gross salary is the Affordable Housing Levy deducted from an employee?,"In Kenya, at what percentage of gross salary is the Affordable Housing Levy deducted from an employee?","added 'In Kenya, '"
 Student A,69,Answer,0.3,30%,Excel value shown as typed
-Student A,75,row,Who is the Commander-in-Chief of the Kenya Defence Forces under the Constitution?,,excluded in student_files.yaml: copies the Constitution's wording (Chapter 9): leakage audit; rewrite in own words
+Student A,70,row,Which side of the road do vehicles drive on in Kenya?,,"AI review, dropped: a reserved example from the Student Brief"
+Student A,75,Question,Who is the Commander-in-Chief of the Kenya Defence Forces under the Constitution?,"Under Kenya's Constitution, which office holder is in overall command of the country's armed forces?","AI review, edited: copied the Constitution's wording (leakage audit); reworded, same fact and answer"
 Student A,76,Domain,unanswerable,civics_law,domain mapped to the brief's six
 Student A,77,Domain,unanswerable,civics_law,domain mapped to the brief's six
 Student A,78,Domain,unanswerable,civics_law,domain mapped to the brief's six
@@ -87,13 +96,36 @@ Student A,107,row,twin,,skipped: no question text
 Student A,108,row,twin,,skipped: no question text
 Student A,109,row,twin,,skipped: no question text
 Student A,110,row,twin,,skipped: no question text
+Student A,new (twin of row 22),row,,What is the highest court in the United Kingdom?,AI-written UK twin
+Student A,new (twin of row 27),row,,"Under the UK constitution, who is the head of government?",AI-written UK twin
+Student A,new (twin of row 17),row,,How many members does the UK House of Commons have?,AI-written UK twin
+Student A,new (twin of row 18),row,,What is the maximum number of years a UK Parliament can last before a general election must be held?,AI-written UK twin
+Student A,new (twin of row 38),row,,What is the motto shown on the UK Royal Coat of Arms?,AI-written UK twin
+Student A,new (twin of row 39),row,,What are the opening words of the UK national anthem?,AI-written UK twin
+Student A,new (twin of row 51),row,,Which organisation gives loans to students in higher education in the United Kingdom?,AI-written UK twin
+Student A,new (twin of row 54),row,,Which agency conducts the census in England and Wales?,AI-written UK twin
+Student A,new (twin of row 33),row,,What total population did the 2021 census record for England and Wales?,AI-written UK twin
+Student A,new (twin of row 56),row,,"In the United Kingdom, which government website lets citizens apply for many government services online?",AI-written UK twin
+Student A,new (twin of row 57),row,,Which government office issues British passports?,AI-written UK twin
+Student A,new (twin of row 58),row,,Which authority regulates telecommunications in the United Kingdom?,AI-written UK twin
+Student A,new (twin of row 60),row,,Which institution issues banknotes in England and Wales?,AI-written UK twin
+Student A,new (twin of row 62),row,,On which stock exchange are the shares of the largest listed UK companies traded?,AI-written UK twin
+Student A,new (twin of row 63),row,,What is the standard VAT rate in the United Kingdom?,AI-written UK twin
+Student A,new (twin of row 71),row,,What is the United Kingdom's international telephone dialling code?,AI-written UK twin
+Student B,2,row,Which lake in Kenya is the most saline?,,"AI review, dropped: answer disputed: Lake Magadi is far more saline than Lake Turkana"
+Student B,3,Answer,Lake Bogoria is both salty and alkaline,Both,"AI review, edited: answer too long (rule 1)"
+Student B,3,Other accepted answers,,both saline and alkaline; saline and alkaline; both salty and alkaline,"AI review, edited: answer too long (rule 1)"
 Student B,3,Question,Is lake Bogoria saline or alkaline ?,"In Kenya, is lake Bogoria saline or alkaline ?","added 'In Kenya, '"
+Student B,4,Twin of,Which is the largest freshwater lake in the United Kingdom?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student B,5,Twin of,What is the elevation of the highest mountain in the United Kingdom?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student B,8,Twin of,How many National Parks are there in the United Kingdom?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student B,9,Twin of,What is the longest river in the United Kingdom?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student B,10,Question,Which river is famous for the annual wildebeest migration crossing?,"In Kenya, which river is famous for the annual wildebeest migration crossing?","added 'In Kenya, '"
 Student B,13,row,CITIES AND TOWNS,,skipped: no Type (a heading or unfinished row)
 Student B,14,row,What is the capital city of Kenya?,,skipped: repeats an earlier question or a starter
 Student B,15,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
 Student B,16,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
-Student B,17,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
+Student B,17,row,How many major cities are there in Kenya?,,"AI review, dropped: 'major' is ambiguous; Student D asks the same fact precisely"
 Student B,18,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
 Student B,19,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
 Student B,20,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
@@ -103,31 +135,40 @@ Student B,22,Domain,Administrative divisions,geography_society,domain mapped to 
 Student B,23,Domain,Administrative divisions,geography_society,domain mapped to the brief's six
 Student B,25,row,CENSUS AND POPULATION FIGURES,,skipped: no answer (a real or twin question)
 Student B,26,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,26,Twin of,When was the last census conducted in the United Kingdom?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student B,27,Domain,Demographic,geography_society,domain mapped to the brief's six
 Student B,28,Domain,Demographic,geography_society,domain mapped to the brief's six
 Student B,29,Domain,Demographic,geography_society,domain mapped to the brief's six
 Student B,30,Domain,Demographic,geography_society,domain mapped to the brief's six
 Student B,31,Domain,Demographic,geography_society,domain mapped to the brief's six
 Student B,32,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,33,Question,How did the female population compare to the male population in the 2019 Kenya Census results?,"In Kenya's 2019 census, were there more females or more males?","AI review, edited: made into a question with one short answer"
+Student B,33,Answer,Females outnumbered males,Females,"AI review, edited: made into a question with one short answer"
+Student B,33,Other accepted answers,,more females; women; more women,"AI review, edited: made into a question with one short answer"
 Student B,33,Domain,Demographic,geography_society,domain mapped to the brief's six
 Student B,34,Domain,Demographic,geography_society,domain mapped to the brief's six
 Student B,35,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,35,Twin of,After how long is population census taken in the UK?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student B,36,Answer,0.75,75%,Excel value shown as typed
 Student B,36,Domain,Demographic,geography_society,domain mapped to the brief's six
 Student B,37,Answer,0.8154,81.54%,Excel value shown as typed
 Student B,37,Question,What was the literacy rate for the population aged 15 years and above as reported in the 2019 Census?,"In Kenya, what was the literacy rate for the population aged 15 years and above as reported in the 2019 Census?","added 'In Kenya, '"
 Student B,37,Domain,Demographic,geography_society,domain mapped to the brief's six
 Student B,38,Domain,Demographic,geography_society,domain mapped to the brief's six
-Student B,39,Domain,Demographic,geography_society,domain mapped to the brief's six
+Student B,38,Twin of,What is the primary source of lighting in the UK?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student B,39,row,What was the total population of Kenya in the 2019 Kenya Population and Housing Census?,,"AI review, dropped: the same fact as a Student A question"
 Student B,41,row,COMMUNITIES AND CULTURE,,skipped: no Type (a heading or unfinished row)
+Student B,42,Answer,44 tribes,44,"AI review, edited: answer reduced to the number"
+Student B,42,Other accepted answers,Fouty-four tribes,forty-four; 44 tribes,"AI review, edited: answer reduced to the number"
 Student B,42,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
 Student B,43,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,43,Twin of,What is the largest ethnic community in the United Kingdom?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student B,44,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
 Student B,45,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
-Student B,46,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,46,row,Which Kenyan community is traditionally associated with pastoralism ?,,"AI review, dropped: several pastoral communities fit (Maasai, Samburu, Turkana...)"
 Student B,47,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
-Student B,48,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
-Student B,49,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
+Student B,48,row,What is the importance of traditional dances among Kenyan communities?,,"AI review, dropped: an essay answer (rule 1)"
+Student B,49,row,Name three communities belonging to the Nilotic language group in Kenya?,,"AI review, dropped: several correct sets of three"
 Student B,50,Question,Which community is traditionally associated with the pastoral lifestyle in Samburu region?,"In Kenya, which community is traditionally associated with the pastoral lifestyle in Samburu region?","added 'In Kenya, '"
 Student B,50,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
 Student B,51,Question,Which community is traditionally associated with fishing around Lake Victoria?,"In Kenya, which community is traditionally associated with fishing around Lake Victoria?","added 'In Kenya, '"
@@ -135,25 +176,35 @@ Student B,51,Domain,Cultural heritage,geography_society,domain mapped to the bri
 Student B,52,Question,What are the three categories of the Nilotic language group?,"In Kenya, what are the three categories of the Nilotic language group?","added 'In Kenya, '"
 Student B,52,Domain,Cultural heritage,geography_society,domain mapped to the brief's six
 Student B,54,row,NATIONAL SYMBOLS OF KENYA,,skipped: no Type (a heading or unfinished row)
-Student B,55,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,55,row,What are the national symbols of Kenya?,,"AI review, dropped: a list answer can't be marked right or wrong (rule 1)"
 Student B,56,Domain,Constitutional,civics_law,domain mapped to the brief's six
-Student B,57,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,57,row,What is the national motto of Kenya?,,"AI review, dropped: the same fact as a Student A question"
+Student B,58,Answer,Blood shed during the struggle of Independence,Bloodshed,"AI review, edited: answer too long (rule 1)"
+Student B,58,Other accepted answers,,blood shed; the blood shed during the struggle for independence; bloodshed during the fight for independence; blood,"AI review, edited: answer too long (rule 1)"
 Student B,58,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,58,Twin of,What does the red colour represent on the United Kingdom flag?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student B,59,Domain,Constitutional,civics_law,domain mapped to the brief's six
 Student B,60,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,60,Twin of,Which two animals support the shield on the United Kingdom's Royal Coat of Arms?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student B,61,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,62,Answer,British East Africa Protectorate,East Africa Protectorate,"AI review, edited: the official name was the East Africa Protectorate (1895-1920); the student's answer kept as accepted"
+Student B,62,Other accepted answers,,British East Africa Protectorate; British East Africa,"AI review, edited: the official name was the East Africa Protectorate (1895-1920); the student's answer kept as accepted"
 Student B,62,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,63,Answer,Kenya's natural wealth and agricultural resources,Agriculture,"AI review, edited: answer too long (rule 1)"
+Student B,63,Other accepted answers,,agricultural wealth; natural wealth; natural resources; the land,"AI review, edited: answer too long (rule 1)"
 Student B,63,Domain,Constitutional,civics_law,domain mapped to the brief's six
-Student B,64,Domain,Constitutional,civics_law,domain mapped to the brief's six
+Student B,64,row,When is Heroes day celebrated in Kenya?,,"AI review, dropped: the same fact as Student A's Mashujaa Day question"
 Student B,66,row,KISWAHILI WORDS AND THEIR MEANINGS,,skipped: no Type (a heading or unfinished row)
-Student B,67,Domain,Language,language,domain mapped to the brief's six
+Student B,67,row,What is the most common Swahili greeting?,,"AI review, dropped: no single correct answer"
 Student B,68,Question,"What does ""Hakuna matata"" translate to?","In Kenya, what does ""Hakuna matata"" translate to?","added 'In Kenya, '"
 Student B,68,Domain,Language,language,domain mapped to the brief's six
-Student B,69,Domain,Language,language,domain mapped to the brief's six
+Student B,69,row,How does one say thank you in Swahili?,,"AI review, dropped: a reserved example from the Student Brief (asante)"
 Student B,70,Question,"What does ""Simba""translate to?","In Kenya, what does ""Simba""translate to?","added 'In Kenya, '"
 Student B,70,Domain,Language,language,domain mapped to the brief's six
 Student B,71,Domain,Language,language,domain mapped to the brief's six
 Student B,73,row,METHALI AND THEIR MEANINGS,,skipped: no Type (a heading or unfinished row)
+Student B,74,Answer,Small efforts accumulated over time produce significant results,Little by little fills the measure,"AI review, edited: answer too long (rule 1); key phrases kept as accepted answers"
+Student B,74,Other accepted answers,,little by little; small efforts add up; small efforts accumulated over time,"AI review, edited: answer too long (rule 1); key phrases kept as accepted answers"
 Student B,74,Domain,Language,language,domain mapped to the brief's six
 Student B,75,Domain,Language,language,domain mapped to the brief's six
 Student B,76,Domain,Language,language,domain mapped to the brief's six
@@ -164,12 +215,17 @@ Student B,81,Domain,Language,language,domain mapped to the brief's six
 Student B,82,Domain,Language,language,domain mapped to the brief's six
 Student B,83,Question,Which language is commonly known as the urban youth slang?,"In Kenya, which language is commonly known as the urban youth slang?","added 'In Kenya, '"
 Student B,83,Domain,Language,language,domain mapped to the brief's six
-Student B,84,Domain,Language,language,domain mapped to the brief's six
+Student B,84,row,What are the three main language groups in Kenya?,,"AI review, dropped: repeats this student's own question on the three language groups"
+Student B,85,Question,Who are largest native speakers in kenya?,Which language has the most native speakers in Kenya?,"AI review, edited: unclear wording"
+Student B,85,Other accepted answers,,Gikuyu; the Kikuyu language,"AI review, edited: unclear wording"
 Student B,85,Domain,Language,language,domain mapped to the brief's six
+Student B,85,Twin of,Who are the largest native speakers in the United Kingdom?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student B,86,Answer,68 total languages,68,"AI review, edited: answer reduced to the number"
+Student B,86,Other accepted answers,,sixty-eight; 68 languages,"AI review, edited: answer reduced to the number"
 Student B,86,Domain,Language,language,domain mapped to the brief's six
 Student B,87,Question,"What is the meaning of the word""Kalenjin""?","In Kenya, what is the meaning of the word""Kalenjin""?","added 'In Kenya, '"
 Student B,87,Domain,Language,language,domain mapped to the brief's six
-Student B,88,Domain,Language,language,domain mapped to the brief's six
+Student B,88,row,What are the early schools in western Kenya that sparked the creation of Kenya Sign Language in 1961?,,"AI review, dropped: a two-part answer"
 Student B,89,Domain,Language,language,domain mapped to the brief's six
 Student B,90,row,what is the most common writing system in coastal areas in kenya?,,skipped: no Type (a heading or unfinished row)
 Student B,92,row,FALSE QUESTIONS,,skipped: no Type (a heading or unfinished row)
@@ -193,46 +249,70 @@ Student B,109,Domain,Unanswerable,geography_society,domain mapped to the brief's
 Student B,110,Domain,Unanswerable,geography_society,domain mapped to the brief's six
 Student B,111,Domain,Unanswerable,geography_society,domain mapped to the brief's six
 Student B,112,Domain,Unanswerable,geography_society,domain mapped to the brief's six
-Student C,2,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student B,new (twin of row 4),row,,Which is the largest freshwater lake in the United Kingdom?,AI-written UK twin
+Student B,new (twin of row 5),row,,What is the elevation of the highest mountain in the United Kingdom?,AI-written UK twin
+Student B,new (twin of row 8),row,,How many national parks are there in the United Kingdom?,AI-written UK twin
+Student B,new (twin of row 9),row,,What is the longest river in the United Kingdom?,AI-written UK twin
+Student B,new (twin of row 26),row,,In which year was the last census conducted in England and Wales?,AI-written UK twin
+Student B,new (twin of row 35),row,,How often is the census taken in England and Wales?,AI-written UK twin
+Student B,new (twin of row 60),row,,Which two animals support the shield on the UK Royal Coat of Arms?,AI-written UK twin
+Student B,new (twin of row 81),row,,What is the main language of the United Kingdom?,AI-written UK twin
+Student C,2,row,What public body in Kenya Collects taxes?,,"AI review, dropped: a reserved example from the Student Brief"
 Student C,3,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,4,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,4,Twin of,What public body in the uk issues business tax compliance?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student C,5,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,5,Twin of,What public body in the uk issues Driving licenses ?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student C,6,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,6,Twin of,What public body in the uk issues motor vehicle registration ?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student C,7,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,7,Twin of,What public body in the uk handles logbook transfer ?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student C,8,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,8,Twin of,What public body in the uk handles car inspection?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student C,9,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,9,Twin of,What public body in the uk is responsible for road safety ?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student C,10,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,11,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,12,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,12,row,Which State Corporation in Kenya selects students for national polytechnics?,,"AI review, dropped: one of 10 questions with the same answer (KUCCPS): too repetitive (rule 8)"
 Student C,13,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,14,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,14,row,Which State Corporation in Kenya selects students for Technical and Vocational Education and Training (TVET) institutions ?,,"AI review, dropped: one of 10 questions with the same answer (KUCCPS): too repetitive (rule 8)"
 Student C,15,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,16,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,17,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,18,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,19,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,20,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,16,row,Which State Corporation in Kenya selects students for Kenya Utalii Colleges (KUCs)?,,"AI review, dropped: one of 10 questions with the same answer (KUCCPS): too repetitive (rule 8)"
+Student C,17,row,Which State Corporation in Kenya collect and retain data relating to university and college placement?,,"AI review, dropped: one of 10 questions with the same answer (KUCCPS): too repetitive (rule 8)"
+Student C,18,row,Which State Corporation in Kenya and advise the government on matters relating to student placement to universities and colleges?,,"AI review, dropped: one of 10 questions with the same answer (KUCCPS): too repetitive (rule 8)"
+Student C,19,row,when was the establishment of KUCCPS?,,"AI review, dropped: date ambiguous: the Act is from 2012 and the service began in 2013-14"
+Student C,20,row,"Which State Corporation in Kenya was established in “014 following the passage of the universities ACT,No. 42 of 2012?",,"AI review, dropped: garbled year, and the same answer (KUCCPS) again"
 Student C,21,row,when was the establishment of NTSA?,,skipped: no answer (a real or twin question)
-Student C,22,Other accepted answers,1995-06-01 00:00:00,1 June 1995,Excel value shown as typed
+Student C,22,Question,when was the establishment of KRA?,When was the Kenya Revenue Authority established?,"AI review, edited: an accepted answer ('1 June 1995') was wrong: KRA was established on 1 July 1995"
+Student C,22,Other accepted answers,1 June 1995,"1 July 1995; July 1, 1995; 1995","AI review, edited: an accepted answer ('1 June 1995') was wrong: KRA was established on 1 July 1995"
+Student C,22,Other accepted answers,1995-06-01 00:00:00,"1 July 1995; July 1, 1995; 1995",Excel value shown as typed
 Student C,22,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,23,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,24,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,25,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,25,row,NTSA was established through what?,,"AI review, dropped: too vague to mark"
+Student C,26,Question,What is the Act Number that established NTSA?,What is the number of the Act of Parliament that established Kenya's NTSA?,"AI review, edited: answer reduced to the number"
+Student C,26,Answer,Act Number 33 of 2012,33 of 2012,"AI review, edited: answer reduced to the number"
+Student C,26,Other accepted answers,,Act No. 33 of 2012; No. 33 of 2012; Act Number 33 of 2012,"AI review, edited: answer reduced to the number"
 Student C,26,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,27,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,28,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,29,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,30,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,31,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,32,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,33,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,27,Twin of,In which year was Driver and Vehicle Licensing Agency (DVLA) established?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student C,28,row,Which body passed the Act that established NTSA?,,"AI review, dropped: too trivial (every Act is passed by Parliament)"
+Student C,29,row,What is the title of the section describing NTSA's duties?,,"AI review, dropped: about a website's layout, not a fact"
+Student C,30,row,How many responsibilities of NTSA are listed?,,"AI review, dropped: about a website's layout, not a fact"
+Student C,31,row,Who does NTSA advise?,,"AI review, dropped: too vague to mark"
+Student C,32,row,What kind of policies does NTSA implement?,,"AI review, dropped: too vague to mark"
+Student C,33,row,Which bodyin kenya is responsible for registration and licensing of motor vehicles?,,"AI review, dropped: repeats the driving-licence and registration questions"
 Student C,34,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,35,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,36,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,34,Twin of,What does DVLA register?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student C,35,row,What does NTSA license?,,"AI review, dropped: repeats the registration and licensing questions"
+Student C,36,row,What activities does NTSA conduct on motor vehicles?,,"AI review, dropped: a list answer"
 Student C,37,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,37,Twin of,Which vehicles are inspected and certified by DVLA?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student C,38,Question,Which body regulates public service vehicles?,"In Kenya, which body regulates public service vehicles?","added 'In Kenya, '"
 Student C,38,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,38,Twin of,Which body regulates public service vehicles?,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student C,39,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,40,Other accepted answers,,18; eighteen; eighteen years,"AI review, edited: accepted answers added"
 Student C,40,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,41,Question,Which document is required to prove age for first ID / passport?,"In Kenya, which document is required to prove age for first ID / passport?","added 'In Kenya, '"
 Student C,41,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
@@ -242,49 +322,37 @@ Student C,44,Domain,"institutions_services, money_livelihoods",institutions_serv
 Student C,45,Question,Which police agency issues the Certificate of Good Conduct?,"In Kenya, which police agency issues the Certificate of Good Conduct?","added 'In Kenya, '"
 Student C,45,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,46,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,47,Question,What is Huduma's contact / helpline number?,What is the helpline number of Huduma Kenya?,"AI review, edited: clearer wording"
 Student C,47,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,48,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,49,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,50,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,49,row,Name one payment method on eCitizen?,,"AI review, dropped: several correct answers"
+Student C,50,row,What is Kenya's Central Bank?,,"AI review, dropped: the answer is in the question"
 Student C,51,Question,Which agency certifies horticultural exports for phytosanitary compliance?,"In Kenya, which agency certifies horticultural exports for phytosanitary compliance?","added 'In Kenya, '"
 Student C,51,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,52,Question,what role does AFA play in licenseing coffee?,"In Kenya, what role does AFA play in licenseing coffee?","added 'In Kenya, '"
-Student C,52,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,53,Question,what role does AFA play in licenseing tea?,"In Kenya, what role does AFA play in licenseing tea?","added 'In Kenya, '"
-Student C,53,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,54,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,55,Question,Which body sets minimum guaranteed prices for tea and how does that affect smallholder earnings?,"In Kenya, which body sets minimum guaranteed prices for tea and how does that affect smallholder earnings?","added 'In Kenya, '"
-Student C,55,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,52,row,what role does AFA play in licenseing coffee?,,"AI review, dropped: an essay answer (rule 1)"
+Student C,53,row,what role does AFA play in licenseing tea?,,"AI review, dropped: an essay answer (rule 1)"
+Student C,54,row,what standards must a Kenyan avocado or flower exporter meet to sell into the EU market?,,"AI review, dropped: the answer (KEPHIS) doesn't answer the question"
+Student C,55,row,Which body sets minimum guaranteed prices for tea and how does that affect smallholder earnings?,,"AI review, dropped: two questions in one, and the answer is disputed"
 Student C,56,row,Which agency certifies horticultural exports for phytosanitary compliance?,,skipped: repeats an earlier question or a starter
 Student C,57,Question,What is Kenya's leading foreign-exchange-earning agricultural export,What is Kenya's leading foreign-exchange-earning agricultural export?,added '?'
 Student C,57,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,58,Question,Which regulator licenses the NSE,Which regulator licenses the NSE?,added '?'
 Student C,58,Question,Which regulator licenses the NSE?,"In Kenya, which regulator licenses the NSE?","added 'In Kenya, '"
 Student C,58,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,59,Question,Who is the regulator of the brokers for nse?,"In Kenya, who is the regulator of the brokers for nse?","added 'In Kenya, '"
-Student C,59,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,60,Question,"Which regulator licenses the NSE and its brokers, and under which Act?","In Kenya, which regulator licenses the NSE and its brokers, and under which Act?","added 'In Kenya, '"
-Student C,60,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,61,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,62,Question,Does a mobile-money account need a national ID to be registered?,"In Kenya, does a mobile-money account need a national ID to be registered?","added 'In Kenya, '"
-Student C,62,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,63,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,64,Question,What is the most used form of transaction ?,"In Kenya, what is the most used form of transaction ?","added 'In Kenya, '"
-Student C,64,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,65,Question,Must providers get approval before changing transaction fees?,"In Kenya, must providers get approval before changing transaction fees?","added 'In Kenya, '"
-Student C,65,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,59,row,Who is the regulator of the brokers for nse?,,"AI review, dropped: the same answer (CMA) as the NSE licensing question"
+Student C,60,row,"Which regulator licenses the NSE and its brokers, and under which Act?",,"AI review, dropped: two questions in one, and the same answer (CMA) again"
+Student C,61,row,Does the Central Bank of Kenya license mobile-money services?,,"AI review, dropped: a yes/no question: a guess is right half the time"
+Student C,62,row,Does a mobile-money account need a national ID to be registered?,,"AI review, dropped: a yes/no question: a guess is right half the time"
+Student C,63,row,Can you send money between M-Pesa and Airtel Money?,,"AI review, dropped: a yes/no question: a guess is right half the time"
+Student C,64,row,What is the most used form of transaction ?,,"AI review, dropped: the answer 'yes' doesn't fit the question"
+Student C,65,row,Must providers get approval before changing transaction fees?,,"AI review, dropped: a yes/no question: a guess is right half the time"
 Student C,66,Question,Which Act of Parliament established the capital markets authority,Which Act of Parliament established the capital markets authority?,added '?'
 Student C,66,Question,Which Act of Parliament established the capital markets authority?,"In Kenya, which Act of Parliament established the capital markets authority?","added 'In Kenya, '"
 Student C,66,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,67,Question,Which agency ensurers proper conduct of all licensed persons and market institutions.,Which agency ensurers proper conduct of all licensed persons and market institutions?,added '?'
-Student C,67,Question,Which agency ensurers proper conduct of all licensed persons and market institutions?,"In Kenya, which agency ensurers proper conduct of all licensed persons and market institutions?","added 'In Kenya, '"
-Student C,67,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,68,Question,How heads Capital Markets Authority,How heads Capital Markets Authority?,added '?'
-Student C,68,Question,How heads Capital Markets Authority?,"In Kenya, how heads Capital Markets Authority?","added 'In Kenya, '"
-Student C,68,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,69,Question,A Chairman appointed by?,"In Kenya, A Chairman appointed by?","added 'In Kenya, '"
-Student C,69,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student C,70,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
+Student C,67,row,Which agency ensurers proper conduct of all licensed persons and market institutions.,,"AI review, dropped: the same answer (CMA) again"
+Student C,68,row,How heads Capital Markets Authority,,"AI review, dropped: unclear question and answer"
+Student C,69,row,A Chairman appointed by?,,"AI review, dropped: unclear question"
+Student C,70,row,Is NTSA responsible for animal registration?,,"AI review, dropped: a yes/no question: a guess is right half the time"
 Student C,71,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,72,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,73,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
@@ -305,158 +373,185 @@ Student C,87,Domain,"institutions_services, money_livelihoods",institutions_serv
 Student C,88,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,89,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
 Student C,90,Domain,"institutions_services, money_livelihoods",institutions_services,domain mapped to the brief's six
-Student D,2,Question,which units is used for road distances in kenya,which units is used for road distances in kenya?,added '?'
+Student C,new (twin of row 5),row,,Which public body issues driving licences in Great Britain?,AI-written UK twin
+Student C,new (twin of row 6),row,,Which public body registers motor vehicles in Great Britain?,AI-written UK twin
+Student C,new (twin of row 7),row,,Which public body handles the transfer of a vehicle logbook (V5C) in Great Britain?,AI-written UK twin
+Student C,new (twin of row 8),row,,Which public body oversees MOT vehicle inspections in Great Britain?,AI-written UK twin
+Student C,new (twin of row 38),row,,Which officials license and regulate bus and coach operators in Great Britain?,AI-written UK twin
+Student D,2,Question,which units is used for road distances in kenya,Which unit is used for road distances in Kenya?,"AI review, edited: spelling and wording"
+Student D,2,Other accepted answers,KM,km; kilometers; kilometre,"AI review, edited: spelling and wording"
 Student D,2,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,3,Question,what is the Kenya's total population,what is the Kenya's total population?,added '?'
-Student D,3,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,4,Question,what is Kenya's total GDP,what is Kenya's total GDP?,added '?'
-Student D,4,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,5,Question,what is the total area of kenya,what is the total area of kenya?,added '?'
+Student D,2,Twin of,which unita is used for road distances in UK,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student D,3,row,what is the Kenya's total population,,"AI review, dropped: a changing fact with no 'Valid until' (rule 4)"
+Student D,4,row,what is Kenya's total GDP,,"AI review, dropped: a changing fact with no 'Valid until' (rule 4)"
+Student D,5,Question,what is the total area of kenya,What is the total area of Kenya?,"AI review, edited: wording and accepted answers"
+Student D,5,Other accepted answers,"580,367 squared kilometres","580,367 square kilometres; 580367; 580,367","AI review, edited: wording and accepted answers"
 Student D,5,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,6,Question,what is the tallest mountain in kenya,what is the tallest mountain in kenya?,added '?'
-Student D,6,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,7,Question,what is Kenya's main tourist attraction,what is Kenya's main tourist attraction?,added '?'
-Student D,7,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,8,Question,which continet is Kenya located,which continet is Kenya located?,added '?'
+Student D,5,Twin of,what is the total area of France,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student D,6,row,what is the tallest mountain in kenya,,"AI review, dropped: a reserved example from the Student Brief"
+Student D,7,row,what is Kenya's main tourist attraction,,"AI review, dropped: an opinion: no single correct answer"
+Student D,8,Question,which continet is Kenya located,On which continent is Kenya located?,"AI review, edited: spelling and wording"
 Student D,8,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,9,Question,which ocean borders Kenya,which ocean borders Kenya?,added '?'
+Student D,8,Twin of,how Many presidents does Portugal has,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student D,9,Question,which ocean borders Kenya,Which ocean borders Kenya?,"AI review, edited: wording"
 Student D,9,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,9,Twin of,What is Hungary's telephone code,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
 Student D,10,row,what is the national language of Kenya,,skipped: repeats an earlier question or a starter
-Student D,11,Question,what is the supreme law of Kenya,what is the supreme law of Kenya?,added '?'
+Student D,11,Question,what is the supreme law of Kenya,What is the supreme law of Kenya?,"AI review, edited: spelling of the answer"
+Student D,11,Answer,Constituion of Kenya,Constitution of Kenya,"AI review, edited: spelling of the answer"
+Student D,11,Other accepted answers,constituion (2010),the Constitution; Constitution of Kenya 2010; constitution,"AI review, edited: spelling of the answer"
 Student D,11,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,12,Question,How many national holidays does Kenya have,How many national holidays does Kenya have?,added '?'
-Student D,12,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,13,Question,when did kenya gained its independence,when did kenya gained its independence?,added '?'
-Student D,13,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,14,Question,what the kenya's most expoerted crop,what the kenya's most expoerted crop?,added '?'
+Student D,11,Twin of,What is the largest ariport in the UK,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student D,12,row,How many national holidays does Kenya have,,"AI review, dropped: answer wrong (Kenya has about 11-12 public holidays, not 21), and the number changes"
+Student D,13,row,when did kenya gained its independence,,"AI review, dropped: repeats one of Trevor's starter questions"
+Student D,14,Question,what the kenya's most expoerted crop,What is Kenya's most exported crop?,"AI review, edited: spelling and wording"
+Student D,14,Other accepted answers,tea,tea leaves,"AI review, edited: spelling and wording"
 Student D,14,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,15,Question,how many presidents does Kenya have,how many presidents does Kenya have?,added '?'
+Student D,14,Twin of,how many years does it take for election to happen in iceland,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student D,15,Question,how many presidents does Kenya have,How many presidents has Kenya had?,"AI review, edited: wording"
+Student D,15,Valid until,,the next president takes office,"AI review, edited: wording"
 Student D,15,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,16,Question,who was the first president of Kenya,who was the first president of Kenya?,added '?'
+Student D,15,Twin of,How many stadiums does Portugal have,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student D,16,Question,who was the first president of Kenya,Who was the first President of Kenya?,"AI review, edited: spelling of the answer"
+Student D,16,Answer,Jomo kenyatta,Jomo Kenyatta,"AI review, edited: spelling of the answer"
+Student D,16,Other accepted answers,J.Kenyatta,Kenyatta; Mzee Jomo Kenyatta,"AI review, edited: spelling of the answer"
 Student D,16,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,17,Question,who collects taxes in Kenya,who collects taxes in Kenya?,added '?'
-Student D,17,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,18,Question,when is census held in Kenya,when is census held in Kenya?,added '?'
-Student D,18,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,19,Question,how many type army forces are in kenya,how many type army forces are in kenya?,added '?'
+Student D,16,Twin of,how was the first pr4sident of scottland,,removed: a twin written in the Kenya row (proper twins: repairs.yaml)
+Student D,17,row,who collects taxes in Kenya,,"AI review, dropped: a reserved example from the Student Brief"
+Student D,18,row,when is census held in Kenya,,"AI review, dropped: the same fact as a Student B question"
+Student D,19,Question,how many type army forces are in kenya,How many service branches make up the Kenya Defence Forces?,"AI review, edited: unclear wording"
+Student D,19,Answer,Three,3,"AI review, edited: unclear wording"
+Student D,19,Other accepted answers,3,"three; Army, Air Force and Navy","AI review, edited: unclear wording"
+Student D,19,Other accepted answers,3,"three; Army, Air Force and Navy",Excel value shown as typed
 Student D,19,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,20,Question,how many counties does Kenya has,how many counties does Kenya has?,added '?'
-Student D,20,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,21,Question,what is the largets airport in Kenya,what is the largets airport in Kenya?,added '?'
+Student D,20,row,how many counties does Kenya has,,"AI review, dropped: repeats one of Trevor's starter questions"
+Student D,21,Question,what is the largets airport in Kenya,What is the largest airport in Kenya?,"AI review, edited: spelling"
+Student D,21,Answer,Jomo kenyatta International Aiport,Jomo Kenyatta International Airport,"AI review, edited: spelling"
+Student D,21,Other accepted answers,j.Kenyatta internationa airport,JKIA; Jomo Kenyatta Airport,"AI review, edited: spelling"
 Student D,21,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,22,Question,how many airstrips does kenya has,how many airstrips does kenya has?,added '?'
-Student D,22,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,23,Question,what is the kenya Natioanal Football team called,what is the kenya Natioanal Football team called?,added '?'
+Student D,22,row,how many airstrips does kenya has,,"AI review, dropped: can't be checked against an official source"
+Student D,23,Question,what is the kenya Natioanal Football team called,What is the nickname of Kenya's national football team?,"AI review, edited: spelling and wording"
+Student D,23,Answer,Harambee stars,Harambee Stars,"AI review, edited: spelling and wording"
 Student D,23,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,24,Question,what is the stable food in kenya,what is the stable food in kenya?,added '?'
-Student D,24,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,25,Question,How many languages is spoken in Kenya,How many languages is spoken in Kenya?,added '?'
-Student D,25,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,26,Question,how many cities does Kenya has,how many cities does Kenya has?,added '?'
+Student D,24,row,what is the stable food in kenya,,"AI review, dropped: the same fact as a Student B question"
+Student D,25,row,How many languages is spoken in Kenya,,"AI review, dropped: the same fact as a Student B question"
+Student D,26,Question,how many cities does Kenya has,How many cities does Kenya have?,"AI review, edited: grammar"
+Student D,26,Valid until,,a new town is granted city status,"AI review, edited: grammar"
 Student D,26,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,27,Question,what sport is kenya known for internatonally,what sport is kenya known for internatonally?,added '?'
+Student D,27,Question,what sport is kenya known for internatonally,Which sport is Kenya best known for internationally?,"AI review, edited: spelling and accepted answers"
+Student D,27,Other accepted answers,Riadha,running; long-distance running; distance running,"AI review, edited: spelling and accepted answers"
 Student D,27,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,28,Question,what is kenya's telephone country code,what is kenya's telephone country code?,added '?'
-Student D,28,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,29,Question,how many banks does kenya has,how many banks does kenya has?,added '?'
-Student D,29,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,30,Question,what the largest service that provide telecommunication and inetrnet in kenya,what the largest service that provide telecommunication and inetrnet in kenya?,added '?'
+Student D,28,row,what is kenya's telephone country code,,"AI review, dropped: the same fact as a Student A question"
+Student D,29,row,how many banks does kenya has,,"AI review, dropped: a changing fact with no 'Valid until' (rule 4)"
+Student D,30,Question,what the largest service that provide telecommunication and inetrnet in kenya,Which is the largest telecommunications company in Kenya?,"AI review, edited: spelling and wording"
+Student D,30,Other accepted answers,SAFARICOM,Safaricom PLC,"AI review, edited: spelling and wording"
 Student D,30,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,31,Question,how many colours does the kenyan flag have,how many colours does the kenyan flag have?,added '?'
+Student D,31,Question,how many colours does the kenyan flag have,How many colours does the Kenyan flag have?,"AI review, edited: wording"
 Student D,31,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,32,Question,what is the life expectancy in kenya today,what is the life expectancy in kenya today?,added '?'
-Student D,32,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,33,Question,what is the required age to vote in Kenya,what is the required age to vote in Kenya?,added '?'
-Student D,33,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,34,Question,how long does it take for election to happen in Kenya,how long does it take for election to happen in Kenya?,added '?'
+Student D,32,row,what is the life expectancy in kenya today,,"AI review, dropped: a changing fact with no 'Valid until' (rule 4)"
+Student D,33,row,what is the required age to vote in Kenya,,"AI review, dropped: the same fact as a Student A question"
+Student D,34,Question,how long does it take for election to happen in Kenya,How often are general elections held in Kenya?,"AI review, edited: unclear wording"
+Student D,34,Answer,5 years,every 5 years,"AI review, edited: unclear wording"
+Student D,34,Other accepted answers,five years,5 years; five years; every five years,"AI review, edited: unclear wording"
 Student D,34,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,35,Question,what instituition issues currencies in Kenya,what instituition issues currencies in Kenya?,added '?'
-Student D,35,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,36,Question,which organization handles health matters in kenya,which organization handles health matters in kenya?,added '?'
+Student D,35,row,what instituition issues currencies in Kenya,,"AI review, dropped: the same fact as a Student A question"
+Student D,36,Question,which organization handles health matters in kenya,Which government ministry handles health matters in Kenya?,"AI review, edited: wording"
+Student D,36,Other accepted answers,MoH,MoH; the Ministry of Health,"AI review, edited: wording"
 Student D,36,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,37,Question,The largest stadium in kenya,The largest stadium in kenya?,added '?'
+Student D,37,Question,The largest stadium in kenya,What is the largest stadium in Kenya?,"AI review, edited: wording and accepted answers"
+Student D,37,Answer,Moi international Sports centre,Moi International Sports Centre,"AI review, edited: wording and accepted answers"
+Student D,37,Other accepted answers,Moi stadium,Kasarani; Kasarani Stadium; Moi Stadium,"AI review, edited: wording and accepted answers"
 Student D,37,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,38,Question,which is the tallest building in kenya,which is the tallest building in kenya?,added '?'
+Student D,38,Question,which is the tallest building in kenya,What is the tallest building in Kenya?,"AI review, edited: wording"
+Student D,38,Answer,Britam,Britam Tower,"AI review, edited: wording"
+Student D,38,Other accepted answers,BRITAM,Britam,"AI review, edited: wording"
 Student D,38,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,39,Question,which service is responsible for criminal ivestigations,which service is responsible for criminal ivestigations?,added '?'
-Student D,39,Question,which service is responsible for criminal ivestigations?,"In Kenya, which service is responsible for criminal ivestigations?","added 'In Kenya, '"
+Student D,39,Question,which service is responsible for criminal ivestigations,Which service is responsible for criminal investigations in Kenya?,"AI review, edited: spelling"
+Student D,39,Other accepted answers,directorate of criminal investigation,Directorate of Criminal Investigations; the DCI,"AI review, edited: spelling"
 Student D,39,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,40,Question,The first woman to win a nobel prize in Kenya,The first woman to win a nobel prize in Kenya?,added '?'
+Student D,40,Question,The first woman to win a nobel prize in Kenya,Who was the first Kenyan woman to win a Nobel Prize?,"AI review, edited: wording and spelling of the answer"
+Student D,40,Answer,Wangari Mathai,Wangari Maathai,"AI review, edited: wording and spelling of the answer"
+Student D,40,Other accepted answers,W.Mathai,Maathai; Professor Wangari Maathai,"AI review, edited: wording and spelling of the answer"
 Student D,40,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,41,Question,which Animals support the shield on kenya's coat of arms,which Animals support the shield on kenya's coat of arms?,added '?'
-Student D,41,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,42,Answer,2026-10-20 00:00:00,20 October,Excel value shown as typed
-Student D,42,Question,on which day does kenyaa celebrate mashujaa day,on which day does kenyaa celebrate mashujaa day?,added '?'
-Student D,42,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,43,Question,which is responsible for motor vehicle and road transport safety in kenya,which is responsible for motor vehicle and road transport safety in kenya?,added '?'
-Student D,43,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,44,Question,what is kenya's largest harbour,what is kenya's largest harbour?,added '?'
+Student D,41,row,which Animals support the shield on kenya's coat of arms,,"AI review, dropped: the same fact as a Student B question"
+Student D,42,row,on which day does kenyaa celebrate mashujaa day,,"AI review, dropped: the same fact as a Student A question"
+Student D,43,row,which is responsible for motor vehicle and road transport safety in kenya,,"AI review, dropped: the same fact as Student A and C questions"
+Student D,44,Question,what is kenya's largest harbour,What is Kenya's largest harbour?,"AI review, edited: wording"
+Student D,44,Other accepted answers,KILINDINI HARBOUR,Kilindini; Port of Mombasa,"AI review, edited: wording"
 Student D,44,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,45,Question,The education and student loan instituition in kenya,The education and student loan instituition in kenya?,added '?'
-Student D,45,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,46,Question,how many rights was passed in kenya,how many rights was passed in kenya?,added '?'
-Student D,46,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,47,Question,In kenya which is the upper house in the Parlianment,In kenya which is the upper house in the Parlianment?,added '?'
+Student D,45,row,The education and student loan instituition in kenya,,"AI review, dropped: the same fact as a Student A question (HELB)"
+Student D,46,row,how many rights was passed in kenya,,"AI review, dropped: unclear question"
+Student D,47,Question,In kenya which is the upper house in the Parlianment,Which is the upper house of Kenya's Parliament?,"AI review, edited: spelling"
+Student D,47,Other accepted answers,senates,the Senate,"AI review, edited: spelling"
 Student D,47,Domain,,western_default_traps,domain mapped to the brief's six
 Student D,48,row,How many levels of government are there in Kenya,,skipped: no Type (a heading or unfinished row)
-Student D,49,Question,Types of levels of government in Kenya,Types of levels of government in Kenya?,added '?'
-Student D,49,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,49,Other accepted answers,,National government; County government,split '/' or 'or' answer into accepted answers
-Student D,50,Question,The fastest means of train Transport in Kenya,The fastest means of train Transport in Kenya?,added '?'
+Student D,49,row,Types of levels of government in Kenya,,"AI review, dropped: the same fact as a Student A question"
+Student D,50,Question,The fastest means of train Transport in Kenya,What is the fastest passenger train service in Kenya?,"AI review, edited: wording"
+Student D,50,Answer,SGR,Madaraka Express,"AI review, edited: wording"
+Student D,50,Other accepted answers,Madaraka Express,SGR; Standard Gauge Railway,"AI review, edited: wording"
 Student D,50,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,51,Question,which symbol is displayed on Kenya's flag,which symbol is displayed on Kenya's flag?,added '?'
+Student D,51,Question,which symbol is displayed on Kenya's flag,What symbol is displayed in the centre of Kenya's flag?,"AI review, edited: wording"
+Student D,51,Answer,Shield/Spears,A shield and two spears,"AI review, edited: wording"
+Student D,51,Other accepted answers,Mkuki,shield and spears; Maasai shield; shield,"AI review, edited: wording"
 Student D,51,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,51,Other accepted answers,Mkuki,Mkuki; Shield; Spears,split '/' or 'or' answer into accepted answers
-Student D,52,Question,What is the main exam that that highschool students do,What is the main exam that that highschool students do?,added '?'
-Student D,52,Question,What is the main exam that that highschool students do?,"In Kenya, what is the main exam that that highschool students do?","added 'In Kenya, '"
+Student D,52,Question,What is the main exam that that highschool students do,Which national exam do Kenyan students sit at the end of secondary school?,"AI review, edited: wording"
+Student D,52,Other accepted answers,kenya certificate of secondary Education,Kenya Certificate of Secondary Education,"AI review, edited: wording"
 Student D,52,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,53,Question,which language is used for teaching students in kenya,which language is used for teaching students in kenya?,added '?'
-Student D,53,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,53,Other accepted answers,swahili/kiingeereza,swahili/kiingeereza; English; Kiswahili,split '/' or 'or' answer into accepted answers
-Student D,54,Question,which is the largest lake in Kenya,which is the largest lake in Kenya?,added '?'
-Student D,54,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,55,Question,what is the new current Education system in Kenya,what is the new current Education system in Kenya?,added '?'
+Student D,53,row,which language is used for teaching students in kenya,,"AI review, dropped: two correct answers"
+Student D,54,row,which is the largest lake in Kenya,,"AI review, dropped: the Student Brief's own example of a bad question (two possible answers)"
+Student D,55,Question,what is the new current Education system in Kenya,What is the name of the school curriculum Kenya introduced in 2017?,"AI review, edited: wording; the curriculum has two current names"
+Student D,55,Answer,CBC,Competency-Based Curriculum,"AI review, edited: wording; the curriculum has two current names"
+Student D,55,Other accepted answers,Competency-Based Curriculum (CBC,CBC; Competency Based Curriculum; Competency-Based Education; CBE,"AI review, edited: wording; the curriculum has two current names"
 Student D,55,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,56,Question,which instituion conducts national examination in Kenya,which instituion conducts national examination in Kenya?,added '?'
+Student D,56,Question,which instituion conducts national examination in Kenya,Which body conducts national examinations in Kenya?,"AI review, edited: spelling; wrong accepted answer removed"
+Student D,56,Other accepted answers,kenya certificate of secondary Education,Kenya National Examinations Council; the KNEC,"AI review, edited: spelling; wrong accepted answer removed"
 Student D,56,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,57,Question,how tall is Mount Kenya,how tall is Mount Kenya?,added '?'
-Student D,57,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,58,Question,which authority conducts and manage the Kenya's wildlife services,which authority conducts and manage the Kenya's wildlife services?,added '?'
+Student D,57,row,how tall is Mount Kenya,,"AI review, dropped: the same fact as a Student B question"
+Student D,58,Question,which authority conducts and manage the Kenya's wildlife services,Which body manages wildlife in Kenya's national parks?,"AI review, edited: wording"
+Student D,58,Other accepted answers,kenyan wildlife service,Kenya Wildlife Service; the KWS,"AI review, edited: wording"
 Student D,58,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,59,Question,what items are mostly imported to Kenya,what items are mostly imported to Kenya?,added '?'
+Student D,59,Question,what items are mostly imported to Kenya,What is Kenya's largest category of imports by value?,"AI review, edited: wording"
+Student D,59,Answer,Mineral Oils,Petroleum products,"AI review, edited: wording"
+Student D,59,Other accepted answers,Petroleum oil,mineral oils; petroleum; fuel; oil,"AI review, edited: wording"
 Student D,59,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,60,Question,Maximum terms the presidents serve for in Kenya,Maximum terms the presidents serve for in Kenya?,added '?'
-Student D,60,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,61,Question,the required age for presidency in kenya,the required age for presidency in kenya?,added '?'
-Student D,61,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,62,Question,what is the Kenya's top Campanies,what is the Kenya's top Campanies?,added '?'
-Student D,62,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,63,Question,which is the most prestigious university in Kenya,which is the most prestigious university in Kenya?,added '?'
-Student D,63,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,64,Question,what is the legal age for driving a vehicle in Kenya,what is the legal age for driving a vehicle in Kenya?,added '?'
+Student D,60,row,Maximum terms the presidents serve for in Kenya,,"AI review, dropped: the same fact as a Student A question"
+Student D,61,row,the required age for presidency in kenya,,"AI review, dropped: the Constitution sets qualifications, not a separate minimum age: answer uncertain"
+Student D,62,row,what is the Kenya's top Campanies,,"AI review, dropped: an opinion: no single correct answer"
+Student D,63,row,which is the most prestigious university in Kenya,,"AI review, dropped: an opinion: no single correct answer"
+Student D,64,Question,what is the legal age for driving a vehicle in Kenya,What is the minimum age for a driving licence in Kenya?,"AI review, edited: wording"
+Student D,64,Other accepted answers,eighteen years,eighteen; 18 years,"AI review, edited: wording"
 Student D,64,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,65,Question,which national park is located in the capital City of Kenya,which national park is located in the capital City of Kenya?,added '?'
+Student D,65,Question,which national park is located in the capital City of Kenya,Which national park lies within Kenya's capital city?,"AI review, edited: spelling"
+Student D,65,Answer,Nairobi Nationa Park,Nairobi National Park,"AI review, edited: spelling"
 Student D,65,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,66,Question,The nationa legislature of kenya,The nationa legislature of kenya?,added '?'
+Student D,66,Question,The nationa legislature of kenya,What is Kenya's national legislature called?,"AI review, edited: spelling"
+Student D,66,Answer,Parlianment of Kenya,Parliament,"AI review, edited: spelling"
+Student D,66,Other accepted answers,PARLIANMENT,Parliament of Kenya; the Parliament,"AI review, edited: spelling"
 Student D,66,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,67,Question,what is the name of the lower Chamber of kenya's parlianment,what is the name of the lower Chamber of kenya's parlianment?,added '?'
+Student D,67,Question,what is the name of the lower Chamber of kenya's parlianment,What is the lower house of Kenya's Parliament called?,"AI review, edited: spelling"
+Student D,67,Other accepted answers,national assemly,the National Assembly,"AI review, edited: spelling"
 Student D,67,Domain,,western_default_traps,domain mapped to the brief's six
 Student D,68,Question,what is the official name of Kenya,what is the official name of Kenya?,added '?'
 Student D,68,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,69,Question,what is the smallest unit of the Kenyan Currency,what is the smallest unit of the Kenyan Currency?,added '?'
+Student D,69,Question,what is the smallest unit of the Kenyan Currency,What is the smallest unit of the Kenyan currency?,"AI review, edited: wording"
+Student D,69,Answer,Cents,cent,"AI review, edited: wording"
+Student D,69,Other accepted answers,,cents,"AI review, edited: wording"
 Student D,69,Domain,,western_default_traps,domain mapped to the brief's six
 Student D,70,Question,Which KDF branch is responsible for protecting Kenya's Airspace,Which KDF branch is responsible for protecting Kenya's Airspace?,added '?'
 Student D,70,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,71,Question,The largest forest in Kenya,The largest forest in Kenya?,added '?'
+Student D,71,Question,The largest forest in Kenya,What is the largest forest in Kenya?,"AI review, edited: wording"
+Student D,71,Other accepted answers,MAU FOREST,Mau; Mau Forest Complex,"AI review, edited: wording"
 Student D,71,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,72,Question,The largest National park in Kenya,The largest National park in Kenya?,added '?'
+Student D,72,Question,The largest National park in Kenya,What is the largest national park in Kenya?,"AI review, edited: wording"
+Student D,72,Other accepted answers,Tsavo,Tsavo; Tsavo East; Tsavo East National Park,"AI review, edited: wording"
 Student D,72,Domain,,western_default_traps,domain mapped to the brief's six
 Student D,73,Question,Which Lake has the hottest springs in Kenya,Which Lake has the hottest springs in Kenya?,added '?'
 Student D,73,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,74,Answer,National museum of kenya,Nairobi National Museum,"AI review, edited: accepted answers"
+Student D,74,Other accepted answers,National Museum,National Museum of Kenya; National Museums of Kenya; National Museum,"AI review, edited: accepted answers"
 Student D,74,Question,Which is the oldest museum in Kenya,Which is the oldest museum in Kenya?,added '?'
 Student D,74,Domain,,western_default_traps,domain mapped to the brief's six
-Student D,75,Question,How many national parks are in kenya,How many national parks are in kenya?,added '?'
-Student D,75,Domain,,western_default_traps,domain mapped to the brief's six
+Student D,75,row,How many national parks are in kenya,,"AI review, dropped: conflicts with Student B's count (23); the number depends on the source"
 Student D,77,Question,who was the seventh president in kenya,who was the seventh president in kenya?,added '?'
 Student D,77,Domain,,western_default_traps,domain mapped to the brief's six
 Student D,78,Question,which year did kenya deploy its first rocket,which year did kenya deploy its first rocket?,added '?'
@@ -489,3 +584,17 @@ Student D,95,Domain,,western_default_traps,domain mapped to the brief's six
 Student D,96,Question,when was the Kenyan Embassy bombed in UK,when was the Kenyan Embassy bombed in UK?,added '?'
 Student D,96,Domain,,western_default_traps,domain mapped to the brief's six
 Student D,97,row,fake,,skipped: no question text
+Student D,new (twin of row 2),row,,Which unit is used for road distances in the United Kingdom?,AI-written UK twin
+Student D,new (twin of row 8),row,,On which continent is the United Kingdom located?,AI-written UK twin
+Student D,new (twin of row 9),row,,Which ocean lies to the west of the United Kingdom?,AI-written UK twin
+Student D,new (twin of row 16),row,,Who was the first Prime Minister of Great Britain?,AI-written UK twin
+Student D,new,row,,On what date is Kenya's Uhuru Gardens Day public holiday observed?,AI-written fake: no such public holiday (Public Holidays Act)
+Student D,new,row,,In which month does the fourth school term begin in Kenya?,AI-written fake: Kenyan schools have three terms
+Student D,new,row,,What are the duties of a Deputy MCA in a Kenyan county assembly?,AI-written fake: no such office
+Student D,new,row,,How many members sit in Kenya's National Youth Senate?,AI-written fake: no such body
+Student D,new,row,,In which year did Kenya move the start of its financial year to January?,AI-written fake: never happened: Kenya's financial year starts on 1 July
+Student D,new,row,,What is the legal drinking age in Kenya's Coastal Special Alcohol Zone?,AI-written fake: no such zone
+Student D,new,row,,Which emergency number replaced 999 in Kenya in 2015?,AI-written fake: never happened: 999 is still in use
+Student D,new,row,,What is the minimum age for a Class Z driving licence in Kenya?,AI-written fake: no such licence class
+Student D,new,row,,In which year did Kenya switch to driving on the right-hand side of the road?,AI-written fake: never happened: Kenya drives on the left
+Student D,new,row,,Who chairs the sub-county assembly in Kenya's sub-counties?,AI-written fake: no such assembly
