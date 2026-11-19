@@ -486,6 +486,29 @@ the command above, reads the report with you, and uploads `data/kenya/questions.
 → you **Run All** in Colab with `m0_base.yaml` (it asks only the new questions) → download → run
 `notebooks/analysis.ipynb` for the final H1, H2, H5 and twins.
 
+#### M1 (RAG) vs M0 on trivia: first H4 result (19 November)
+
+M1 ran on Kaggle (T4, 1,457 questions, 3 Kenyan passages in every prompt) and finished at 13:34.
+`bluff compare --config configs/variants/m0_base.yaml --other configs/variants/m1_rag.yaml`
+(paired, the same 218 TriviaQA test questions; report: `reports/compare/m0_base__vs__m1_rag.json`):
+
+| | M0 | M1 (RAG) | Paired test |
+|---|---|---|---|
+| Says "I don't know" when offered the option | 35% | **88%** | McNemar: 117 questions newly abstained vs 3 the other way, p ≈ 10⁻³⁰ (Holm-adjusted ≈ 10⁻³⁰) |
+| Wrong answer (asked normally) | 64% | 69% | 25 newly wrong vs 14 newly right, p = 0.11 (not significant) |
+| Hedges when *not* offered "I don't know" | 0% | 0% | — |
+| Internal detection (probe AUROC) | 0.773 | 0.806 | Δ +0.03 [−0.03, 0.10] |
+| Expressed detection (abstention) | 0.598 | 0.560 | Δ −0.04 [−0.12, 0.04] |
+| Verbalisation gap | 0.175 | 0.246 | Δ +0.07 [−0.01, 0.16], p ≈ 0.06 |
+| Latency p50 | 0.18 s | 1.5 s | longer prompts |
+
+**What it means (trivia only).** The Kenyan passages are irrelevant to trivia questions, so this
+is the "irrelevant reading material" test. **H4 as stated (retrieval gives false confidence) is
+not supported here:** offered the option, the model with irrelevant passages says "I don't know"
+far *more* often. Asked normally it never hedges and is slightly more often wrong (not
+significant). Its inside knows a little more than it says (gap +0.07, not significant). The
+relevant-material test is on the Kenya questions (the M1 + Kenya run).
+
 #### What actually happened (19 November)
 
 - The four students' sheets arrived in four different layouts (one file per student, plus one
