@@ -185,6 +185,7 @@ class HFBackend:
         if adapter:
             from peft import PeftModel
 
+            skip_torchao_check()
             self.model = PeftModel.from_pretrained(self.model, adapter)
         self.model.eval()
 
@@ -242,6 +243,17 @@ class HFBackend:
             latency_ms=(time.perf_counter() - start) * 1000,
             meta={"tokens": [self.tok.decode([int(i)]) for i in gen_ids]},  # one per token_prob
         )
+
+
+def skip_torchao_check() -> None:
+    """Let peft load a LoRA adapter on machines with an old `torchao` installed (Kaggle ships
+    0.10; peft >= 0.18 raises ImportError for anything below 0.16 while checking whether a layer
+    is a torchao-quantised one). We never use torchao, so tell that one check it isn't there."""
+    try:
+        import peft.tuners.lora.torchao as lora_torchao
+    except ImportError:
+        return
+    lora_torchao.is_torchao_available = lambda: False
 
 
 def resolve_dtype(torch: Any, dtype: str) -> Any:
