@@ -486,6 +486,21 @@ the command above, reads the report with you, and uploads `data/kenya/questions.
 → you **Run All** in Colab with `m0_base.yaml` (it asks only the new questions) → download → run
 `notebooks/analysis.ipynb` for the final H1, H2, H5 and twins.
 
+#### What actually happened (19 November)
+
+- The four students' sheets arrived in four different layouts (one file per student, plus one
+  draft tab). `bluff clean-sheets` + `bluff import-sheet` (run step by step in
+  `notebooks/kenya_questions.ipynb`) cleaned and imported them, logging every change.
+- The students' review step wasn't done and their UK twins were unusable, so **an AI review
+  repaired the set** (`data/kenya/repairs.yaml`, declared in `AI_USE.md`): 81 rows dropped
+  (duplicates, yes/no, essay or list answers, reserved examples, wrong or disputed answers,
+  changing facts), answers and wording corrected, 33 UK twins and 10 fakes written.
+- **Result:** 326 items: 211 real Kenya questions, 82 fakes, 33 UK twins. `validate` passes, the
+  leakage audit finds 0 overlaps. Full story and commands: `docs/kenya-questions.md`.
+- GitHub's history had been rewritten (the same files, "Co-Authored-By" lines removed), so the
+  laptop now works on branch `kenya-repairs`, which is GitHub's `main`; the old local `main` is
+  kept as a backup.
+
 ---
 
 ## PART E: Extras, only if A–D went smoothly (Wednesday 18 – Thursday 19)
