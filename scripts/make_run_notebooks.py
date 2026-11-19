@@ -70,6 +70,11 @@ Time: {time}.
 **If the session drops:** Ctrl+Shift+P → Reload Window → reconnect → **Run All** again. It picks
 up where it stopped and only asks the questions not yet answered.
 
+**On Kaggle instead** (when Colab refuses a GPU): kaggle.com → **Create → New Notebook → File →
+Import Notebook** (this file) → right panel: **Accelerator = GPU T4 x2**, **Internet = On** →
+**Add-ons → Secrets**: `GH_TOKEN` and `HF_TOKEN`, both attached → **Save Version → Save & Run
+All (Commit)**. It runs in the background; the laptop can be closed.
+
 *Made by `scripts/make_run_notebooks.py` from `colab_run.ipynb`: don't edit this file by hand.*"""
 
 
