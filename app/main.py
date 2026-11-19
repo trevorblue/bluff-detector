@@ -23,6 +23,7 @@ artefacts/<variant>/serving/. Start it with `make serve`; interactive docs at /d
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import os
 import time
@@ -53,11 +54,17 @@ STATE: dict[str, Any] = {}
 DETECTOR_NAMES = ["logreg", "xgboost", "probe_linear", "probe_mlp"]
 
 
-def model_card(cfg: dict[str, Any], meta: dict[str, Any]) -> dict[str, Any]:
+def model_card(cfg: dict[str, Any], meta: dict[str, Any], art: Path) -> dict[str, Any]:
     """What the demo page shows under "About this detector": provenance, thresholds, the test
     metrics from the last `bluff evaluate`, and typical confidence numbers of right and wrong
     training answers. The parts whose files are missing (e.g. inside Docker) are left out."""
     p = paths(cfg)
+    # Use the results of the same run as the served detector: <root>/artefacts/<variant>/serving
+    # sits next to <root>/reports/<variant> and <root>/data/processed/<variant>.
+    root, variant = art.parent.parent.parent, meta.get("variant", cfg["variant"]["id"])
+    if (root / "reports" / variant / "metrics.json").exists():
+        p = dataclasses.replace(p, reports=root / "reports" / variant,
+                       features=root / "data" / "processed" / variant)
     card: dict[str, Any] = {k: meta.get(k) for k in (
         "variant", "detector", "version", "base_model", "trained_at", "n_train", "n_val",
         "t_abstain", "tau_flag", "cost_matrix", "probe_layer", "probe_position", "git_sha")}
@@ -107,7 +114,7 @@ def _load_state() -> None:
         name: load_detector(art.parent / name) for name in DETECTOR_NAMES
         if (art.parent / name / "detector.joblib").exists()
     }
-    STATE["card"] = model_card(cfg, STATE["meta"])
+    STATE["card"] = model_card(cfg, STATE["meta"], art)
     STATE["backend"] = build_backend(cfg)  # load once, never per request
     STATE["retriever"] = build_retriever(cfg)
     STATE["request_log"] = RequestLog(os.environ.get("BLUFF_REQUEST_LOG", "logs/requests.jsonl"))
