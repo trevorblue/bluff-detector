@@ -1,7 +1,8 @@
-"""QLoRA fine-tuning for variant M2 - a template, not yet run.
+"""QLoRA fine-tuning for variant M2: a small adapter trained on the Kenyan fine-tuning documents.
 
-Needs `pip install .[llm,qlora]` and a CUDA GPU. Not exercised in CI. Read every TODO
-before the first run, and run a tiny pilot (a few hundred steps) before the full job.
+Needs `pip install .[llm,qlora]` and a CUDA GPU (the 4-bit base needs bitsandbytes); not run in
+CI. Settings come from `finetune:` in the config (epochs, batch_size, grad_accum,
+learning_rate). Writes the adapter and `training_log.json` (loss per step) for the report.
 
 Data rule: train ONLY on data/corpus/finetune_docs.jsonl, which must be disjoint by
 document from the evaluation questions and the retrieval index. Run `bluff audit` first.
@@ -20,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from bluff.backends import resolve_dtype
-from bluff.utils import read_jsonl
+from bluff.utils import read_jsonl, write_json
 
 log = logging.getLogger(__name__)
 WINDOW = 1024  # tokens per training window
@@ -75,27 +76,40 @@ def run(cfg: dict[str, Any], output_dir: str = "artefacts/adapters/m2_qlora") ->
                for ids in [tok(d["text"])["input_ids"]] for i in range(0, len(ids), WINDOW)]
     ds = Dataset.from_dict({"input_ids": windows})
     log.info("%d documents -> %d training windows of up to %d tokens", len(docs), len(ds), WINDOW)
+    ft = cfg.get("finetune", {})
+    # The corpus is small (~80k tokens, ~80 windows): several passes at 8 windows a step give
+    # ~30 optimizer steps; a single pass at 16 a step gave only ~5, too few to change the model.
     args = TrainingArguments(
         output_dir=output_dir,
-        per_device_train_batch_size=4,
-        gradient_accumulation_steps=4,
-        num_train_epochs=1,  # TODO: pick from the pilot's loss curve
-        learning_rate=2e-4,
+        per_device_train_batch_size=ft.get("batch_size", 2),
+        gradient_accumulation_steps=ft.get("grad_accum", 4),
+        num_train_epochs=ft.get("epochs", 3),
+        learning_rate=ft.get("learning_rate", 2e-4),
         lr_scheduler_type="cosine",
         warmup_ratio=0.03,
-        logging_steps=20,
-        save_strategy="epoch",
+        logging_steps=1,
+        save_strategy="no",  # only the final adapter is kept (below), not optimizer checkpoints
         bf16=compute_dtype == torch.bfloat16,
         fp16=compute_dtype == torch.float16,
         seed=cfg["seed"],
         report_to=["mlflow"] if cfg["tracking"]["mlflow"] else [],
     )
-    Trainer(
+    trainer = Trainer(
         model=model,
         args=args,
         train_dataset=ds,
         data_collator=DataCollatorForLanguageModeling(tok, mlm=False),
-    ).train()
+    )
+    result = trainer.train()
     model.save_pretrained(output_dir)
     tok.save_pretrained(output_dir)
-    log.info("adapter saved to %s - point model.adapter at it in the M2 config", output_dir)
+    write_json(Path(output_dir) / "training_log.json", {
+        "documents": len(docs), "windows": len(ds), "window_tokens": WINDOW,
+        "epochs": args.num_train_epochs, "steps": result.global_step,
+        "train_loss": result.training_loss,
+        "loss_per_step": [h["loss"] for h in trainer.state.log_history if "loss" in h],
+        "lora": {"r": lora.r, "alpha": lora.lora_alpha,
+                 "target_modules": sorted(lora.target_modules)},
+    })
+    log.info("adapter saved to %s after %d steps (training loss %.3f)",
+             output_dir, result.global_step, result.training_loss)

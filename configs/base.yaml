@@ -82,6 +82,12 @@ gates:
   max_ece_increase: 0.0
   max_gap_between_pools: 0.25
 
+finetune: # QLoRA for M2 (src/bluff/pipeline/finetune_qlora.py); ~80 windows of 1,024 tokens
+  epochs: 3
+  batch_size: 2
+  grad_accum: 4 # 8 windows per optimizer step -> ~30 steps in total
+  learning_rate: 0.0002
+
 tracking:
   mlflow: false # true once `pip install .[track]` and an MLflow server are running
   tracking_uri: http://localhost:5000
