@@ -17,6 +17,7 @@ Writes: artefacts/adapters/m2_qlora/ (the adapter M2 and M3 load)
 from __future__ import annotations
 
 import logging
+import math
 from pathlib import Path
 from typing import Any
 
@@ -86,7 +87,9 @@ def run(cfg: dict[str, Any], output_dir: str = "artefacts/adapters/m2_qlora") ->
         num_train_epochs=ft.get("epochs", 3),
         learning_rate=ft.get("learning_rate", 2e-4),
         lr_scheduler_type="cosine",
-        warmup_ratio=0.03,
+        # 3% of the steps as warm-up (transformers 5 removed `warmup_ratio`; steps work in all)
+        warmup_steps=max(1, round(0.03 * ft.get("epochs", 3) * math.ceil(
+            len(ds) / (ft.get("batch_size", 2) * ft.get("grad_accum", 4))))),
         logging_steps=1,
         save_strategy="no",  # only the final adapter is kept (below), not optimizer checkpoints
         bf16=compute_dtype == torch.bfloat16,
