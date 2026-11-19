@@ -37,6 +37,7 @@ the saved results (no GPU). Charts are saved to `reports/results_figures/`.
 code('''
 import json
 import os
+import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -305,36 +306,73 @@ irrelevant (the "useless material" test); on **Kenya** questions they can contai
 """)
 
 code('''
+def in_passages(variant):
+    \"\"\"qid -> was the correct answer (or an accepted one) in the passages M1 was given?\"\"\"
+    norm = lambda t: " " + " ".join(re.findall(r"\w+", str(t).lower())) + " "  # noqa: E731
+    chunks = {c["id"]: c["text"] for c in read_jsonl("data/corpus/retrieval_chunks.jsonl")}
+    gens = {g["qid"]: g for g in read_jsonl(f"data/interim/{variant}/generations.jsonl")
+            if g["condition"] == "open"}
+    qs = {x["id"]: x for x in read_jsonl("data/processed/questions.jsonl")}
+    out = {}
+    for qid, g in gens.items():
+        text = norm(" ".join(chunks.get(i, "") for i in g["retrieved_ids"]))
+        answers = [a for a in [qs[qid].get("gold"), *qs[qid]["aliases"]] if a and len(a) > 1]
+        out[qid] = any(norm(a) in text for a in answers)
+    return out
+
+
 if m1 is None:
     print("M1 results not downloaded yet.")
 else:
-    both = m0.merge(m1[["qid", "y_wrong", "abstained", "open_abstained"]], on="qid",
-                    suffixes=("", "_m1"))
+    both = m0.merge(m1[["qid", "y_wrong", "abstained"]], on="qid", suffixes=("", "_m1"))
+    covered = in_passages("m1_rag")
+    both["answer in passages"] = both.qid.map(covered)
+    ken = both.pool == "kenya"
+    groups = [("Trivia (documents irrelevant)", (both.pool == "trivia") & (both.split == "test")),
+              ("Kenya, all", ken),
+              ("Kenya, answer IN the 3 passages", ken & both["answer in passages"]),
+              ("Kenya, answer NOT in the passages", ken & ~both["answer in passages"])]
     rows = []
-    for label, mask in [("Trivia (irrelevant documents)",
-                         (both.pool == "trivia") & (both.split == "test")),
-                        ("Kenya (relevant documents)", both.pool == "kenya")]:
+    for label, mask in groups:
         d_ = both[mask]
-        if len(d_) < 30:
-            rows.append({"set": label, "n": len(d_), "note": "pending: run run_m1_rag.ipynb"})
-            continue
         w = metrics.mcnemar(d_.y_wrong.values, d_.y_wrong_m1.values)
         a = metrics.mcnemar(d_.abstained.values, d_.abstained_m1.values)
         rows.append({"set": label, "n": len(d_),
                      "wrong M0": f"{100 * d_.y_wrong.mean():.0f}%",
                      "wrong M1": f"{100 * d_.y_wrong_m1.mean():.0f}%",
-                     "wrong: p": round(w["p_value"], 4),
+                     "wrong: p": float(f"{w['p_value']:.2g}"),
                      "'I don't know' M0": f"{100 * d_.abstained.mean():.0f}%",
                      "'I don't know' M1": f"{100 * d_.abstained_m1.mean():.0f}%",
                      "abstain: p": float(f"{a['p_value']:.2g}")})
-    display(pd.DataFrame(rows).set_index("set"))
+    H4 = pd.DataFrame(rows).set_index("set")
+    display(H4)
+    print(f"Kenya questions whose answer was in M1's passages: "
+          f"{int(both[ken]['answer in passages'].sum())} of {int(ken.sum())}")
+    fig, ax = plt.subplots(figsize=(8, 3.6))
+    labels = ["Kenya: answer IN passages", "Kenya: answer NOT in passages",
+              "Trivia (irrelevant)"]
+    pick = [groups[2][1], groups[3][1], groups[0][1]]
+    x = np.arange(3)
+    ax.bar(x - 0.18, [both[m].y_wrong.mean() for m in pick], 0.36, color=C["trivia"],
+           label="M0: no documents")
+    ax.bar(x + 0.18, [both[m].y_wrong_m1.mean() for m in pick], 0.36, color=C["kenya"],
+           label="M1: with 3 passages")
+    ax.set_xticks(x, labels)
+    ax.set_ylim(0, 1)
+    ax.set_ylabel("wrong rate")
+    ax.legend()
+    ax.set_title("H4: retrieval halves errors when the answer is in the passages")
+    save(fig, "h4_retrieval")
+    plt.show()
 ''')
 
 md("""
-**Reading it.** On trivia, irrelevant passages made the model take the "I don't know" option far
-*more* often (cautious, not falsely confident), with no significant change in accuracy. The Kenya
-row fills in once M1 has answered the Kenya questions (`notebooks/run_m1_rag.ipynb`, then
-re-download and Run All).
+**Reading it.** When the answer **is** in the passages, retrieval roughly **halves the errors**.
+When it **isn't** (on Kenya questions the collection doesn't cover, and on trivia), the model
+does **not** become falsely confident: it takes the "I don't know" option as often or more often,
+and its accuracy doesn't change significantly. So H4's claim (false confidence when the documents
+don't contain the answer) is not supported. About half the Kenya questions are covered by the
+document collection, a limitation of its size (the Constitution plus 63 Wikipedia articles).
 """)
 
 md("""
@@ -404,8 +442,9 @@ rows = [
     ("Fake questions",
      f"invents an answer {100 * (1 - fakes.open_abstained.mean()):.0f}% of the time asked "
      f"normally, {100 * (1 - fakes.abstained.mean()):.0f}% when offered 'I don't know'", "—"),
-    ("H4 Retrieval", "trivia: irrelevant documents -> far more 'I don't know', accuracy unchanged;"
-     " Kenya: see the H4 table", "Not supported (trivia)"),
+    ("H4 Retrieval",
+     "answer in passages: errors halved; not in passages: no false confidence (see H4 table)",
+     "Not supported (helps, no false confidence)"),
     ("H3 Fine-tuning", "built, not run", "Future work"),
 ]
 display(pd.DataFrame(rows, columns=["hypothesis", "result", "verdict"]).set_index("hypothesis"))
