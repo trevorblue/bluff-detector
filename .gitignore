@@ -15,12 +15,16 @@ data/processed/*
 !data/**/.gitkeep
 artefacts/*
 !artefacts/.gitkeep
-# The submitted run's trained detectors and registry are kept in git (small, ~6 MB). The M2
-# adapter (~70 MB) and other runs stay out; they are in the Hugging Face dataset repo.
+# The submitted run's trained detectors and registry are kept in git (small, ~6 MB), and so is
+# the M2 adapter (74 MB, under GitHub's 100 MB file limit) so M2 runs without Hugging Face.
+# Everything is also in the Hugging Face dataset repo (docs/where-things-are.md).
 !artefacts/m0_base/
 !artefacts/m1_rag/
 !artefacts/m2_qlora/
 !artefacts/registry/
+!artefacts/adapters/
+artefacts/adapters/*
+!artefacts/adapters/m2_qlora/
 reports/*
 data/datasets/*
 !data/datasets/.gitkeep
