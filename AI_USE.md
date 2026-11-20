@@ -13,6 +13,8 @@ Required by the DSA 8401 capstone brief. Edit this as the project evolves.
 | 16 Nov 2026 | Claude Code | The live-guard demo page (`app/static/index.html`), laptop serving (`scripts/serve_laptop.ps1`), monitoring (`bluff monitor`), the Kenyan document collection for RAG and fine-tuning (`bluff build-corpus`, `data/corpus/sources.yaml`) | Chose to build M1 (RAG) |
 | 18–19 Nov 2026 | Claude Code | Importing and cleaning the students' sheets (`bluff import-sheet`, `bluff clean-sheets`, `notebooks/kenya_questions.ipynb`) and per-student fix lists | Collected the sheets; matched files to students |
 | 19 Nov 2026 | Claude Code | **An AI review and repair of the Kenya question set** (`data/kenya/repairs.yaml`; see below) | Decided, because of the deadline, to repair the gaps with AI instead of waiting for the students |
+| 19–20 Nov 2026 | Claude Code | Fixes that let the M2 fine-tuning run on Kaggle (`finetune_qlora.py` settings, a peft/torchao workaround); the results notebook (`notebooks/results.ipynb`: H1–H5, the H4 split by whether the answer was in the passages, the H3 comparison); plain-language explanations in `docs/concepts.md` | Ran M1 and M2 on Kaggle; asked for the H4 split; I interpret the results in the report |
+| 20 Nov 2026 | Claude Code | The redesigned demo page (three tabs, the "words vs inside" readout, the results tab and `GET /v1/results`); storing every artefact (the M2 adapter in git, M1/M2 dataset exports, M1/M2 analysis notebooks and charts, `docs/where-things-are.md`) | Asked for the redesign and for everything to be stored; reviewed the page |
 
 ## The Kenya question set: what is human-written and what is not
 

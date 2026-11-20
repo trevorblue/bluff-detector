@@ -98,3 +98,32 @@ def test_not_ready_without_artefact(tmp_path, monkeypatch):
         assert c.get("/health").status_code == 200
         assert c.get("/ready").status_code == 503
         assert c.post("/v1/ask", json={"question": "Any question?"}).status_code == 503
+
+
+def test_results_served_from_the_saved_summary(client, monkeypatch, tmp_path):
+    summary = {"h1": {"verdict": "supported"}, "variants": [{"id": "m0_base", "ran": True}]}
+    path = tmp_path / "results_summary.json"
+    path.write_text(json.dumps(summary))
+    monkeypatch.setenv("BLUFF_RESULTS", str(path))
+    assert client.get("/v1/results").json() == summary
+    monkeypatch.setenv("BLUFF_RESULTS", str(tmp_path / "missing.json"))
+    assert client.get("/v1/results").status_code == 404
+
+
+def test_committed_results_summary_has_every_hypothesis():
+    from pathlib import Path
+
+    summary = json.loads(Path("reports/results_summary.json").read_text())
+    assert {"h1", "h2", "h3", "h4", "h5", "fakes", "guard", "variants"} <= set(summary)
+    assert [v["id"] for v in summary["variants"]][:3] == ["m0_base", "m1_rag", "m2_qlora"]
+
+
+def test_model_card_says_what_is_running(client):
+    card = client.get("/v1/model-card").json()
+    assert card["backend"] == "fake" and card["retrieval"] is False and card["adapter"] is None
+    assert card["description"]
+
+
+def test_passages_empty_without_retrieval(client):
+    body = client.post("/v1/ask", json={"question": "What is the capital of Kenya?"}).json()
+    assert body["passages"] == [] and body["sources"] == []

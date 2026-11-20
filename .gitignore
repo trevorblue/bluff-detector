@@ -35,6 +35,7 @@ data/datasets/*
 !reports/m2_qlora/
 !reports/compare/
 !reports/results_figures/
+!reports/results_summary.json
 mlruns/
 logs/
 mlflow.db

@@ -5,6 +5,7 @@
 .github
 data
 reports
+!reports/results_summary.json
 tests
 **/__pycache__
 **/*.pyc

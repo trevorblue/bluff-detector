@@ -537,6 +537,12 @@ relevant-material test is on the Kenya questions (the M1 + Kenya run).
       bootstrap, McNemar's test and Holm correction.
 14. **Model M1: RAG (H4).** Only after M2, if time is still left. Otherwise **cut**.
 
+    **As it happened:** both ran, M1 first. M1 (RAG) ran on Kaggle on 18–19 November (about six
+    hours) and M2 (QLoRA) on 19–20 November (8 minutes of fine-tuning, 42 steps, then the full
+    run). Results: H4 not supported (retrieval halves errors when the answer is in the passages and
+    does no harm otherwise), H3 supported ("I don't know" halved, accuracy unchanged). M3 was not
+    run. All in `notebooks/results.ipynb`.
+
 ---
 
 ## PART F: Finish (Thursday 19 – Friday 20)
@@ -581,7 +587,28 @@ relevant-material test is on the Kenya questions (the M1 + Kenya run).
     writes `reports/m0_base/monitoring/drift_report.md`: the live block rate and latency against
     the validation baseline, and for each confidence number and for P(wrong) a PSI and a KS test
     against the training data (OK / WATCH / DRIFT). Below 30 requests it says **TOO EARLY**.
-16. **Claude:** put the real results in the README.
+    **Redesigned 20 November** (the page you demo). Three tabs:
+    - **Ask the model:** the answer, then *two readings on one scale*: the chance it is wrong
+      judged from its **words** (orange ring: the average of the two outside detectors) and from
+      its **inside** (indigo dot: the linear probe, which decides), with the guard's dashed line
+      at 25%. If the words looked fine but the inside crossed the line: **"Blocked: bluff
+      caught"**. Then the answer word by word, the passages it was shown (M1 only), all four
+      detectors, the confidence numbers and the audit record, each folded away. Examples are real
+      test questions (a caught Kenya bluff, a known Kenya fact, a made-up question, a UK twin,
+      trivia). Your questions stay in "This session"; click one to see it again.
+    - **What we found:** H1, H2, H5, the made-up questions, H4 and H3, each with its verdict, the
+      numbers in words and a paired-dot chart (hover a dot for its value; "Show the numbers" gives
+      the table); then M0–M3 side by side and what the guard would do on Kenya. The numbers come
+      from `GET /v1/results`, which serves `reports/results_summary.json`, written by the last
+      cell of `notebooks/results.ipynb`: re-run the notebook and the page follows.
+    - **How it works:** the seven steps, M0–M3, and a glossary.
+    - Light and dark mode, works on a phone. Run M1 or M2 instead of M0 with
+      `scripts\serve_laptop.ps1 -Variant m1_rag` or `-Variant m2_qlora`.
+16. **Claude:** put the real results in the README. **Done**, and on 20 November everything was
+    checked and stored: the M2 adapter added to git (with a model card), the M1 and M2 datasets
+    exported and uploaded, the 13 analysis charts made for M1 and M2
+    (`notebooks/analysis_m1_rag.ipynb`, `analysis_m2_qlora.ipynb`). What lives where:
+    [where-things-are.md](where-things-are.md).
 17. **You:** write the report in your own words. Include what was cut and why: M1/H4, UK twins
     if missing, monitoring, and M2/H3 if not reached.
 18. **You:** **submit, Friday 20.**
@@ -590,15 +617,18 @@ relevant-material test is on the Kenya questions (the M1 + Kenya run).
 
 ## Summary: what Friday's submission contains
 
+The plan above was written on 15 November; this is what was actually delivered on 20 November.
+
 | | Status |
 |---|---|
-| **H1, H2, H5** | ✅ From step 5, finalised in step 11 |
-| **H3** | ⭐ Only if step 13 happens |
-| **H4** | ❌ Cut |
-| **M0** | ✅ |
-| **M2** / **M1** | ⭐ Extra / ❌ cut |
-| **4 detectors** | ✅ Trained in step 5 |
-| **All metrics** | ✅ Computed in steps 5 and 11 (the H3 comparison only with M2) |
-| **Live guard, API, Docker, CI/CD** | ✅ Already built; demoed in step 15 |
+| **H1, H2, H5** | ✅ Supported (M0) |
+| **H3** | ✅ Supported (M0 vs M2) |
+| **H4** | ✅ Tested, **not supported** (M0 vs M1): retrieval helps, no false confidence |
+| **M0, M1, M2** | ✅ Run, trained, evaluated, registered |
+| **M3** | ❌ Not run (future work) |
+| **4 detectors** | ✅ For each of M0, M1, M2 |
+| **All metrics** | ✅ Per variant, plus the M0 vs M1 and M0 vs M2 comparisons |
+| **Live guard, API, Docker, CI/CD, monitoring** | ✅ Built; demo page redesigned in step 15 |
+| **Report** | ✍️ Yours, in your own words |
 
-**Next action:** Part A (accounts and tokens), then step 4, the smoke test.
+**Next action:** write the report, make the repo public, submit.

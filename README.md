@@ -37,8 +37,9 @@
 > questions and 326 Kenya items (211 real Kenya questions written by four students and the author,
 > 82 questions about things that don't exist, 33 UK twins) as **M0** (base), **M1** (RAG) and
 > **M2** (QLoRA fine-tuned), on free Kaggle and Colab T4 GPUs. **H1, H2, H3 and H5 are supported;
-> H4 is not.** See [Results](#results) and [`notebooks/results.ipynb`](notebooks/results.ipynb).
-> M3 (RAG + fine-tuning) is future work.
+> H4 is not.** See [Results](#results) and [`notebooks/results.ipynb`](notebooks/results.ipynb), or
+> the demo page's "What we found" tab. M3 (RAG + fine-tuning) is future work. Every file of the
+> project, and whether it lives on GitHub or Hugging Face: [docs/where-things-are.md](docs/where-things-are.md).
 
 ## The question
 
@@ -215,7 +216,7 @@ jupyter lab notebooks/results.ipynb                  # or open it in VS Code: al
 synthetic questions with a fake language model. **Its numbers mean nothing scientifically.**
 
 ```bash
-make test                                            # 70 unit, data, integration and API tests
+make test                                            # 74 unit, data, integration and API tests
 bluff all --config configs/variants/dev_fake.yaml    # every pipeline stage
 cat reports/dev_fake/summary.md
 ```
@@ -240,13 +241,31 @@ and audits. Explained in [docs/kenya-questions.md](docs/kenya-questions.md).
 **5. The live guard on a laptop** (CPU, 7.7 GB RAM is enough; about 20–40 s per question):
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1   # then http://127.0.0.1:8000
+powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1                     # M0, then http://127.0.0.1:8000
+powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1 -Variant m1_rag     # M1 (shows the passages)
+powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1 -Variant m2_qlora   # M2 (loads the adapter)
 ```
 
-The demo page shows the verdict in plain words, all four detectors' P(wrong) ("inside" vs
-"outside"), the answer word by word with its probabilities, the confidence signals against
-typical right and wrong answers, and the detector's test metrics. Every request is logged;
-`bluff monitor --config configs/variants/m0_base.yaml` writes a drift report.
+The demo page has three tabs:
+
+- **Ask the model**: the answer, then two readings of the same answer on one "chance it's
+  wrong" scale, what its *words* suggest (the outside detectors) and what its *inside* suggests
+  (the probe), with the guard's line. When the words sound sure but the inside does not, it says
+  "Blocked: bluff caught". Below: the answer word by word, the retrieved passages (M1), all four
+  detectors, the confidence numbers and the audit record. Example questions come from the test set.
+- **What we found**: every hypothesis with its verdict, numbers and a chart, the four model
+  versions side by side, and what the guard would do on the Kenya questions. Served by
+  `GET /v1/results` from `reports/results_summary.json`, which the last cell of
+  `notebooks/results.ipynb` writes, so the page and the notebook show the same numbers.
+- **How it works**: the pipeline, M0–M3 and a glossary.
+
+<p align="center">
+  <img src="docs/assets/demo-ask.png" width="49%" alt="The Ask tab: a blocked bluff, with its words at 18% and its inside at 99.9% chance of being wrong.">
+  <img src="docs/assets/demo-findings.png" width="49%" alt="The What we found tab: each hypothesis with a paired-dot chart.">
+</p>
+
+Every request is logged; `bluff monitor --config configs/variants/m0_base.yaml` writes a drift
+report.
 
 **6. In a container:** `docker compose up --build` serves the API (the image runs the fake backend
 unless given a real model), and `docker compose --profile tracking up` adds MLflow on `:5000`.
@@ -283,9 +302,10 @@ answer text is a placeholder:
 
 | Endpoint | Purpose |
 |---|---|
-| `GET /` | The demo page: a question box over `/v1/ask` |
+| `GET /` | The demo page: ask the model, what we found, how it works |
 | `POST /v1/ask` | Question in → the model answers → the detector scores it from the model's own internals → `answer`, `answer_with_citation` or `abstain`; also returns every detector's P(wrong), the confidence signals and the answer token by token |
-| `GET /v1/model-card` | The live detector's test metrics and the typical signals of right and wrong training answers |
+| `GET /v1/model-card` | The live detector's test metrics, which variant is running (retrieval, adapter, device) and the typical signals of right and wrong training answers |
+| `GET /v1/results` | The project's headline results, hypothesis by hypothesis (`reports/results_summary.json`) |
 | `GET /health` | Liveness: the process is up |
 | `GET /ready` | Readiness: `503` until the generator and detector are loaded |
 | `GET /metadata` | Provenance of the live detector: git SHA, data sha256, config, seed, threshold, validation metrics |
@@ -392,9 +412,12 @@ configs/            base.yaml + one file per variant (m0_base, m1_rag, m2_qlora,
 data/kenya/         the Kenya question set (questions.jsonl), the student-file map, the repairs and
                     every change (cleaned/changes.csv); see docs/kenya-questions.md
 data/corpus/        retrieval and fine-tuning corpora (disjoint by document) and sources.yaml
-notebooks/          results.ipynb, analysis.ipynb, kenya_questions.ipynb, run_*.ipynb (GPU runners)
-artefacts/          the submitted run's trained detectors (m0_base, m1_rag, m2_qlora) and the registry
-reports/            metrics, per-question scores, summaries, comparisons and charts
+notebooks/          results.ipynb, analysis.ipynb (M0), analysis_m1_rag.ipynb, analysis_m2_qlora.ipynb,
+                    kenya_questions.ipynb, run_*.ipynb (GPU runners)
+artefacts/          the trained detectors (m0_base, m1_rag, m2_qlora), the registry and the M2
+                    adapter (adapters/m2_qlora, with its model card)
+reports/            metrics, per-question scores, summaries, comparisons, charts and
+                    results_summary.json (what the demo page's results tab shows)
 scripts/            laptop serving, notebook generators
 src/bluff/
   backends.py       the LLM under test: HFBackend (real) and FakeBackend (test double)
@@ -410,7 +433,7 @@ src/bluff/
 app/                FastAPI service (main.py) and its typed contract (schemas.py)
 tests/              unit, data contracts, integration (end to end), API
 .github/workflows/  ci.yml (merge gate), ct.yml (continuous training), cd.yml (build, scan, push)
-docs/               research proposal and the figures in this README
+docs/               guides, the research proposal and the figures in this README
 Dockerfile          multi-stage, non-root, healthcheck, hashed lock install
 dvc.yaml            the pipeline as DVC stages, for content-hashed data versioning
 ```
@@ -427,6 +450,7 @@ Dates, owners and scope cuts are in the [build plan](docs/plan.md).
 - [x] Both prompt conditions on M0; the four cells and the verbalisation gap (H1, H2, H5)
 - [x] Retrieval corpus (Constitution + 63 Wikipedia articles) → M1 → `bluff compare` (H4)
 - [x] Live guard demo page, laptop serving, request log and drift report
+- [x] Demo page redesign: ask / what we found / how it works, results served from the notebook's summary
 - [x] Fine-tuning corpus + audit → `bluff finetune_qlora` → M2 → `bluff compare` M0 vs M2 (H3)
 - [ ] A second-person human review of the Kenya set, and official sources for every question
 - [ ] LLM judge in `pipeline/label.py`; manual adjudication of `review_sample.jsonl` (label-noise rate)
@@ -455,6 +479,7 @@ Dates, owners and scope cuts are in the [build plan](docs/plan.md).
 
 - [Results notebook](notebooks/results.ipynb): every hypothesis with its numbers, charts and real examples
 - [Full flow](docs/full-flow.md): every step from setup to submission, as it actually happened
+- [Where things are](docs/where-things-are.md): every file of the project, on GitHub or Hugging Face, and why
 - [The Kenya questions](docs/kenya-questions.md): from the students' sheets to the test set, with the AI repairs
 - [Architecture guide](docs/architecture.md): how the system works, one question at a time, and what every file is
 - [Concepts](docs/concepts.md): every idea explained, from the models and metrics to Docker, CI/CD and monitoring

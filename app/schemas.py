@@ -30,6 +30,14 @@ class Token(BaseModel):
     entropy: float
 
 
+class Passage(BaseModel):
+    """A retrieved document passage the model was shown (RAG variants only)."""
+
+    id: str
+    text: str = Field(description="the passage, shortened to its first 600 characters")
+    score: float = Field(description="BM25 relevance score")
+
+
 class AskResponse(BaseModel):
     request_id: str
     verdict: Literal["answer", "answer_with_citation", "abstain"]
@@ -40,6 +48,11 @@ class AskResponse(BaseModel):
     bluff_score: float = Field(ge=0.0, le=1.0, description="detector P(wrong)")
     threshold: float = Field(description="abstain when bluff_score > threshold")
     sources: list[str] = Field(default_factory=list, description="retrieved passage ids")
+    passages: list[Passage] = Field(
+        default_factory=list,
+        description="the retrieved passages themselves (empty without RAG, or when an abstention "
+        "is not revealed)",
+    )
     variant: str
     detector: str
     model_version: str

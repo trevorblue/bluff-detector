@@ -527,6 +527,92 @@ rows = [
 display(pd.DataFrame(rows, columns=["hypothesis", "result", "verdict"]).set_index("hypothesis"))
 ''')
 
+md("""
+### Save the headline numbers
+
+The demo page's "What we found" tab (`GET /v1/results`) shows these numbers. They are written
+here, from the variables above, so the page and this notebook can never disagree.
+""")
+
+code('''
+def num(x):
+    return None if x is None or (isinstance(x, float) and np.isnan(x)) else float(x)
+
+
+def ci(c):
+    return {k: num(c[k]) for k in ("point", "lo", "hi")}
+
+
+def variant_row(v, label):
+    path = Path(f"reports/{v}/metrics.json")
+    if not path.exists():
+        return {"id": v, "label": label, "ran": False}
+    mv = json.loads(path.read_text())
+    out = {"id": v, "label": label, "ran": True}
+    for key, name in [("trivia_test", "trivia"), ("kenya", "kenya")]:
+        a, d = mv["abstention"][key], mv["detectors"]["probe_linear"]["sets"][key]
+        out[name] = {"n": a["n"], "wrong": num(d["wrong_rate"]),
+                     "abstain": num(a["abstain_rate"]), "probe_auroc": num(d["auroc"]),
+                     "gap": num(a["verbalisation_gap"]["point"])}
+    return out
+
+
+summary = {
+    "about": {"model": "Qwen2.5-1.5B-Instruct", "n_trivia": int(len(m0[m0.pool == "trivia"])),
+              "n_trivia_test": int(len(trivia)), "n_kenya": int(len(kenya)),
+              "n_fakes": int(len(fakes)), "n_twins": int(len(twins))},
+    "variants": [variant_row("m0_base", "M0 base"), variant_row("m1_rag", "M1 + RAG"),
+                 variant_row("m2_qlora", "M2 + QLoRA"),
+                 variant_row("m3_rag_qlora", "M3 RAG + QLoRA")],
+    "h1": {"verdict": "supported" if g_t["lo"] > 0 and g_k["lo"] > 0 else "partly",
+           **{name: {"internal": ci(A[key]["internal_detection"]),
+                     "expressed": ci(A[key]["expressed_detection"]),
+                     "gap": ci(A[key]["verbalisation_gap"]),
+                     "silent_knowing": ci(A[key]["silent_knowing_rate"])}
+              for key, name in [("trivia_test", "trivia"), ("kenya", "kenya")]}},
+    "h2": {"verdict": "supported" if p_h2 < 0.05 else "not supported",
+           "wrong_kenya": num(kenya.y_wrong.mean()), "wrong_trivia": num(trivia.y_wrong.mean()),
+           "fisher_p": num(p_h2), "twins_n": T["n_pairs"],
+           "twins_wrong_kenya": num(T["wrong_rate"]["kenya"]),
+           "twins_wrong_uk": num(T["wrong_rate"]["uk"]),
+           "twins_p": num(T["mcnemar_wrong"]["p_value"])},
+    "h5": {"verdict": "supported" if drop < 0.1 else "not supported",
+           "auroc_trivia": num(M["detectors"]["probe_linear"]["sets"]["trivia_test"]["auroc"]),
+           "auroc_kenya": num(M["detectors"]["probe_linear"]["sets"]["kenya"]["auroc"]),
+           "drop": num(drop)},
+    "fakes": {"n": int(len(fakes)), "invents_normal": num(1 - fakes.open_abstained.mean()),
+              "invents_offered": num(1 - fakes.abstained.mean())},
+    "guard": {"t_abstain": num(M["t_abstain"]), "wrong_all": num(y.mean()),
+              "blocked": num(blocked.mean()), "wrong_let_through": num(y[~blocked].mean()),
+              "caught": num((blocked & y).sum() / y.sum()),
+              "right_lost": num((blocked & ~y).sum() / (~y).sum())},
+}
+if "both" in globals():
+    h4 = []
+    for label, mask in groups:
+        d_ = both[mask]
+        h4.append({"set": label, "n": int(len(d_)),
+                   "wrong_m0": num(d_.y_wrong.mean()), "wrong_m1": num(d_.y_wrong_m1.mean()),
+                   "wrong_p": num(metrics.mcnemar(d_.y_wrong.values,
+                                                  d_.y_wrong_m1.values)["p_value"]),
+                   "abstain_m0": num(d_.abstained.mean()),
+                   "abstain_m1": num(d_.abstained_m1.mean())})
+    summary["h4"] = {"verdict": "not supported", "groups": h4}
+if cmp2.exists():
+    summary["h3"] = {"verdict": "supported", **{
+        name: {"abstain_m0": num(C2[key]["abstain_rate"]["a"]),
+               "abstain_m2": num(C2[key]["abstain_rate"]["b"]),
+               "abstain_p": num(C2[key]["mcnemar_abstain"]["p_value"]),
+               "wrong_m0": num(C2[key]["wrong_rate"]["a"]),
+               "wrong_m2": num(C2[key]["wrong_rate"]["b"]),
+               "delta_internal": ci(C2[key]["delta_internal"]),
+               "delta_expressed": ci(C2[key]["delta_expressed"]),
+               "delta_gap": ci(C2[key]["delta_gap"])}
+        for key, name in [("trivia_test", "trivia"), ("kenya", "kenya")]}}
+Path("reports/results_summary.json").write_text(json.dumps(summary, indent=1))
+print("wrote reports/results_summary.json with", ", ".join(summary))
+''')
+
 nb = nbf.v4.new_notebook(cells=cells)
 nb.metadata["kernelspec"] = {"name": "bluff-detector", "display_name": "bluff-detector (.venv)",
                              "language": "python"}

@@ -7,6 +7,8 @@
     GET  /ready     readiness: generator and detector are loaded (503 until then)
     GET  /metadata  provenance of the live detector: git SHA, data hash, thresholds
     GET  /v1/model-card  the live detector's test metrics and typical confidence numbers
+    GET  /v1/results     the project's headline results, hypothesis by hypothesis, as saved by
+                         notebooks/results.ipynb (reports/results_summary.json)
 
 Environment
     BLUFF_CONFIG        variant config (default configs/variants/dev_fake.yaml)
@@ -16,6 +18,7 @@ Environment
     BLUFF_DEVICE        optional override of model.device, e.g. "cpu" on a laptop
     BLUFF_REQUEST_LOG   where each request's audit record is appended for monitoring
                         (default logs/requests.jsonl; "off" disables it)
+    BLUFF_RESULTS       the headline results file (default reports/results_summary.json)
 
 CRISP-DM: deployment. Uses what the pipeline built: the detector in
 artefacts/<variant>/serving/. Start it with `make serve`; interactive docs at /docs.
@@ -36,7 +39,7 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import HTMLResponse
 
-from app.schemas import AskRequest, AskResponse, Token
+from app.schemas import AskRequest, AskResponse, Passage, Token
 from bluff import __version__
 from bluff.backends import build_backend
 from bluff.config import load_config, paths
@@ -69,6 +72,12 @@ def model_card(cfg: dict[str, Any], meta: dict[str, Any], art: Path) -> dict[str
         "variant", "detector", "version", "base_model", "trained_at", "n_train", "n_val",
         "t_abstain", "tau_flag", "cost_matrix", "probe_layer", "probe_position", "git_sha")}
     card["validation"] = meta.get("val", {})
+    card["description"] = cfg["variant"].get("description")
+    card["model"] = cfg["model"].get("name")
+    card["adapter"] = cfg["model"].get("adapter")
+    card["retrieval"] = bool(cfg.get("retrieval", {}).get("enabled"))
+    card["device"] = cfg["model"].get("device")
+    card["backend"] = cfg["model"].get("backend")
     if (p.reports / "metrics.json").exists():
         m = read_json(p.reports / "metrics.json")
         card["test"] = {
@@ -166,6 +175,19 @@ def get_model_card() -> dict[str, Any]:
     return STATE["card"]
 
 
+@app.get("/v1/results")
+def get_results() -> dict[str, Any]:
+    """The headline results of every hypothesis (for the demo page's "What we found" tab).
+
+    Written by the last cell of notebooks/results.ipynb, so the page and the notebook show the
+    same numbers. Independent of which variant this server is running."""
+    path = Path(os.environ.get("BLUFF_RESULTS", "reports/results_summary.json"))
+    if not path.exists():
+        raise HTTPException(status_code=404,
+                            detail=f"{path} not found - run notebooks/results.ipynb")
+    return read_json(path)
+
+
 @app.post("/v1/ask", response_model=AskResponse)
 def ask(req: AskRequest) -> AskResponse:
     # A plain `def`: generation and scoring are CPU/GPU-bound, so FastAPI runs this in a
@@ -196,6 +218,8 @@ def ask(req: AskRequest) -> AskResponse:
         bluff_score=p_wrong,
         threshold=threshold,
         sources=[p.id for p in passages] if v != "abstain" else [],
+        passages=[Passage(id=p.id, text=p.text[:600], score=p.score) for p in passages]
+        if shown else [],
         variant=meta["variant"],
         detector=meta["detector"],
         model_version=meta["version"],

@@ -34,6 +34,8 @@ COPY app/ app/
 COPY configs/ configs/
 # The trained detector is baked in: the image digest is the release.
 COPY artefacts/ artefacts/
+# The headline results for the demo page's "What we found" tab (GET /v1/results).
+COPY reports/results_summary.json reports/results_summary.json
 USER app
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=20s \

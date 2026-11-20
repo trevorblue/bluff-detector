@@ -3,448 +3,1104 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bluff Detector: live guard</title>
-<!-- The live guard's demo page, served by app/main.py at "/". It only calls the API
-     (POST /v1/ask, GET /v1/model-card); all the work happens in the API. No external files. -->
+<title>Bluff Detector</title>
+<!-- The demo page, served by app/main.py at "/". Three tabs: ask the live model (POST /v1/ask),
+     what the project found (GET /v1/results) and how it works. It only calls the API; the one
+     outside file is the Archivo font from Google Fonts (without internet it falls back to the
+     system font). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap">
 <style>
+  /* ---------- tokens ---------- */
   :root {
-    --bg: #f5f6f8; --card: #ffffff; --text: #1c2230; --muted: #5b6577; --line: #e0e4ea;
-    --accent: #1f4fd1; --accent-bg: #e8eefc; --ok: #1b7a3a; --ok-bg: #e5f4ea;
-    --warn: #9a6200; --warn-bg: #fdf3e1; --stop: #b3261e; --stop-bg: #fce9e7; --track: #e9ecf1;
+    color-scheme: light;
+    --page: #f1f3f6;      /* cool grey-blue paper */
+    --surface: #fcfcfd;   /* panels and charts */
+    --ink: #15171c;
+    --ink-2: #4e5462;
+    --muted: #7a808c;
+    --rule: #dde1e7;
+    --track: #e7eaef;
+    --says: #c2610f;      /* what its words suggest (outside detectors) */
+    --knows: #4a47d1;     /* what its inside suggests (the probe) */
+    --knows-wash: rgba(74, 71, 209, .14);
+    --good: #157a34; --good-wash: #e3f2e7;
+    --stop: #c42f2f; --stop-wash: #fbe7e6;
+    --focus: #4a47d1;
+    --font: "Archivo", "Segoe UI", system-ui, -apple-system, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #11141a; --card: #1a1e26; --text: #e6e9ef; --muted: #9aa3b2; --line: #2b313c;
-      --accent: #7ea6ff; --accent-bg: #1d2a47; --ok: #6fcf8f; --ok-bg: #17301f;
-      --warn: #f0b85a; --warn-bg: #3a2c12; --stop: #ff8a80; --stop-bg: #3a1c1a; --track: #2a2f39;
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0f1115; --surface: #17191e; --ink: #eceef2; --ink-2: #b7bcc6; --muted: #858b96;
+      --rule: #2a2e36; --track: #252930; --says: #d9742a; --knows: #7d79eb;
+      --knows-wash: rgba(125, 121, 235, .2); --good: #4cbb6c; --good-wash: #15291c;
+      --stop: #e46a6a; --stop-wash: #331a1b; --focus: #9d9af2;
     }
   }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0f1115; --surface: #17191e; --ink: #eceef2; --ink-2: #b7bcc6; --muted: #858b96;
+    --rule: #2a2e36; --track: #252930; --says: #d9742a; --knows: #7d79eb;
+    --knows-wash: rgba(125, 121, 235, .2); --good: #4cbb6c; --good-wash: #15291c;
+    --stop: #e46a6a; --stop-wash: #331a1b; --focus: #9d9af2;
+  }
+
+  /* ---------- base ---------- */
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
-         font: 15.5px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif; }
-  main { max-width: 900px; margin: 0 auto; padding: 28px 16px 56px; }
-  h1 { font-size: 1.65rem; margin: 0 0 4px; letter-spacing: -.01em; }
-  h2 { font-size: 1.08rem; margin: 0 0 4px; }
-  h3 { font-size: .95rem; margin: 18px 0 6px; }
-  p { margin: 6px 0; }
-  .sub { color: var(--muted); margin: 0 0 18px; max-width: 70ch; }
-  .muted { color: var(--muted); font-size: .9rem; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-          padding: 20px; margin-bottom: 16px; }
-  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-  .step { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-          padding: 12px 14px; font-size: .9rem; }
-  .step b { display: block; margin-bottom: 2px; }
-  .step .n { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 6px;
-             border-radius: 50%; background: var(--accent-bg); color: var(--accent); font-size: .8rem;
-             font-weight: 700; }
-  form { display: flex; gap: 8px; }
-  input[type=text] { flex: 1; min-width: 0; padding: 12px 14px; font: inherit; color: var(--text);
-                     background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
-  input[type=text]:focus-visible, button:focus-visible, summary:focus-visible {
-    outline: 2px solid var(--accent); outline-offset: 2px; }
-  button { padding: 12px 18px; font: inherit; font-weight: 600; color: #fff;
-           background: var(--accent); border: 0; border-radius: 8px; cursor: pointer; }
-  button:disabled { opacity: .6; cursor: wait; }
-  .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-  .chip { padding: 5px 11px; font-size: .85rem; font-weight: 400; color: var(--text);
-          background: var(--bg); border: 1px solid var(--line); border-radius: 999px; }
-  .opt { display: flex; align-items: center; gap: 6px; margin-top: 12px; color: var(--muted);
-         font-size: .88rem; }
-  .banner { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px;
-            border-radius: 10px; margin-bottom: 14px; }
-  .banner.answer { background: var(--ok-bg); }
-  .banner.abstain { background: var(--stop-bg); }
-  .badge { flex: none; padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: .8rem;
-           color: #fff; }
-  .answer .badge { background: var(--ok); }
-  .abstain .badge { background: var(--stop); }
-  .big { font-size: 1.4rem; font-weight: 650; margin: 2px 0 8px; word-wrap: break-word; }
-  .withheld b { color: var(--stop); }
-  .gauge { position: relative; height: 16px; background: var(--track); border-radius: 8px;
-           margin: 30px 0 6px; }
-  .gauge .fill { height: 100%; border-radius: 8px; transition: width .5s; }
-  .line { position: absolute; top: -8px; width: 2px; height: 32px; background: var(--text); }
-  .line span { position: absolute; top: -21px; left: 50%; transform: translateX(-50%);
-               white-space: nowrap; font-size: .75rem; color: var(--muted); }
-  .scale { display: flex; justify-content: space-between; font-size: .78rem; color: var(--muted); }
-  .rows { display: grid; gap: 10px; margin-top: 6px; }
-  .drow { display: grid; grid-template-columns: 210px 1fr 54px; gap: 10px; align-items: center; }
-  .drow .name { font-size: .9rem; }
-  .drow .name small { display: block; color: var(--muted); font-size: .78rem; }
-  .bar { position: relative; height: 12px; background: var(--track); border-radius: 6px; }
-  .bar .fill { height: 100%; border-radius: 6px; }
-  .bar .line { top: -4px; height: 20px; }
-  .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
-  .tag { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 4px;
-         font-size: .72rem; background: var(--accent-bg); color: var(--accent); font-weight: 600; }
-  .note { margin-top: 12px; padding: 10px 12px; border-left: 3px solid var(--accent);
-          background: var(--accent-bg); border-radius: 0 8px 8px 0; font-size: .9rem; }
-  .tokens { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-  .tok { display: grid; justify-items: center; padding: 6px 8px; border-radius: 8px;
-         min-width: 44px; border: 1px solid var(--line); }
-  .tok .w { font-weight: 600; white-space: pre; }
-  .tok .p { font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .hi { background: var(--ok-bg); } .mid { background: var(--warn-bg); }
-  .lo { background: var(--stop-bg); }
-  .legend { display: flex; gap: 12px; font-size: .78rem; color: var(--muted); margin-top: 6px; }
-  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px;
-              margin-right: 4px; vertical-align: -1px; }
-  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-  th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line);
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font);
+         font-size: 16px; line-height: 1.55; font-variation-settings: "wdth" 100; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+  h1, h2, h3 { margin: 0; line-height: 1.2; }
+  h2 { font-size: 1.625rem; font-weight: 700; letter-spacing: -.01em; }
+  h3 { font-size: 1.0625rem; font-weight: 650; }
+  p { margin: 0 0 .75em; }
+  a { color: var(--knows); text-underline-offset: 3px; }
+  .muted { color: var(--muted); }
+  .small { font-size: .875rem; }
+  .num { font-variant-numeric: tabular-nums; font-variation-settings: "wdth" 87; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);
+        white-space: nowrap; }
+
+  /* ---------- masthead ---------- */
+  .masthead { padding: 28px 0 0; }
+  .masthead .wrap { display: grid; grid-template-columns: 1fr auto; gap: 16px 32px;
+                    align-items: end; }
+  .wordmark { font-size: clamp(2rem, 5.2vw, 3.25rem); font-weight: 800; letter-spacing: -.02em;
+              font-variation-settings: "wdth" 125; line-height: 1; }
+  .tagline { margin: 10px 0 0; color: var(--ink-2); font-size: 1.0625rem; max-width: 46ch; }
+  .live { display: grid; grid-template-columns: auto auto; gap: 2px 14px; font-size: .875rem;
+          padding: 10px 14px; border: 1px solid var(--rule); border-radius: 10px;
+          background: var(--surface); min-width: 260px; }
+  .live dt { color: var(--muted); }
+  .live dd { margin: 0; font-weight: 600; }
+  .live .pulse { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+                 background: var(--muted); margin-right: 6px; vertical-align: 1px; }
+  .live.ready .pulse { background: var(--good); }
+  .live .warn { grid-column: 1 / -1; color: var(--stop); font-weight: 600; margin-top: 4px; }
+
+  /* ---------- tabs ---------- */
+  .tabs { margin-top: 26px; border-bottom: 1px solid var(--rule); }
+  .tabs .wrap { display: flex; gap: 4px; align-items: end; }
+  .tab { appearance: none; border: 0; background: none; font: inherit; color: var(--ink-2);
+         font-weight: 600; padding: 12px 14px 11px; border-bottom: 3px solid transparent;
+         cursor: pointer; margin-bottom: -1px; }
+  .tab:hover { color: var(--ink); }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+  .theme { margin-left: auto; appearance: none; border: 1px solid var(--rule);
+           background: var(--surface); color: var(--ink-2); font: inherit; font-size: .8125rem;
+           padding: 5px 10px; border-radius: 999px; cursor: pointer; margin-bottom: 8px; }
+  main.wrap { padding-top: 28px; padding-bottom: 64px; }
+  [role="tabpanel"][hidden] { display: none; }
+
+  /* ---------- ask tab ---------- */
+  .ask-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px;
+              align-items: start; }
+  .panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; }
+  .askbox { padding: 22px; }
+  .askbox label.q { display: block; font-weight: 650; font-size: 1.0625rem; margin-bottom: 10px; }
+  .askrow { display: flex; gap: 10px; }
+  .askrow input { flex: 1; min-width: 0; font: inherit; font-size: 1.0625rem; color: var(--ink);
+                  background: var(--page); border: 1px solid var(--rule); border-radius: 10px;
+                  padding: 13px 15px; }
+  .askrow input::placeholder { color: var(--muted); }
+  .btn { appearance: none; font: inherit; font-weight: 700; font-size: 1rem; color: #fff;
+         background: var(--ink); border: 0; border-radius: 10px; padding: 0 22px; cursor: pointer;
+         min-height: 50px; }
+  :root[data-theme="dark"] .btn { color: var(--page); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn { color: var(--page); } }
+  .btn:disabled { opacity: .55; cursor: progress; }
+  .examples { margin-top: 16px; }
+  .examples p { font-size: .875rem; color: var(--muted); margin-bottom: 8px; }
+  .ex-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ex { appearance: none; font: inherit; font-size: .875rem; text-align: left; color: var(--ink);
+        background: var(--page); border: 1px solid var(--rule); border-radius: 8px;
+        padding: 7px 10px; cursor: pointer; max-width: 100%; }
+  .ex:hover { border-color: var(--muted); }
+  .ex b { font-weight: 650; color: var(--ink-2); margin-right: 6px; }
+  .reveal { display: flex; gap: 8px; align-items: flex-start; margin-top: 16px; font-size: .875rem;
+            color: var(--ink-2); }
+  .reveal input { margin-top: 4px; accent-color: var(--ink); }
+
+  .result { margin-top: 20px; padding: 24px 22px 22px; }
+  .result:empty { display: none; }
+  .status { display: inline-flex; align-items: center; gap: 8px; font-weight: 700;
+            font-size: .9375rem; padding: 5px 12px 5px 9px; border-radius: 999px; margin: 0 0 14px; }
+  .status svg { width: 16px; height: 16px; flex: none; }
+  .status.ok { color: var(--good); background: var(--good-wash); }
+  .status.stop { color: var(--stop); background: var(--stop-wash); }
+  .said { font-size: .875rem; color: var(--muted); margin: 0 0 2px; }
+  .answer { font-size: clamp(1.75rem, 4.4vw, 2.75rem); font-weight: 700; line-height: 1.12;
+            font-variation-settings: "wdth" 112; letter-spacing: -.015em; margin: 0 0 10px;
+            overflow-wrap: anywhere; }
+  .answer.withheld { color: var(--ink-2); text-decoration: line-through;
+                     text-decoration-thickness: 2px; text-decoration-color: var(--stop); }
+  .reply { color: var(--ink-2); margin: 0 0 22px; }
+  .reply q { font-style: italic; }
+
+  /* the signature: one scale, two readings */
+  .readout { margin: 6px 0 14px; }
+  .readout-title { font-size: .875rem; color: var(--ink-2); margin-bottom: 58px; }
+  .scale { position: relative; height: 10px; margin: 0 6px; }
+  .scale .base { position: absolute; inset: 0; background: var(--track); border-radius: 5px; }
+  .scale .zone { position: absolute; top: 0; bottom: 0; right: 0; border-radius: 0 5px 5px 0;
+                 background: repeating-linear-gradient(135deg, transparent 0 5px,
+                   color-mix(in srgb, var(--stop) 22%, transparent) 5px 6px); }
+  .scale .gap { position: absolute; top: 1px; bottom: 1px; background: var(--knows-wash);
+                border-top: 2px solid var(--knows); border-bottom: 2px solid var(--knows);
+                transition: left .7s cubic-bezier(.2,.7,.2,1), width .7s cubic-bezier(.2,.7,.2,1); }
+  .scale .guard { position: absolute; top: -40px; bottom: -12px; width: 0;
+                  border-left: 2px dashed var(--ink); }
+  .scale .guard span { position: absolute; top: -4px; left: 6px; white-space: nowrap;
+                       font-size: .75rem; font-weight: 650; color: var(--ink); }
+  .mark { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px;
+          border-radius: 50%; transition: left .7s cubic-bezier(.2,.7,.2,1); z-index: 2; }
+  .mark.says { background: var(--surface); border: 4px solid var(--says); }
+  .mark.knows { background: var(--knows); box-shadow: 0 0 0 2px var(--surface); }
+  .mlabel { position: absolute; white-space: nowrap; font-size: .8125rem; transform: translateX(-50%);
+            transition: left .7s cubic-bezier(.2,.7,.2,1); background: var(--surface);
+            padding: 0 4px; border-radius: 4px; z-index: 3; }
+  .mlabel b { font-variant-numeric: tabular-nums; font-variation-settings: "wdth" 87;
+              font-size: 1rem; }
+  .mlabel.says { bottom: calc(100% + 10px); color: var(--says); }
+  .mlabel.says span, .mlabel.knows span { color: var(--ink-2); }
+  .mlabel.knows { top: calc(100% + 12px); color: var(--knows); }
+  .mlabel.edge-l { transform: translateX(-9px); }
+  .mlabel.edge-r { transform: translateX(calc(-100% + 9px)); }
+  .ticks { display: flex; justify-content: space-between; margin: 46px 6px 0; font-size: .75rem;
+           color: var(--muted); }
+  .explain { font-size: 1rem; color: var(--ink); max-width: 68ch; margin: 18px 0 0; }
+  .explain b { font-variant-numeric: tabular-nums; }
+
+  .section-h { font-size: .9375rem; font-weight: 650; margin: 26px 0 8px; }
+  .words { display: flex; flex-wrap: wrap; gap: 4px; }
+  .w { display: grid; justify-items: center; padding: 6px 8px 5px; border-radius: 6px;
+       min-width: 40px; background: var(--page); border-bottom: 3px solid var(--rule); }
+  .w .t { font-weight: 600; white-space: pre; }
+  .w .p { font-size: .75rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .w.lo { border-bottom-color: var(--says); }
+  .w.mid { border-bottom-color: color-mix(in srgb, var(--says) 45%, var(--rule)); }
+  .key { display: flex; gap: 16px; flex-wrap: wrap; font-size: .8125rem; color: var(--muted);
+         margin-top: 8px; }
+  .key i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 6px; }
+
+  details.more { border-top: 1px solid var(--rule); }
+  details.more:last-of-type { border-bottom: 1px solid var(--rule); }
+  details.more > summary { list-style: none; cursor: pointer; padding: 13px 0; font-weight: 600;
+                           display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; }
+  details.more > summary::-webkit-details-marker { display: none; }
+  details.more > summary::after { content: "+"; font-weight: 400; font-size: 1.25rem;
+                                  line-height: 1; color: var(--muted); margin-left: auto; }
+  details.more[open] > summary::after { content: "–"; }
+  details.more > summary small { font-weight: 400; color: var(--muted); font-size: .875rem; }
+  details.more .body { padding: 0 0 16px; }
+  .more-wrap { margin-top: 24px; }
+
+  .drow { display: grid; grid-template-columns: 170px minmax(0, 1fr) 52px; gap: 12px;
+          align-items: center; padding: 6px 0; }
+  .drow .name { font-size: .9375rem; }
+  .drow .name small { display: block; color: var(--muted); font-size: .8125rem; }
+  .bar { position: relative; height: 8px; background: var(--track); border-radius: 4px; }
+  .bar .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+  .bar .fill.says { background: var(--says); }
+  .bar .fill.knows { background: var(--knows); }
+  .bar .g { position: absolute; top: -5px; bottom: -5px; border-left: 2px dashed var(--ink); }
+  .drow .v { text-align: right; font-weight: 650; }
+  .served { font-size: .75rem; font-weight: 650; color: var(--knows); margin-left: 6px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+  th, td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--rule);
            vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; font-size: .8rem; }
-  td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .like-right { color: var(--ok); font-weight: 600; }
-  .like-wrong { color: var(--stop); font-weight: 600; }
-  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;
-           margin: 12px 0; }
-  .tile { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
-  .tile .v { font-size: 1.45rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .tile .k { font-size: .8rem; color: var(--muted); font-weight: 600; text-transform: uppercase;
-             letter-spacing: .03em; }
-  .tile p { font-size: .84rem; color: var(--muted); margin: 4px 0 0; }
-  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 8px 0 0;
-       font-size: .88rem; }
-  dt { color: var(--muted); } dd { margin: 0; word-break: break-word; }
-  details summary { cursor: pointer; font-weight: 600; }
-  details[open] summary { margin-bottom: 8px; }
-  .glossary dt { color: var(--text); font-weight: 600; }
-  .glossary dd { color: var(--muted); margin-bottom: 6px; }
-  .error { color: var(--stop); }
+  th { color: var(--muted); font-weight: 600; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .scroll { overflow-x: auto; }
-  @media (max-width: 640px) {
-    .steps { grid-template-columns: 1fr; }
-    .drow { grid-template-columns: 1fr 54px; }
+  .lean-r { color: var(--good); font-weight: 600; }
+  .lean-w { color: var(--stop); font-weight: 600; }
+  .passage { padding: 10px 12px; background: var(--page); border-radius: 8px; margin-bottom: 8px;
+             font-size: .875rem; white-space: pre-line; max-height: 9.5em; overflow: auto; }
+  .passage b { display: block; font-size: .8125rem; color: var(--ink-2); margin-bottom: 4px; }
+  dl.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px;
+          margin: 0; font-size: .875rem; }
+  dl.kv dt { color: var(--muted); }
+  dl.kv dd { margin: 0; overflow-wrap: anywhere; }
+
+  .waiting { display: grid; gap: 14px; }
+  .waiting .clock { font-size: 2.25rem; font-weight: 700; font-variant-numeric: tabular-nums;
+                    font-variation-settings: "wdth" 87; }
+  .indet { height: 3px; background: var(--track); border-radius: 2px; overflow: hidden;
+           position: relative; }
+  .indet::after { content: ""; position: absolute; top: 0; bottom: 0; width: 30%;
+                  background: var(--knows); animation: slide 1.4s ease-in-out infinite; }
+  @keyframes slide { from { left: -30%; } to { left: 100%; } }
+  .error { color: var(--stop); font-weight: 600; }
+
+  /* empty state */
+  .intro { padding: 24px 22px; margin-top: 20px; }
+  .intro h3 { margin-bottom: 6px; }
+  .intro .demo-scale { margin-top: 26px; opacity: .9; }
+
+  /* aside */
+  aside { display: grid; gap: 20px; }
+  aside .panel { padding: 18px; }
+  aside h3 { margin-bottom: 10px; }
+  .hist { list-style: none; margin: 0; padding: 0; }
+  .hist li + li { border-top: 1px solid var(--rule); }
+  .hist button { appearance: none; border: 0; background: none; font: inherit; color: var(--ink);
+                 width: 100%; text-align: left; padding: 10px 0; cursor: pointer; display: grid;
+                 grid-template-columns: 18px 1fr auto; gap: 8px; align-items: start; }
+  .hist button:hover .q { text-decoration: underline; }
+  .hist .q { font-size: .875rem; }
+  .hist .a { display: block; font-size: .8125rem; color: var(--muted); }
+  .hist .pv { font-size: .8125rem; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+  .hist svg { width: 16px; height: 16px; margin-top: 2px; }
+  .ico-ok { color: var(--good); } .ico-stop { color: var(--stop); }
+
+  /* ---------- findings tab ---------- */
+  .lede { max-width: 72ch; font-size: 1.25rem; line-height: 1.5; margin: 0 0 8px;
+          font-variation-settings: "wdth" 96; }
+  .lede-sub { max-width: 72ch; color: var(--ink-2); margin-bottom: 30px; }
+  .finding { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 28px;
+             padding: 30px 0; border-top: 1px solid var(--rule); }
+  .finding:last-of-type { border-bottom: 1px solid var(--rule); }
+  .code { font-weight: 800; font-variation-settings: "wdth" 125; font-size: .9375rem;
+          color: var(--ink-2); margin: 0 0 6px; }
+  .finding h3 { font-size: 1.375rem; font-weight: 700; margin-bottom: 10px; letter-spacing: -.005em; }
+  .verdict { display: inline-flex; gap: 6px; align-items: center; font-size: .875rem;
+             font-weight: 650; margin: 0 0 12px; }
+  .verdict svg { width: 16px; height: 16px; }
+  .verdict.yes { color: var(--good); }
+  .verdict.no { color: var(--ink-2); }
+  .finding .how { font-size: .875rem; color: var(--muted); }
+  .chart { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+           padding: 18px 18px 12px; }
+  .chart-title { font-size: .9375rem; font-weight: 650; margin: 0 0 4px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .8125rem; color: var(--ink-2);
+            margin: 0 0 18px; }
+  .legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 50%;
+                vertical-align: -1px; margin-right: 6px; }
+  .sw.says { border: 3px solid var(--says); }
+  .sw.knows { background: var(--knows); }
+  .sw.base { border: 2px solid var(--ink-2); }
+  .sw.comp { background: var(--ink); }
+  .db { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 14px;
+        align-items: center; }
+  .db + .db { margin-top: 16px; }
+  .db .lab { font-size: .875rem; line-height: 1.3; }
+  .db .lab small { display: block; color: var(--muted); font-size: .75rem; }
+  .db .trk { position: relative; height: 34px; }
+  .db .line0 { position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--rule); }
+  .db .link { position: absolute; top: calc(50% - 1px); height: 2px; background: var(--muted); }
+  .db .ci { position: absolute; top: calc(50% - 6px); height: 12px; border-left: 1.5px solid;
+            border-right: 1.5px solid; opacity: .8; }
+  .db .ci::after { content: ""; position: absolute; left: 0; right: 0; top: 50%;
+                   border-top: 1.5px solid; }
+  .db .ci.says { color: var(--says); } .db .ci.knows { color: var(--knows); }
+  .dot { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px;
+         border-radius: 50%; z-index: 2; }
+  .dot.says { background: var(--surface); border: 3px solid var(--says); }
+  .dot.knows { background: var(--knows); box-shadow: 0 0 0 2px var(--surface); }
+  .dot.base { background: var(--surface); border: 2px solid var(--ink-2); }
+  .dot.comp { background: var(--ink); box-shadow: 0 0 0 2px var(--surface); }
+  .dot-hit { position: absolute; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px;
+             border-radius: 50%; z-index: 3; cursor: default; }
+  .vlab { position: absolute; top: -4px; transform: translateX(-50%); font-size: .75rem;
+          font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; }
+  .axis { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; margin-top: 8px; }
+  .axis .ax { position: relative; height: 18px; border-top: 1px solid var(--rule);
+              font-size: .75rem; color: var(--muted); }
+  .axis .ax span { position: absolute; top: 3px; transform: translateX(-50%);
+                   font-variant-numeric: tabular-nums; }
+  .refline { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--muted); }
+  .chart details { margin-top: 12px; font-size: .8125rem; }
+  .chart details summary { cursor: pointer; color: var(--ink-2); }
+  .chart details table { margin-top: 8px; font-size: .8125rem; }
+
+  .variants { margin-top: 40px; }
+  .variants h3, .guard-sec h3 { font-size: 1.375rem; font-weight: 700; margin-bottom: 8px; }
+  .variants .scroll { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+                      margin-top: 14px; }
+  .variants table th:first-child, .variants table td:first-child { padding-left: 16px; }
+  .variants table th:last-child, .variants table td:last-child { padding-right: 16px; }
+  .variants tr:last-child td { border-bottom: 0; }
+  .notrun td { color: var(--muted); }
+  .guard-sec { margin-top: 40px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+               gap: 28px; }
+  .prop { margin-bottom: 14px; }
+  .prop .top { display: flex; justify-content: space-between; font-size: .875rem; margin-bottom: 5px; }
+  .prop .top b { font-variant-numeric: tabular-nums; }
+  .prop .bar { height: 10px; }
+  .prop .fill { background: var(--ink); }
+  .foot-note { margin-top: 30px; font-size: .875rem; color: var(--muted); max-width: 80ch; }
+
+  /* ---------- how tab ---------- */
+  .how-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 36px; }
+  .steps { list-style: none; margin: 16px 0 0; padding: 0; counter-reset: s; }
+  .steps li { position: relative; padding: 0 0 18px 44px; counter-increment: s; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 28px;
+                      height: 28px; border-radius: 50%; border: 2px solid var(--ink); display: grid;
+                      place-items: center; font-weight: 700; font-size: .875rem; }
+  .steps li::after { content: ""; position: absolute; left: 14px; top: 30px; bottom: 2px;
+                     border-left: 2px solid var(--rule); }
+  .steps li:last-child::after { display: none; }
+  .steps b { display: block; }
+  .steps span { color: var(--ink-2); font-size: .9375rem; }
+  .vlist { display: grid; gap: 10px; margin-top: 16px; }
+  .vitem { padding: 14px 16px; border: 1px solid var(--rule); border-radius: 10px;
+           background: var(--surface); }
+  .vitem .vh { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .vitem .vh b { font-variation-settings: "wdth" 112; }
+  .vitem .vh small { color: var(--muted); }
+  .vitem p { margin: 4px 0 0; font-size: .9375rem; color: var(--ink-2); }
+  .glossary { margin-top: 40px; }
+  .glossary dl { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 10px 24px;
+                 margin-top: 14px; }
+  .glossary dt { font-weight: 650; }
+  .glossary dd { margin: 0; color: var(--ink-2); max-width: 70ch; }
+  .links { margin-top: 30px; font-size: .875rem; color: var(--ink-2); }
+
+  /* tooltip */
+  #tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--page);
+         font-size: .8125rem; padding: 6px 9px; border-radius: 6px; max-width: 260px;
+         opacity: 0; transition: opacity .12s; }
+  #tip.on { opacity: 1; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 900px) {
+    .ask-grid, .finding, .guard-sec, .how-grid { grid-template-columns: minmax(0, 1fr); }
+    .masthead .wrap { grid-template-columns: minmax(0, 1fr); }
+    .live { min-width: 0; }
+  }
+  @media (max-width: 560px) {
+    .askrow { flex-direction: column; }
+    .btn { min-height: 48px; }
+    .tab { padding: 10px 8px 9px; font-size: .9375rem; }
+    .theme { display: none; }
+    .drow { grid-template-columns: minmax(0, 1fr) 52px; }
     .drow .bar { grid-column: 1 / -1; grid-row: 2; }
-    form { flex-direction: column; }
+    .db, .axis { grid-template-columns: minmax(0, 1fr); }
+    .axis > div:first-child { display: none; }
+    .glossary dl { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+    .glossary dd { margin-bottom: 10px; }
+    .result, .askbox, .intro { padding-left: 16px; padding-right: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
   }
 </style>
 </head>
 <body>
-<main>
-  <h1>Bluff Detector: live guard</h1>
-  <p class="sub">A small language model (Qwen2.5-1.5B) answers your question. A detector then reads
-    the model's <b>own hidden state</b> to estimate the chance the answer is wrong, and a guard
-    refuses to answer when that chance is too high. The point: catch the model when it
-    <i>bluffs</i>, sounding sure while its inside is not.</p>
-
-  <div class="steps" aria-label="How it works">
-    <div class="step"><span class="n">1</span><b>The model answers</b>It writes a short answer,
-      word by word, and the API records how sure it was of each word and its hidden state.</div>
-    <div class="step"><span class="n">2</span><b>Detectors read it</b>Four trained detectors
-      each estimate P(wrong): two from the word confidences, two from the hidden state.</div>
-    <div class="step"><span class="n">3</span><b>The guard decides</b>If the served detector's
-      P(wrong) is above the line, the answer is withheld; otherwise it is shown.</div>
+<header class="masthead">
+  <div class="wrap">
+    <div>
+      <h1 class="wordmark">Bluff Detector</h1>
+      <p class="tagline">When a small AI model answers a question confidently, does its inside
+        already know it is wrong?</p>
+    </div>
+    <dl class="live" id="live" aria-live="polite">
+      <dt><span class="pulse"></span>Live model</dt><dd id="live-model">Loading…</dd>
+      <dt>Detector</dt><dd id="live-det">–</dd>
+      <dt>Running on</dt><dd id="live-dev">–</dd>
+    </dl>
   </div>
+</header>
 
-  <section class="card">
-    <form id="ask">
-      <label for="q" style="position:absolute;left:-9999px">Your question</label>
-      <input id="q" type="text" placeholder="Type a factual question, e.g. Who wrote Petals of Blood?"
-             minlength="3" maxlength="500" required autocomplete="off">
-      <button id="go" type="submit">Ask</button>
-    </form>
-    <div class="examples" id="examples" aria-label="Example questions"></div>
-    <label class="opt"><input type="checkbox" id="reveal" checked> When the guard blocks an
-      answer, also show what the model would have said (for the demo; a real deployment hides it)</label>
-  </section>
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" id="tab-ask" aria-controls="panel-ask" aria-selected="true">Ask the model</button>
+    <button class="tab" role="tab" id="tab-found" aria-controls="panel-found" aria-selected="false" tabindex="-1">What we found</button>
+    <button class="tab" role="tab" id="tab-how" aria-controls="panel-how" aria-selected="false" tabindex="-1">How it works</button>
+    <button class="theme" id="theme" type="button">Dark mode</button>
+  </div>
+</nav>
 
-  <section class="card" id="result" hidden aria-live="polite"></section>
-
-  <section class="card" id="about">
-    <h2>About this detector</h2>
-    <p class="muted" id="about-body">Loading…</p>
-  </section>
-
-  <section class="card">
-    <h2>This session</h2>
-    <div class="scroll"><table>
-      <thead><tr><th>Question</th><th>Model's answer</th><th>Guard</th><th>P(wrong)</th>
-        <th>Time</th></tr></thead>
-      <tbody id="history"><tr><td colspan="5" class="muted">No questions yet.</td></tr></tbody>
-    </table></div>
-  </section>
-
-  <section class="card glossary">
-    <details>
-      <summary>Glossary: what the words on this page mean</summary>
-      <dl>
-        <dt>P(wrong)</dt><dd>A detector's estimate of the chance that the model's answer is wrong,
-          from 0 (surely right) to 1 (surely wrong).</dd>
-        <dt>The guard's line (t_abstain)</dt><dd>The guard withholds an answer when P(wrong) is
-          above it. Here a confident wrong answer counts as 3 times worse than a needless refusal,
-          so the line is 1 / (1 + 3) = 0.25.</dd>
-        <dt>Hidden state</dt><dd>The 1,536 numbers inside the model at the end of its answer (layer
-          21 of 28): its internal "thought". The probes read it.</dd>
-        <dt>Outside vs inside</dt><dd>Outside detectors (logistic regression, XGBoost) only see how
-          sure the model was of its words. Inside detectors (the probes) read the hidden state.</dd>
-        <dt>Silent knowing</dt><dd>The model states a wrong answer confidently while its hidden
-          state already signals doubt. Hypothesis H1 of the project.</dd>
-        <dt>AUROC</dt><dd>Take one right and one wrong answer at random: the share of times the
-          detector gives the wrong one the higher P(wrong). 1.0 = perfect, 0.5 = a coin flip.</dd>
-        <dt>ECE (calibration error)</dt><dd>How far P(wrong) is from the real share of wrong
-          answers, on average. 0 = its probabilities can be taken at face value.</dd>
-        <dt>Entropy ("hesitation")</dt><dd>How spread the model's probability was over the
-          possible next words. 0 = no doubt at all; higher = torn between options.</dd>
-        <dt>95% CI</dt><dd>The range the true value very likely lies in, given how many test
-          questions there were.</dd>
-      </dl>
-    </details>
-  </section>
-
-  <p class="muted">API: <a href="/docs">interactive docs</a> · <a href="/v1/model-card">model card
-    (JSON)</a> · <a href="/metadata">metadata</a>. Every question asked here is logged for
-    monitoring (<code>bluff monitor</code>).</p>
-</main>
-
-<script>
-const EXAMPLES = [
-  "How many counties does Kenya have?",
-  "What is the name of King Lear's youngest daughter?",
-  "What is the capital of Australia?",
-  "Who wrote the novel Petals of Blood?",
-  "In what year was Kenya's 48th county created?",
-];
-const DET = {
-  logreg: { name: "Logistic regression", reads: "outside: the 8 confidence numbers" },
-  xgboost: { name: "XGBoost", reads: "outside: the 8 confidence numbers" },
-  probe_linear: { name: "Linear probe", reads: "inside: the hidden state" },
-  probe_mlp: { name: "MLP probe", reads: "inside: the hidden state" },
-};
-const OUTSIDE = ["logreg", "xgboost"], INSIDE = ["probe_linear", "probe_mlp"];
-const exp = Math.exp;
-const SIGNALS = [
-  ["mean_logprob", "Average word confidence",
-   "How sure it was, on average, of each word it chose.", (v) => pct(exp(v))],
-  ["min_logprob", "Least-sure word", "Its confidence in the word it was least sure of.",
-   (v) => pct(exp(v))],
-  ["frac_low_prob", "Unsure words", "Share of words it gave under 50% probability.", (v) => pct(v)],
-  ["mean_entropy", "Average hesitation", "How torn it was between possible words (0 = no doubt).",
-   (v) => v.toFixed(2)],
-  ["max_entropy", "Biggest hesitation", "Its most torn moment in the answer.", (v) => v.toFixed(2)],
-  ["last_entropy", "Hesitation at the last word", "How torn it was when finishing the answer.",
-   (v) => v.toFixed(2)],
-  ["n_tokens", "Answer length", "Number of word pieces (tokens) in the answer.",
-   (v) => String(Math.round(v))],
-];
-const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
-  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const pct = (x, d = 0) => (x == null || isNaN(x)) ? "–" : `${(x * 100).toFixed(d)}%`;
-const f3 = (x) => (x == null || isNaN(x)) ? "–" : Number(x).toFixed(3);
-const colour = (p, t) => p > t ? "var(--stop)" : "var(--ok)";
-let CARD = null;
-const history = [];
-
-for (const text of EXAMPLES) {
-  const b = document.createElement("button");
-  b.type = "button"; b.className = "chip"; b.textContent = text;
-  b.onclick = () => { $("q").value = text; ask(); };
-  $("examples").appendChild(b);
-}
-
-async function ask() {
-  const question = $("q").value.trim();
-  if (question.length < 3) return;
-  $("go").disabled = true;
-  const t0 = Date.now();
-  const tick = () => { $("go").textContent = `Thinking… ${Math.round((Date.now() - t0) / 1000)} s`; };
-  tick(); const timer = setInterval(tick, 1000);
-  $("result").hidden = false;
-  $("result").innerHTML = `<p class="muted">The model is answering on this computer's processor.
-    On this laptop that takes 20–40 seconds (on the Colab GPU it took 0.2 s).</p>`;
-  try {
-    const res = await fetch("/v1/ask", { method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, reveal: $("reveal").checked }) });
-    const r = await res.json();
-    if (!res.ok) throw new Error(r.detail ? JSON.stringify(r.detail) : res.statusText);
-    show(question, r);
-  } catch (e) {
-    $("result").innerHTML = `<p class="error">The request failed: ${esc(e.message)}</p>`;
-  } finally {
-    clearInterval(timer); $("go").disabled = false; $("go").textContent = "Ask";
-  }
-}
-
-function show(question, r) {
-  const blocked = r.verdict === "abstain";
-  const said = blocked ? r.withheld_answer : r.answer;
-  const t = r.threshold, p = r.bluff_score, dn = DET[r.detector]?.name || r.detector;
-  const sentence = blocked
-    ? `${said != null ? `The model's answer was <b>“${esc(said)}”</b>. ` : ""}The ${esc(dn)}, reading
-       the model's hidden state, puts the chance this answer is wrong at <b>${pct(p)}</b>. That is
-       above the guard's line of ${pct(t)}, so the guard <b>refused to answer</b>.`
-    : `The model answered <b>“${esc(said)}”</b>. The ${esc(dn)}, reading the model's hidden state,
-       puts the chance this is wrong at <b>${pct(p)}</b>, below the guard's line of ${pct(t)}, so
-       the guard <b>let the answer through</b>.`;
-
-  $("result").innerHTML = `
-    <div class="banner ${blocked ? "abstain" : "answer"}">
-      <span class="badge">${blocked ? "BLOCKED" : "ANSWERED"}</span>
+<main class="wrap">
+  <!-- ======================= ASK ======================= -->
+  <section role="tabpanel" id="panel-ask" aria-labelledby="tab-ask">
+    <div class="ask-grid">
       <div>
-        <div class="big">${blocked ? "I'm not confident enough to answer that." : esc(r.answer)}</div>
-        <div>${sentence}</div>
+        <div class="panel askbox">
+          <form id="ask">
+            <label class="q" for="q">Ask a factual question</label>
+            <div class="askrow">
+              <input id="q" type="text" minlength="3" maxlength="500" required autocomplete="off"
+                     placeholder="e.g. Which is the largest inland port city in Kenya?">
+              <button class="btn" id="go" type="submit">Ask</button>
+            </div>
+          </form>
+          <div class="examples">
+            <p>Or try one from the test set:</p>
+            <div class="ex-list" id="examples"></div>
+          </div>
+          <label class="reveal"><input type="checkbox" id="reveal" checked>
+            <span>When the guard blocks an answer, still show what the model was going to say.
+              For the demo only; a real deployment would hide it.</span></label>
+        </div>
+
+        <div class="panel intro" id="intro">
+          <h3>Two readings of every answer</h3>
+          <p class="muted">The model answers. Then two kinds of detector estimate the chance
+            that answer is wrong: one judges <span style="color:var(--says);font-weight:650">its
+            words</span> (how sure it sounded), the other reads <span
+            style="color:var(--knows);font-weight:650">its inside</span> (its hidden state). When
+            the words sound sure but the inside doesn't, the model is bluffing. The guard blocks
+            any answer whose inside reading crosses the dashed line.</p>
+          <div class="demo-scale" id="demo-scale"></div>
+        </div>
+
+        <div class="panel result" id="result" aria-live="polite"></div>
+      </div>
+
+      <aside>
+        <div class="panel">
+          <h3>This session</h3>
+          <ul class="hist" id="history"><li class="muted small">Questions you ask appear
+            here. Select one to see its result again.</li></ul>
+        </div>
+        <div class="panel" id="about">
+          <h3>About the live detector</h3>
+          <div id="about-body" class="small muted">Loading…</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ======================= FINDINGS ======================= -->
+  <section role="tabpanel" id="panel-found" aria-labelledby="tab-found" hidden>
+    <div id="found-body"><p class="muted">Loading the results…</p></div>
+  </section>
+
+  <!-- ======================= HOW ======================= -->
+  <section role="tabpanel" id="panel-how" aria-labelledby="tab-how" hidden>
+    <div class="how-grid">
+      <div>
+        <h2>How a result is made</h2>
+        <ol class="steps">
+          <li><b>Questions</b><span>1,448 general trivia questions, and 326 Kenya items written
+            by four students and checked: 211 real Kenya questions, 82 made-up ones about
+            things that do not exist, and 33 matched UK questions.</span></li>
+          <li><b>The model answers, four times</b><span>Qwen2.5-1.5B-Instruct, an open model
+            small enough to run on a free GPU, answers each question once normally and three
+            more times with "I don't know" offered as an option.</span></li>
+          <li><b>Its hidden state is recorded</b><span>At the end of each answer, the 1,536
+            numbers inside layers 21 and 25 of its 28 layers: what it "thinks" at that
+            moment.</span></li>
+          <li><b>Each answer is marked right or wrong</b><span>Against the accepted answers,
+            with each question's spelling variants.</span></li>
+          <li><b>Four detectors are trained</b><span>On trivia only. Two read the words'
+            confidence (logistic regression, XGBoost); two read the hidden state (a linear
+            probe and a small neural network).</span></li>
+          <li><b>They are tested on questions they never saw</b><span>Held-out trivia, and every
+            Kenya item. Metrics come with 95% confidence intervals.</span></li>
+          <li><b>The best one guards a live API</b><span>Registered as the champion, served by
+            this page's API. It blocks an answer when its estimate of being wrong is above
+            25%.</span></li>
+        </ol>
+      </div>
+      <div>
+        <h2>Four versions of the model</h2>
+        <p class="muted" style="margin-top:8px">The same questions and detectors, with one
+          change to the model each time.</p>
+        <div class="vlist" id="vlist"></div>
       </div>
     </div>
 
-    <h3>The guard's decision</h3>
-    <div class="gauge" role="img" aria-label="P(wrong) ${pct(p)}, line ${pct(t)}">
-      <div class="fill" style="width:${p * 100}%;background:${colour(p, t)}"></div>
-      <div class="line" style="left:${t * 100}%"><span>guard's line ${pct(t)}</span></div>
+    <section class="glossary">
+      <h2>Words used on this page</h2>
+      <dl>
+        <dt>Chance it's wrong, P(wrong)</dt><dd>A detector's estimate that an answer is wrong,
+          from 0% (surely right) to 100% (surely wrong).</dd>
+        <dt>Its words</dt><dd>The verdict of the two outside detectors, which only see how sure
+          the model was of each word it wrote (8 numbers per answer).</dd>
+        <dt>Its inside</dt><dd>The verdict of the linear probe, which reads the model's hidden
+          state: 1,536 numbers from inside layer 21.</dd>
+        <dt>The guard's line</dt><dd>25%. A confident wrong answer is counted as three times
+          worse than an unnecessary refusal, so refusing pays off once the chance of being wrong
+          passes 1 ÷ (1 + 3).</dd>
+        <dt>Bluff</dt><dd>A wrong answer stated with confidence. Bluff caught: the words sounded
+          sure, but the inside reading crossed the guard's line.</dd>
+        <dt>Silent knowing</dt><dd>Of the wrong answers the model gave confidently, the share
+          where its hidden state was already flagged as unsure (hypothesis H1).</dd>
+        <dt>AUROC</dt><dd>Take one right and one wrong answer at random: how often the detector
+          gives the wrong one the higher chance of being wrong. 0.5 is a coin flip; 1.0 is
+          perfect.</dd>
+        <dt>Knowing vs saying</dt><dd>Knowing: how well the hidden state separates right from
+          wrong answers (internal AUROC). Saying: how well the model's own "I don't know" does
+          (expressed AUROC). The difference is the verbalisation gap.</dd>
+        <dt>95% confidence interval</dt><dd>The range the true value very likely lies in, given
+          how many test questions there were. Shown as whiskers on the charts.</dd>
+        <dt>RAG</dt><dd>Retrieval-augmented generation: three relevant passages from Kenyan
+          documents are pasted in front of the question.</dd>
+        <dt>QLoRA</dt><dd>A cheap way to fine-tune: the model is frozen (and compressed to 4 bits
+          while training) and only a small add-on of 18.5 million weights is trained.</dd>
+      </dl>
+    </section>
+    <p class="links">For developers: <a href="/docs">API documentation</a>,
+      <a href="/v1/model-card">model card (JSON)</a>, <a href="/v1/results">results (JSON)</a>,
+      <a href="/metadata">metadata</a>. Every question asked here is logged for drift
+      monitoring (<code>bluff monitor</code>).</p>
+  </section>
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script>
+/* ---------- data ---------- */
+const EXAMPLES = [
+  ["Kenya", "Which is the largest inland port city in Kenya?"],
+  ["Kenya", "In which year did Kenya become independent?"],
+  ["Made up", "What is the name of the third house of Kenya's Parliament?"],
+  ["UK twin", "Which is the largest freshwater lake in the United Kingdom?"],
+  ["Trivia", "How many decades are there in a millennium?"],
+];
+const DET = {
+  logreg: { name: "Logistic regression", reads: "its words", side: "says" },
+  xgboost: { name: "XGBoost", reads: "its words", side: "says" },
+  probe_linear: { name: "Linear probe", reads: "its inside", side: "knows" },
+  probe_mlp: { name: "MLP probe", reads: "its inside", side: "knows" },
+};
+const VARIANTS = {
+  m0_base: ["M0", "Base model", "The model as released, nothing added."],
+  m1_rag: ["M1", "Base + retrieval (RAG)", "Three passages from 441 Kenyan document extracts (the Constitution, Wikipedia) are pasted before each question."],
+  m2_qlora: ["M2", "Fine-tuned (QLoRA)", "A small add-on trained for 42 steps on 26 other Kenyan documents."],
+  m3_rag_qlora: ["M3", "Fine-tuned + retrieval", "Both changes together."],
+  dev_fake: ["Test", "Fake model", "A stand-in that needs no GPU, for tests. Its numbers mean nothing."],
+};
+const SIGNALS = [
+  ["mean_logprob", "Average word confidence", (v) => pct(Math.exp(v))],
+  ["min_logprob", "Least-sure word", (v) => pct(Math.exp(v))],
+  ["frac_low_prob", "Words under 50% sure", (v) => pct(v)],
+  ["mean_entropy", "Average hesitation", (v) => v.toFixed(2)],
+  ["max_entropy", "Biggest hesitation", (v) => v.toFixed(2)],
+  ["last_entropy", "Hesitation at the end", (v) => v.toFixed(2)],
+  ["n_tokens", "Answer length (word pieces)", (v) => String(Math.round(v))],
+  ["retrieval_score", "Best passage match (RAG only)", (v) => v.toFixed(1)],
+];
+const ICON = {
+  ok: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M4.6 8.3l2.2 2.2 4.6-4.8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  stop: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5m0-5l-5 5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  dash: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 8h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+};
+
+/* ---------- helpers ---------- */
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ok = (x) => x != null && !Number.isNaN(x);
+const pct = (x, d = 0) => ok(x) ? `${(x * 100).toFixed(d)}%` : "–";
+const pctSmart = (x) => !ok(x) ? "–" : (x > 0.995 || x < 0.005) ? `${(x * 100).toFixed(1)}%` : pct(x);
+const f2 = (x) => ok(x) ? Number(x).toFixed(2) : "–";
+const signed = (x) => ok(x) ? `${x >= 0 ? "+" : "−"}${Math.abs(x).toFixed(2)}` : "–";
+const pval = (p) => !ok(p) ? "–" : p < 0.001 ? `p < 0.001` : `p = ${p.toFixed(p < 0.01 ? 3 : 2)}`;
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+                set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode */ } } };
+let CARD = null;
+const HISTORY = [];
+
+/* ---------- tabs ---------- */
+const TABS = ["ask", "found", "how"];
+function selectTab(name, focus = false) {
+  for (const t of TABS) {
+    const on = t === name;
+    $(`tab-${t}`).setAttribute("aria-selected", on);
+    $(`tab-${t}`).tabIndex = on ? 0 : -1;
+    $(`panel-${t}`).hidden = !on;
+  }
+  if (focus) $(`tab-${name}`).focus();
+  if (location.hash !== `#${name}`) history.replaceState(null, "", `#${name}`);
+  if (name === "found") loadResults();
+}
+TABS.forEach((t, i) => {
+  $(`tab-${t}`).addEventListener("click", () => selectTab(t));
+  $(`tab-${t}`).addEventListener("keydown", (e) => {
+    const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (d) { e.preventDefault(); selectTab(TABS[(i + d + TABS.length) % TABS.length], true); }
+  });
+});
+selectTab(TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "ask");
+
+/* ---------- theme ---------- */
+function applyTheme(t) {
+  if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+  const dark = t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  $("theme").textContent = dark ? "Light mode" : "Dark mode";
+}
+applyTheme(store.get("bluff-theme"));
+$("theme").addEventListener("click", () => {
+  const dark = $("theme").textContent === "Dark mode";
+  store.set("bluff-theme", dark ? "dark" : "light"); applyTheme(dark ? "dark" : "light");
+});
+
+/* ---------- tooltip ---------- */
+const tip = $("tip");
+function showTip(el) {
+  const r = el.getBoundingClientRect();
+  tip.textContent = el.dataset.tip; tip.classList.add("on");
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = `${Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8)}px`;
+  tip.style.top = `${r.top - h - 8 < 8 ? r.bottom + 8 : r.top - h - 8}px`;
+}
+document.addEventListener("mouseover", (e) => { const el = e.target.closest("[data-tip]"); if (el) showTip(el); });
+document.addEventListener("mouseout", (e) => { if (e.target.closest("[data-tip]")) tip.classList.remove("on"); });
+document.addEventListener("focusin", (e) => { const el = e.target.closest("[data-tip]"); if (el) showTip(el); });
+document.addEventListener("focusout", () => tip.classList.remove("on"));
+
+/* ---------- the readout: one scale, two readings ---------- */
+function readout({ words, inside, t, insideName = "linear probe", animate = true }) {
+  const pos = (v) => Math.min(100, Math.max(0, v * 100));
+  const edge = (v) => v < 0.08 ? " edge-l" : v > 0.92 ? " edge-r" : "";
+  const start = animate ? 0 : null;
+  const hasWords = ok(words);
+  const lo = hasWords ? Math.min(words, inside) : inside, hi = hasWords ? Math.max(words, inside) : inside;
+  const id = `ro${Math.random().toString(36).slice(2, 8)}`;
+  const html = `<div class="readout" id="${id}" role="img" aria-label="Chance the answer is wrong:
+      ${hasWords ? `judged from its words ${pctSmart(words)}, ` : ""}judged from its inside
+      ${pctSmart(inside)}. The guard's line is ${pct(t)}.">
+    <div class="readout-title"><span>Chance the answer is wrong</span></div>
+    <div class="scale">
+      <div class="base"></div>
+      <div class="zone" style="left:${pos(t)}%"></div>
+      ${hasWords ? `<div class="gap" data-l="${pos(lo)}" data-w="${pos(hi) - pos(lo)}"
+        style="left:${start ?? pos(lo)}%;width:${start ?? (pos(hi) - pos(lo))}%"></div>` : ""}
+      <div class="guard" style="left:${pos(t)}%"><span>guard's line ${pct(t)}</span></div>
+      ${hasWords ? `<div class="mark says" data-x="${pos(words)}" style="left:${start ?? pos(words)}%"></div>
+        <div class="mlabel says${edge(words)}" data-x="${pos(words)}" style="left:${start ?? pos(words)}%">
+          Its words <b>${pctSmart(words)}</b></div>` : ""}
+      <div class="mark knows" data-x="${pos(inside)}" style="left:${start ?? pos(inside)}%"></div>
+      <div class="mlabel knows${edge(inside)}" data-x="${pos(inside)}" style="left:${start ?? pos(inside)}%">
+        Its inside <b>${pctSmart(inside)}</b> <span>(${esc(insideName)})</span></div>
     </div>
-    <div class="scale"><span>0%: surely right → answers</span><span>P(wrong) =
-      <b>${pct(p, 1)}</b></span><span>blocks ← 100%: surely wrong</span></div>
-    <p class="muted">Why ${pct(t)}? A confident wrong answer is counted as 3× worse than a needless
-      refusal, so refusing pays off once the chance of being wrong passes 1 / (1 + 3) = 25%.</p>
+    <div class="ticks"><span>0% surely right</span><span>50%</span><span>100% surely wrong</span></div>
+  </div>`;
+  return { html, id };
+}
+function settle(id) {  // the one orchestrated motion: the readings slide to their places
+  const root = $(id); if (!root) return;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    root.querySelectorAll("[data-x]").forEach((el) => { el.style.left = `${el.dataset.x}%`; });
+    const g = root.querySelector(".gap");
+    if (g) { g.style.left = `${g.dataset.l}%`; g.style.width = `${g.dataset.w}%`; }
+  }));
+}
 
-    ${detectorsHtml(r)}
-    ${tokensHtml(r)}
-    ${signalsHtml(r)}
+/* the empty state shows a real example from the test set (no model call) */
+$("demo-scale").innerHTML = readout({ words: 0.18, inside: 0.9986, t: 0.25, animate: false }).html +
+  `<p class="small muted" style="margin-top:12px">A real test answer: asked for Kenya's largest
+   inland port city, the model said "Mombasa" (it is Kisumu). Its words looked 18% likely to be
+   wrong; its inside, 99.9%. The guard would have blocked it.</p>`;
 
-    <details><summary>Call details (the audit record)</summary><dl>
-      <dt>Question</dt><dd>${esc(question)}</dd>
-      <dt>Served detector</dt><dd>${esc(dn)} (${esc(r.detector)}), variant ${esc(r.variant)}</dd>
-      <dt>Model version</dt><dd>${esc(r.model_version)}</dd>
-      <dt>Time taken</dt><dd>${(r.latency_ms / 1000).toFixed(1)} s</dd>
-      <dt>Request id</dt><dd>${esc(r.request_id)}</dd>
-    </dl></details>`;
+/* ---------- ask ---------- */
+for (const [kind, text] of EXAMPLES) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "ex";
+  b.innerHTML = `<b>${esc(kind)}</b>${esc(text)}`;
+  b.onclick = () => { $("q").value = text; ask(); };
+  $("examples").appendChild(b);
+}
+$("ask").addEventListener("submit", (e) => { e.preventDefault(); ask(); });
 
-  history.unshift({ question, said, blocked, p, ms: r.latency_ms });
-  $("history").innerHTML = history.map((h) => `<tr><td>${esc(h.question)}</td>
-    <td>${h.said == null ? '<span class="muted">hidden</span>' : esc(h.said)}</td>
-    <td class="${h.blocked ? "like-wrong" : "like-right"}">${h.blocked ? "blocked" : "answered"}</td>
-    <td class="n">${pct(h.p)}</td><td class="n">${(h.ms / 1000).toFixed(1)} s</td></tr>`).join("");
+async function ask() {
+  const question = $("q").value.trim();
+  if (question.length < 3) { $("q").focus(); return; }
+  $("go").disabled = true;
+  document.querySelectorAll(".ex").forEach((b) => { b.disabled = true; });
+  $("intro").hidden = true;
+  const t0 = Date.now();
+  const cpu = CARD && CARD.backend === "hf" && /cpu/i.test(String(CARD.device));
+  $("result").innerHTML = `<div class="waiting">
+      <div class="said">Asking the model</div>
+      <div class="answer" style="margin:0">${esc(question)}</div>
+      <div class="clock" id="clock">0 s</div>
+      <div class="indet"></div>
+      <p class="small muted" style="margin:0">${cpu ? `The model is running on this laptop's
+        processor, so each answer takes 20 to 40 seconds (on a GPU it takes under a second).`
+        : "Writing the answer, reading its hidden state, then scoring it."}</p></div>`;
+  const timer = setInterval(() => { const c = $("clock");
+    if (c) c.textContent = `${Math.round((Date.now() - t0) / 1000)} s`; }, 500);
+  try {
+    const res = await fetch("/v1/ask", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, reveal: $("reveal").checked }) });
+    const r = await res.json();
+    if (!res.ok) throw new Error(res.status === 503 ? "The model is still loading. Try again in a minute."
+      : r.detail ? (typeof r.detail === "string" ? r.detail : "The question was not accepted (3 to 500 characters).") : res.statusText);
+    HISTORY.unshift({ question, r });
+    renderHistory();
+    showResult(question, r, true);
+  } catch (e) {
+    $("result").innerHTML = `<p class="error">${esc(e.message === "Failed to fetch"
+      ? "The API is not responding. Check that the server is still running." : e.message)}</p>`;
+  } finally {
+    clearInterval(timer);
+    $("go").disabled = false;
+    document.querySelectorAll(".ex").forEach((b) => { b.disabled = false; });
+  }
+}
+
+function wordsReading(r) {
+  const a = r.all_detectors || {};
+  const v = ["logreg", "xgboost"].filter((k) => k in a).map((k) => a[k]);
+  return v.length ? v.reduce((x, y) => x + y) / v.length : null;
+}
+
+function showResult(question, r, animate) {
+  const t = r.threshold, inside = r.bluff_score, words = wordsReading(r);
+  const blocked = r.verdict === "abstain";
+  const said = blocked ? r.withheld_answer : r.answer;
+  const bluff = blocked && ok(words) && words <= t;
+  const dn = DET[r.detector]?.name.toLowerCase() || r.detector;
+  const status = blocked
+    ? `<p class="status stop">${ICON.stop}${bluff ? "Blocked: bluff caught" : "Blocked"}</p>`
+    : `<p class="status ok">${ICON.ok}Answered</p>`;
+  const head = blocked
+    ? (said != null
+        ? `<p class="said">It was going to say</p><p class="answer withheld">${esc(said)}</p>`
+        : `<p class="said">The answer is hidden</p>`) +
+      `<p class="reply">The guard replied instead: <q>I'm not confident enough to answer that.</q></p>`
+    : `<p class="said">The model answered</p><p class="answer">${esc(said)}</p><div style="height:14px"></div>`;
+  let explain;
+  if (ok(words)) {
+    const wTxt = `Judged by its words alone, the chance this answer is wrong is <b>${pctSmart(words)}</b>.`;
+    const iTxt = `Its hidden state puts it at <b>${pctSmart(inside)}</b>.`;
+    explain = bluff
+      ? `${wTxt} ${iTxt} It sounded sure, but inside it was not, so the guard blocked it.`
+      : blocked ? `${wTxt} ${iTxt} The inside reading is above the guard's line of ${pct(t)}, so the guard blocked it.`
+      : `${wTxt} ${iTxt} That is below the guard's line of ${pct(t)}, so the answer went through.`;
+  } else {
+    explain = `The ${esc(dn)} puts the chance this answer is wrong at <b>${pctSmart(inside)}</b>,
+      ${blocked ? "above" : "below"} the guard's line of ${pct(t)}.`;
+  }
+  const ro = readout({ words, inside, t, insideName: dn, animate });
+  $("result").innerHTML = `${status}${head}${ro.html}<p class="explain">${explain}</p>
+    ${wordsHtml(r)}
+    <div class="more-wrap">
+      ${passagesHtml(r)}
+      ${detectorsHtml(r)}
+      ${signalsHtml(r)}
+      <details class="more"><summary>Audit record<small>what the API logged</small></summary>
+        <div class="body"><dl class="kv">
+          <dt>Question</dt><dd>${esc(question)}</dd>
+          <dt>Model version</dt><dd>${esc(VARIANTS[r.variant]?.[0] || r.variant)} (${esc(r.variant)})</dd>
+          <dt>Detector</dt><dd>${esc(r.detector)}, ${esc(r.model_version)}</dd>
+          <dt>Decision</dt><dd>${esc(r.verdict)}</dd>
+          <dt>Time taken</dt><dd>${(r.latency_ms / 1000).toFixed(1)} s</dd>
+          <dt>Request id</dt><dd>${esc(r.request_id)}</dd>
+        </dl></div></details>
+    </div>`;
+  $("intro").hidden = true;
+  if (animate) settle(ro.id);
+}
+
+function wordsHtml(r) {
+  if (!r.tokens || !r.tokens.length) {
+    return r.verdict === "abstain" ? `<p class="section-h">Word by word</p><p class="small muted">Hidden,
+      because the guard blocked this answer. Tick "still show what the model was going to say" to
+      see it.</p>` : "";
+  }
+  const chips = r.tokens.map((x) => {
+    const cls = x.prob >= 0.8 ? "" : x.prob >= 0.5 ? " mid" : " lo";
+    const shown = x.text.replace(/\n/g, "↵") || "·";
+    return `<span class="w${cls}" tabindex="0" data-tip="${esc(shown)}: ${pct(x.prob, 1)} sure, hesitation ${x.entropy.toFixed(2)}">
+      <span class="t">${esc(shown)}</span><span class="p">${pct(x.prob)}</span></span>`; }).join("");
+  return `<p class="section-h">How sure it was of each word</p><div class="words">${chips}</div>
+    <div class="key"><span><i style="background:var(--rule)"></i>80% or more</span>
+      <span><i style="background:color-mix(in srgb, var(--says) 45%, var(--rule))"></i>50 to 80%</span>
+      <span><i style="background:var(--says)"></i>under 50%</span></div>
+    <p class="small muted" style="margin-top:8px">A bluff usually looks calm here: every word
+      stated with high confidence. That is why judging by the words alone misses it.</p>`;
+}
+
+function passagesHtml(r) {
+  if (!r.passages || !r.passages.length) return "";
+  return `<details class="more"><summary>Passages it was shown<small>${r.passages.length} from the
+    Kenyan documents</small></summary><div class="body">
+    ${r.passages.map((p) => `<div class="passage"><b>${esc(p.id)} (match ${p.score.toFixed(1)})</b>${esc(p.text)}</div>`).join("")}
+    </div></details>`;
 }
 
 function detectorsHtml(r) {
-  const all = r.all_detectors || {};
-  const names = Object.keys(DET).filter((n) => n in all);
+  const a = r.all_detectors || {};
+  const names = Object.keys(DET).filter((n) => n in a);
   if (!names.length) return "";
-  const avg = (list) => { const v = list.filter((n) => n in all).map((n) => all[n]);
-                          return v.length ? v.reduce((a, b) => a + b) / v.length : null; };
-  const out = avg(OUTSIDE), ins = avg(INSIDE);
-  let note = "Inside and outside agree on this answer.";
-  if (out != null && ins != null && ins - out > 0.25)
-    note = `<b>The words sound surer than the model's inside is.</b> The outside detectors see
-      a fairly confident answer (${pct(out)} wrong), but the probes reading the hidden state see
-      ${pct(ins)}. Doubt that the confidence numbers miss is the pattern this project calls
-      <b>silent knowing</b>.`;
-  else if (out != null && ins != null && out - ins > 0.25)
-    note = `The words sound unsure (outside ${pct(out)}), but the model's inside looks more
-      confident (${pct(ins)}).`;
   const rows = names.map((n) => `<div class="drow">
-      <div class="name">${DET[n].name}${n === r.detector ? '<span class="tag">used by the guard</span>' : ""}
-        <small>${DET[n].reads}</small></div>
-      <div class="bar"><div class="fill" style="width:${all[n] * 100}%;background:${colour(all[n], r.threshold)}"></div>
-        <div class="line" style="left:${r.threshold * 100}%"></div></div>
-      <div class="num">${pct(all[n])}</div></div>`).join("");
-  return `<h3>Inside vs outside: what all four detectors say</h3>
-    <p class="muted">Each bar is one detector's P(wrong) for this answer; the black mark is the
-      guard's line. Only the tagged detector decides; the others are shown for comparison.</p>
-    <div class="rows">${rows}</div><div class="note">${note}</div>`;
-}
-
-function tokensHtml(r) {
-  if (!r.tokens || !r.tokens.length) {
-    return r.verdict === "abstain" ? `<h3>Word by word</h3><p class="muted">Hidden, because the
-      guard blocked this answer. Tick "show what the model would have said" to see it.</p>` : "";
-  }
-  const chips = r.tokens.map((t) => {
-    const cls = t.prob >= 0.8 ? "hi" : t.prob >= 0.5 ? "mid" : "lo";
-    const shown = t.text.replace(/\n/g, "↵") || "·";
-    return `<div class="tok ${cls}" title="probability ${pct(t.prob, 1)}, hesitation ${t.entropy.toFixed(2)}">
-      <span class="w">${esc(shown)}</span><span class="p">${pct(t.prob)}</span></div>`; }).join("");
-  return `<h3>Word by word: how sure the model was of each piece of its answer</h3>
-    <div class="tokens">${chips}</div>
-    <div class="legend"><span><i class="hi"></i>80% or more</span><span><i class="mid"></i>50–80%</span>
-      <span><i class="lo"></i>under 50%</span></div>
-    <p class="muted">A bluff often looks like this row of green: every word stated with high
-      confidence. That is why the outside detectors can miss it.</p>`;
+      <div class="name">${DET[n].name}${n === r.detector ? '<span class="served">decides</span>' : ""}
+        <small>reads ${DET[n].reads}</small></div>
+      <div class="bar"><div class="fill ${DET[n].side}" style="width:${a[n] * 100}%"></div>
+        <div class="g" style="left:${r.threshold * 100}%"></div></div>
+      <div class="v num">${pctSmart(a[n])}</div></div>`).join("");
+  return `<details class="more"><summary>All four detectors<small>the words reading is the
+    average of the first two</small></summary><div class="body">${rows}
+    <p class="small muted" style="margin-top:8px">Each bar is one detector's chance this answer
+    is wrong; the dashed line is the guard's line. Only the linear probe decides.</p></div></details>`;
 }
 
 function signalsHtml(r) {
   const s = r.signals || {}, ref = CARD?.signal_reference || {};
-  if (!Object.keys(s).length) return "";
-  const rows = SIGNALS.filter(([k]) => k in s).map(([k, label, help, fmt]) => {
+  const keys = SIGNALS.filter(([k]) => k in s && !(k === "retrieval_score" && !CARD?.retrieval));
+  if (!keys.length) return "";
+  const rows = keys.map(([k, label, fmt]) => {
     const v = s[k], rf = ref[k];
     let like = "–";
     if (rf && rf.right !== rf.wrong) {
       const right = Math.abs(v - rf.right) <= Math.abs(v - rf.wrong);
-      like = `<span class="${right ? "like-right" : "like-wrong"}">${right ? "a right answer" : "a wrong answer"}</span>`;
+      like = `<span class="${right ? "lean-r" : "lean-w"}">${right ? "a right answer" : "a wrong answer"}</span>`;
     }
-    return `<tr><td><b>${label}</b><br><span class="muted">${help}</span></td>
-      <td class="n">${fmt(v)}</td><td class="n">${rf ? fmt(rf.right) : "–"}</td>
+    return `<tr><td>${label}</td><td class="n">${fmt(v)}</td><td class="n">${rf ? fmt(rf.right) : "–"}</td>
       <td class="n">${rf ? fmt(rf.wrong) : "–"}</td><td>${like}</td></tr>`; }).join("");
-  return `<h3>The 8 confidence numbers (what the outside detectors read)</h3>
-    <div class="scroll"><table><thead><tr><th>Signal</th><th>This answer</th>
-      <th>Typical right answer</th><th>Typical wrong answer</th><th>Closer to</th></tr></thead>
-      <tbody>${rows}</tbody></table></div>
-    <p class="muted">"Typical" = the median over the training questions the model got right, and
-      the ones it got wrong. The eighth number, the retrieval score, is only used by the RAG variant.</p>`;
+  return `<details class="more"><summary>The confidence numbers<small>what the words detectors
+    read</small></summary><div class="body"><div class="scroll"><table>
+    <thead><tr><th>Signal</th><th class="n">This answer</th><th class="n">Typical right</th>
+    <th class="n">Typical wrong</th><th>Closer to</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="small muted" style="margin-top:8px">Typical = the middle value over the training
+    answers that were right, and those that were wrong.</p></div></details>`;
 }
 
+function renderHistory() {
+  $("history").innerHTML = HISTORY.map((h, i) => {
+    const b = h.r.verdict === "abstain", said = b ? h.r.withheld_answer : h.r.answer;
+    return `<li><button type="button" data-i="${i}">
+      <span class="${b ? "ico-stop" : "ico-ok"}" aria-label="${b ? "blocked" : "answered"}">${b ? ICON.stop : ICON.ok}</span>
+      <span><span class="q">${esc(h.question)}</span><span class="a">${said == null ? "hidden" : esc(said)}</span></span>
+      <span class="pv">${pctSmart(h.r.bluff_score)}</span></button></li>`; }).join("");
+  $("history").querySelectorAll("button").forEach((btn) => btn.addEventListener("click", () => {
+    const h = HISTORY[Number(btn.dataset.i)]; $("q").value = h.question; showResult(h.question, h.r, false);
+    $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+  }));
+}
+
+/* ---------- the live detector ---------- */
 function aboutHtml(c) {
-  const test = c.test?.[c.detector]?.trivia_test, beh = c.behaviour?.trivia_test;
-  const ke = c.test?.[c.detector]?.kenya;
-  const dn = DET[c.detector]?.name || c.detector;
-  const where = c.probe_layer != null ? ` It reads layer ${29 + c.probe_layer} of 28 at the
-    ${c.probe_position === "last_answer" ? "last word" : "average of the answer's words"}.` : "";
-  let html = `<p>The guard uses the <b>${esc(dn)}</b> (version ${esc(c.version)}), trained on
-    ${c.n_train ?? "?"} TriviaQA questions on ${esc((c.trained_at || "").slice(0, 10))} and
-    validated on ${c.n_val ?? "?"} more.${where} The numbers below are from
-    ${test ? `${test.n} held-out test questions it never saw` : "its validation set"}.</p>`;
-  const tiles = [];
-  const a = test?.auroc ?? c.validation?.auroc;
-  if (a != null) tiles.push(["Spots wrong answers (AUROC)", f3(a), `Given one right and one wrong
-    answer, it ranks the wrong one higher ${pct(a)} of the time${test?.auroc_lo != null ? `
-    (95% CI ${pct(test.auroc_lo)}–${pct(test.auroc_hi)})` : ""}. A coin flip would be 50%.`]);
-  const e = test?.ece ?? c.validation?.ece;
-  if (e != null) tiles.push(["Calibration error (ECE)", f3(e), `Its P(wrong) is off by about
-    ${(e * 100).toFixed(0)} percentage points on average, so read it as a ranking more than an
-    exact chance.`]);
-  if (test?.wrong_rate != null) tiles.push(["The model is wrong", pct(test.wrong_rate), `On the
-    test questions. A 1.5-billion-parameter model gets most trivia wrong: there is a lot to catch.`]);
-  if (beh?.silent_knowing_rate) { const s = beh.silent_knowing_rate;
-    tiles.push(["Silent knowing (H1)", pct(s.point), `Of the wrong answers it stated
-      confidently, the probe flagged this share as "unsure" inside (95% CI ${pct(s.lo)}–${pct(s.hi)}).`]); }
-  if (beh?.verbalisation_gap) { const g = beh.verbalisation_gap;
-    tiles.push(["Knows more than it says", `+${f3(g.point)}`, `Inside (probe) separates right from
-      wrong at ${f3(beh.internal_detection?.point)}; its own "I don't know" only at
-      ${f3(beh.expressed_detection?.point)} (gap 95% CI ${f3(g.lo)} to ${f3(g.hi)}).`]); }
-  if (ke) tiles.push(["Kenya questions so far", String(ke.n), ke.n < 30 ? `Too few to judge
-    Kenya yet (hypotheses H2 and H5); the students' questions are being added.` : `Kenya AUROC
-    ${f3(ke.auroc)}.`]);
-  html += `<div class="tiles">${tiles.map(([k, v, p]) => `<div class="tile"><div class="k">${k}</div>
-    <div class="v">${v}</div><p>${p}</p></div>`).join("")}</div>`;
-  if (c.test) {
-    const rows = Object.keys(DET).filter((d) => c.test[d]?.trivia_test).map((d) => {
-      const t = c.test[d].trivia_test;
-      return `<tr><td>${DET[d].name}${d === c.detector ? '<span class="tag">served</span>' : ""}
-        <br><span class="muted">${DET[d].reads}</span></td>
-        <td class="n">${f3(t.auroc)}<br><span class="muted">${f3(t.auroc_lo)}–${f3(t.auroc_hi)}</span></td>
-        <td class="n">${f3(t.pr_auc)}</td><td class="n">${f3(t.ece)}</td>
-        <td class="n">${pct(t.risk_at_80)}</td></tr>`; }).join("");
-    html += `<h3>All four detectors on the test questions</h3><div class="scroll"><table>
-      <thead><tr><th>Detector</th><th>AUROC (95% CI)</th><th>PR-AUC</th><th>ECE</th>
-      <th>Wrong when answering its surest 80%</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="muted">PR-AUC: like AUROC, but focused on catching the wrong answers. Last column:
-      if the system answered only the 80% of questions the detector is surest about, the share of
-      those answers that would be wrong (lower is better; answering everything:
-      ${pct(test?.wrong_rate)}).</p>`;
+  const k = c.test?.[c.detector]?.kenya, tr = c.test?.[c.detector]?.trivia_test;
+  return `<dl class="kv">
+    <dt>Version</dt><dd>${esc(c.detector)} ${esc(c.version)}</dd>
+    <dt>Trained on</dt><dd>${c.n_train ?? "?"} trivia questions</dd>
+    <dt>Reads</dt><dd>${c.probe_layer != null ? `layer ${29 + c.probe_layer} of 28, ${c.probe_position === "last_answer" ? "last word" : "averaged over the answer"}` : "–"}</dd>
+    ${tr ? `<dt>AUROC trivia</dt><dd class="num">${f2(tr.auroc)} (n = ${tr.n})</dd>` : ""}
+    ${k ? `<dt>AUROC Kenya</dt><dd class="num">${f2(k.auroc)} (n = ${k.n})</dd>` : ""}
+    <dt>Guard's line</dt><dd class="num">${pct(c.t_abstain)}</dd>
+  </dl>`;
+}
+fetch("/v1/model-card").then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((c) => {
+  CARD = c;
+  const v = VARIANTS[c.variant];
+  $("live-model").textContent = v ? `${v[0]}: ${v[1]}` : c.variant;
+  $("live-det").textContent = `${DET[c.detector]?.name || c.detector}, ${c.version}`;
+  $("live-dev").textContent = c.backend === "fake" ? "no model (test mode)"
+    : /cpu/i.test(String(c.device)) ? "this computer's processor" : String(c.device || "auto");
+  $("live").classList.add("ready");
+  if (c.backend === "fake") $("live").insertAdjacentHTML("beforeend",
+    `<dd class="warn">Test mode: a fake model. Its answers and numbers mean nothing.</dd>`);
+  $("about-body").className = "small";
+  $("about-body").innerHTML = aboutHtml(c);
+}).catch(() => {
+  $("live-model").textContent = "not loaded";
+  $("about-body").textContent = "The detector is still loading, or missing. Reload in a minute.";
+});
+
+/* ---------- findings ---------- */
+let RESULTS = null;
+function loadResults() {
+  if (RESULTS) return;
+  RESULTS = "loading";
+  fetch("/v1/results").then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((d) => {
+    RESULTS = d; $("found-body").innerHTML = findingsHtml(d); renderVariants(d);
+  }).catch(() => {
+    RESULTS = null;
+    $("found-body").innerHTML = `<p class="error">The results file is missing. Run
+      notebooks/results.ipynb to create reports/results_summary.json.</p>`;
+  });
+}
+
+/* a paired-dot chart: every finding here is a pair of numbers */
+function dumbbell({ rows, domain, fmt, a, b, ref, ticks, title, summary }) {
+  const [d0, d1] = domain, x = (v) => ((v - d0) / (d1 - d0)) * 100;
+  const body = rows.map((r) => {
+    const [pa, pb] = [x(r.a), x(r.b)];
+    const ci = (c, cls) => c ? `<div class="ci ${cls}" style="left:${x(c.lo)}%;width:${x(c.hi) - x(c.lo)}%"></div>` : "";
+    const lab = (v, p, other) => `<span class="vlab" style="left:${p}%;${Math.abs(p - other) < 9 ? (p < other ? "transform:translateX(-100%)" : "transform:none") : ""}">${fmt(v)}</span>`;
+    return `<div class="db"><div class="lab">${r.label}${r.sub ? `<small>${r.sub}</small>` : ""}</div>
+      <div class="trk"><div class="line0"></div>
+        ${ref != null ? `<div class="refline" style="left:${x(ref)}%"></div>` : ""}
+        <div class="link" style="left:${Math.min(pa, pb)}%;width:${Math.abs(pb - pa)}%"></div>
+        ${ci(r.aci, a.cls)}${ci(r.bci, b.cls)}
+        <div class="dot ${a.cls}" style="left:${pa}%"></div><div class="dot ${b.cls}" style="left:${pb}%"></div>
+        <span class="dot-hit" style="left:${pa}%" tabindex="0" data-tip="${esc(r.plain)} ${a.name}: ${fmt(r.a)}${r.aci ? ` (95% CI ${fmt(r.aci.lo)} to ${fmt(r.aci.hi)})` : ""}"></span>
+        <span class="dot-hit" style="left:${pb}%" tabindex="0" data-tip="${esc(r.plain)} ${b.name}: ${fmt(r.b)}${r.bci ? ` (95% CI ${fmt(r.bci.lo)} to ${fmt(r.bci.hi)})` : ""}"></span>
+        ${lab(r.a, pa, pb)}${lab(r.b, pb, pa)}
+      </div></div>`; }).join("");
+  const axis = `<div class="axis"><div></div><div class="ax">${ticks.map((t) =>
+    `<span style="left:${x(t[0])}%;${x(t[0]) < 3 ? "transform:none" : x(t[0]) > 97 ? "transform:translateX(-100%)" : ""}">${t[1]}</span>`).join("")}</div></div>`;
+  const table = `<details><summary>Show the numbers</summary><div class="scroll"><table>
+    <thead><tr><th></th><th class="n">${a.name}</th><th class="n">${b.name}</th></tr></thead><tbody>
+    ${rows.map((r) => `<tr><td>${esc(r.plain)}</td><td class="n">${fmt(r.a)}${r.aci ? ` [${fmt(r.aci.lo)}, ${fmt(r.aci.hi)}]` : ""}</td>
+      <td class="n">${fmt(r.b)}${r.bci ? ` [${fmt(r.bci.lo)}, ${fmt(r.bci.hi)}]` : ""}</td></tr>`).join("")}
+    </tbody></table></div></details>`;
+  return `<div class="chart" role="group" aria-label="${esc(summary)}">
+    <p class="chart-title">${title}</p>
+    <div class="legend"><span><i class="sw ${a.cls}"></i>${a.name}</span><span><i class="sw ${b.cls}"></i>${b.name}</span></div>
+    ${body}${axis}${table}</div>`;
+}
+
+function verdictTag(v) {
+  const yes = /^supported/i.test(v);
+  return `<p class="verdict ${yes ? "yes" : "no"}">${yes ? ICON.ok : ICON.dash}${yes ? "Supported" : v.charAt(0).toUpperCase() + v.slice(1)}</p>`;
+}
+function finding(code, title, verdict, text, how, chart) {
+  return `<article class="finding"><div><p class="code">${code}</p><h3>${title}</h3>
+    ${verdict ? verdictTag(verdict) : ""}${text}<p class="how">${how}</p></div><div>${chart}</div></article>`;
+}
+
+function findingsHtml(d) {
+  const P = (x) => pct(x), AU = (x) => f2(x);
+  const h1 = d.h1, h2 = d.h2, h3 = d.h3, h4 = d.h4, h5 = d.h5, fk = d.fakes, g = d.guard;
+  const pTicks = [[0, "0%"], [0.5, "50%"], [1, "100%"]];
+  let html = `<p class="lede">Yes, often it knows. The model is wrong on ${P(h2.wrong_kenya)} of Kenya
+    questions, and of the wrong answers it gave confidently, its hidden state had already flagged
+    ${P(h1.kenya.silent_knowing.point)} as unsure. A probe reading that hidden state spots wrong
+    answers far better than the model's own "I don't know".</p>
+    <p class="lede-sub">Tested on ${d.about.n_trivia_test} held-out trivia questions and
+    ${d.about.n_kenya} Kenya questions the detectors never saw, plus ${d.about.n_fakes} made-up
+    questions and ${d.about.n_twins} UK twins. Model: ${esc(d.about.model)}. The full workings are in
+    notebooks/results.ipynb.</p>`;
+
+  html += finding("H1", "The model knows more than it says", h1.verdict,
+    `<p>Its hidden state separates right from wrong answers better than its own willingness to
+     say "I don't know": AUROC ${AU(h1.trivia.internal.point)} vs ${AU(h1.trivia.expressed.point)} on
+     trivia, ${AU(h1.kenya.internal.point)} vs ${AU(h1.kenya.expressed.point)} on Kenya. On Kenya,
+     ${P(h1.kenya.silent_knowing.point)} of its confident wrong answers were already flagged inside.</p>`,
+    "Internal vs expressed AUROC on the same answers, with bootstrap 95% confidence intervals; the gap is above zero in both sets.",
+    dumbbell({ title: "How well each reading separates right from wrong (AUROC)",
+      summary: "Inside reading beats the model's own I don't know on trivia and Kenya",
+      domain: [0.45, 0.9], fmt: AU, ref: 0.5, ticks: [[0.5, "0.5 coin flip"], [0.7, "0.7"], [0.9, "0.9"]],
+      a: { name: "What it says (its own \"I don't know\")", cls: "says" },
+      b: { name: "What it knows (probe on its inside)", cls: "knows" },
+      rows: [["trivia", "Trivia", `n = ${d.about.n_trivia_test}`], ["kenya", "Kenya", `n = ${d.about.n_kenya}`]].map(([k, l, s]) => ({
+        label: l, sub: s, plain: l + ":", a: h1[k].expressed.point, b: h1[k].internal.point,
+        aci: h1[k].expressed, bci: h1[k].internal })) }));
+
+  html += finding("H2", "It is worse on Kenyan questions", h2.verdict,
+    `<p>Wrong on ${P(h2.wrong_kenya)} of Kenya questions against ${P(h2.wrong_trivia)} of trivia
+     (${pval(h2.fisher_p)}, one-sided). On ${h2.twins_n} matched pairs, the same question asked about
+     Kenya and about the UK, it was wrong ${P(h2.twins_wrong_kenya)} vs ${P(h2.twins_wrong_uk)}:
+     the same direction, but too few pairs to be sure (${pval(h2.twins_p)}).</p>`,
+    "Fisher's exact test on the wrong rates; McNemar's test on the twin pairs.",
+    dumbbell({ title: "Share of answers that were wrong",
+      summary: "Wrong more often on Kenya than on trivia and on UK twins",
+      domain: [0, 1], fmt: P, ticks: pTicks,
+      a: { name: "General or UK", cls: "base" }, b: { name: "Kenya", cls: "comp" },
+      rows: [
+        { label: "Trivia vs Kenya", sub: "all questions", plain: "All questions,", a: h2.wrong_trivia, b: h2.wrong_kenya },
+        { label: "Twin pairs", sub: `${h2.twins_n} matched pairs`, plain: "Twin pairs,", a: h2.twins_wrong_uk, b: h2.twins_wrong_kenya },
+      ] }));
+
+  html += finding("H5", "The detector still works on Kenya", h5.verdict,
+    `<p>Trained only on trivia, the probe's AUROC drops from ${AU(h5.auroc_trivia)} to
+     ${AU(h5.auroc_kenya)} on Kenya questions, a drop of ${AU(h5.drop)}. It travels: what it learned
+     about doubt is not specific to trivia.</p>`,
+    "The drop counts as small below 0.10.",
+    dumbbell({ title: "Linear probe AUROC", summary: "Probe AUROC barely drops from trivia to Kenya",
+      domain: [0.45, 0.9], fmt: AU, ref: 0.5, ticks: [[0.5, "0.5 coin flip"], [0.7, "0.7"], [0.9, "0.9"]],
+      a: { name: "Trivia (like its training)", cls: "base" }, b: { name: "Kenya (never seen)", cls: "comp" },
+      rows: [{ label: "Linear probe", plain: "Linear probe,", a: h5.auroc_trivia, b: h5.auroc_kenya }] }));
+
+  html += finding("Made up", "It invents answers to questions about things that don't exist", null,
+    `<p>Asked normally about ${fk.n} made-up things (a third house of Parliament, a 2,000-shilling
+     note), it invented an answer ${P(fk.invents_normal)} of the time. Offered "I don't know" as an
+     option, it still invented one ${P(fk.invents_offered)} of the time.</p>`,
+    "Every answer to a made-up question counts as wrong unless it declines.",
+    dumbbell({ title: "Share of made-up questions it answered anyway",
+      summary: "Invents answers to almost every made-up question unless offered I don't know",
+      domain: [0, 1], fmt: P, ticks: pTicks,
+      a: { name: "Offered \"I don't know\"", cls: "base" }, b: { name: "Asked normally", cls: "comp" },
+      rows: [{ label: "Made-up questions", sub: `n = ${fk.n}`, plain: "Made-up questions,", a: fk.invents_offered, b: fk.invents_normal }] }));
+
+  if (h4) {
+    const G = h4.groups;
+    html += finding("H4", "Retrieval helps when the answer is there, and does no harm when it isn't", h4.verdict,
+      `<p>H4 predicted that pasting Kenyan documents in front of the question would make the model
+       falsely confident. It didn't. When one of the 3 passages contained the answer
+       (${G[2].n} of ${G[1].n} Kenya questions), wrong answers fell from ${P(G[2].wrong_m0)} to
+       ${P(G[2].wrong_m1)} (${pval(G[2].wrong_p)}). When none did, nothing changed significantly
+       (${P(G[3].wrong_m0)} to ${P(G[3].wrong_m1)}), and on trivia it said "I don't know" far more
+       (${P(G[0].abstain_m0)} to ${P(G[0].abstain_m1)}).</p>`,
+      "M0 vs M1 on the same questions, McNemar's test.",
+      dumbbell({ title: "Share of answers that were wrong, without and with retrieval",
+        summary: "Retrieval halves wrong answers when the answer is in the passages",
+        domain: [0, 1], fmt: P, ticks: pTicks,
+        a: { name: "M0, no documents", cls: "base" }, b: { name: "M1, with 3 passages", cls: "comp" },
+        rows: [
+          { label: "Answer in passages", sub: `Kenya, n = ${G[2].n}`, plain: "Kenya, answer in passages:", a: G[2].wrong_m0, b: G[2].wrong_m1 },
+          { label: "Answer not in passages", sub: `Kenya, n = ${G[3].n}`, plain: "Kenya, answer not in passages:", a: G[3].wrong_m0, b: G[3].wrong_m1 },
+          { label: "Trivia", sub: "documents irrelevant", plain: "Trivia:", a: G[0].wrong_m0, b: G[0].wrong_m1 },
+        ] }));
   }
-  html += `<p class="muted">The guard's line is ${f3(c.t_abstain)} (from a ${c.cost_matrix?.cost_confident_wrong ?? 3}:1
-    cost of a confident wrong answer vs a needless refusal). The probe's separate "unsure" flag,
-    used for the silent-knowing count, is ${f3(c.tau_flag)}: only 10% of right validation answers
-    cross it.</p>`;
+
+  if (h3) {
+    html += finding("H3", "Fine-tuning breaks saying, not knowing", h3.verdict,
+      `<p>After a light fine-tune on Kenyan documents (M2), the model said "I don't know" about half
+       as often: ${P(h3.kenya.abstain_m0)} to ${P(h3.kenya.abstain_m2)} on Kenya,
+       ${P(h3.trivia.abstain_m0)} to ${P(h3.trivia.abstain_m2)} on trivia (${pval(h3.kenya.abstain_p)}).
+       It was not more often right (wrong ${P(h3.kenya.wrong_m0)} to ${P(h3.kenya.wrong_m2)}). On Kenya,
+       what its words reveal fell (${signed(h3.kenya.delta_expressed.point)} AUROC) while what its
+       inside reveals did not change significantly (${signed(h3.kenya.delta_internal.point)}).</p>`,
+      "M0 vs M2 on the same questions: McNemar's test with Holm correction; paired bootstrap on the AUROCs. The growth in the gap is in the predicted direction but not significant.",
+      dumbbell({ title: "Share of answers where it said \"I don't know\" (when offered)",
+        summary: "Fine-tuning halves I don't know on trivia and Kenya",
+        domain: [0, 0.5], fmt: P, ticks: [[0, "0%"], [0.25, "25%"], [0.5, "50%"]],
+        a: { name: "M0, base", cls: "base" }, b: { name: "M2, fine-tuned", cls: "comp" },
+        rows: [
+          { label: "Trivia", sub: `n = ${d.about.n_trivia_test}`, plain: "Trivia,", a: h3.trivia.abstain_m0, b: h3.trivia.abstain_m2 },
+          { label: "Kenya", sub: `n = ${d.about.n_kenya}`, plain: "Kenya,", a: h3.kenya.abstain_m0, b: h3.kenya.abstain_m2 },
+        ] }));
+  }
+
+  // the four versions side by side
+  const vr = d.variants.map((v) => {
+    const n = VARIANTS[v.id] || [v.id, v.label];
+    if (!v.ran) return `<tr class="notrun"><td><b>${n[0]}</b> ${esc(n[1])}</td><td colspan="5">Not run (future work)</td></tr>`;
+    return `<tr><td><b>${n[0]}</b> ${esc(n[1])}</td><td class="n">${P(v.kenya.wrong)}</td>
+      <td class="n">${P(v.kenya.abstain)}</td><td class="n">${f2(v.kenya.probe_auroc)}</td>
+      <td class="n">${P(v.trivia.wrong)}</td><td class="n">${P(v.trivia.abstain)}</td></tr>`; }).join("");
+  html += `<section class="variants"><h3>The four versions side by side</h3>
+    <p class="muted" style="max-width:72ch">"I don't know" is the share of answers where it took
+      that option when offered. AUROC is the linear probe's, each trained on its own version's
+      answers.</p>
+    <div class="scroll"><table><thead><tr><th>Version</th><th class="n">Kenya wrong</th>
+      <th class="n">Kenya "I don't know"</th><th class="n">Kenya AUROC</th><th class="n">Trivia wrong</th>
+      <th class="n">Trivia "I don't know"</th></tr></thead><tbody>${vr}</tbody></table></div></section>`;
+
+  // the guard's trade-off, honestly
+  const prop = (label, v, help) => `<div class="prop"><div class="top"><span>${label}</span><b>${P(v)}</b></div>
+    <div class="bar" role="img" aria-label="${label}: ${P(v)}"><div class="fill" style="width:${v * 100}%"></div></div>
+    ${help ? `<p class="small muted" style="margin:4px 0 0">${help}</p>` : ""}</div>`;
+  html += `<section class="guard-sec"><div><h3>What the guard would do on Kenya questions</h3>
+      <p>With the line at ${P(g.t_abstain)}, the guard catches almost every wrong answer, but on
+      Kenya it also refuses most right ones: it is cautious, because the model is wrong so
+      often. Of the answers it lets through, ${P(g.wrong_let_through)} are still wrong, against
+      ${P(g.wrong_all)} if it answered everything.</p>
+      <p class="how">The line comes from the 3:1 cost of a confident wrong answer vs a refusal. A
+      higher line would answer more and catch less.</p></div>
+    <div class="chart">${prop("Wrong answers caught", g.caught)}${prop("Right answers refused", g.right_lost)}
+      ${prop("Questions refused overall", g.blocked)}${prop("Wrong among the answers it gives", g.wrong_let_through, `${P(g.wrong_all)} without the guard`)}</div></section>`;
+
+  html += `<p class="foot-note">The same Kenya numbers using only the questions written and not
+    edited by people (no AI-written items) are close to these: see section 7 of
+    notebooks/results.ipynb. The UK twins were written with AI help, so the twin comparison has
+    no human-only version.</p>`;
   return html;
 }
 
-$("ask").addEventListener("submit", (e) => { e.preventDefault(); ask(); });
-fetch("/v1/model-card").then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((c) => {
-  CARD = c; $("about-body").outerHTML = `<div id="about-body">${aboutHtml(c)}</div>`;
-}).catch(() => { $("about-body").textContent = "The detector is still loading, or missing."; });
+function renderVariants(d) {
+  const ran = Object.fromEntries((d?.variants || []).map((v) => [v.id, v.ran]));
+  $("vlist").innerHTML = ["m0_base", "m1_rag", "m2_qlora", "m3_rag_qlora"].map((id) => {
+    const [code, name, text] = VARIANTS[id];
+    const state = ran[id] === undefined ? "" : ran[id] ? "run and tested" : "not run";
+    return `<div class="vitem"><div class="vh"><b>${code} ${esc(name)}</b><small>${state}</small></div><p>${esc(text)}</p></div>`;
+  }).join("");
+}
+renderVariants(null);
+fetch("/v1/results").then((r) => r.ok ? r.json() : null).then((d) => { if (d) renderVariants(d); }).catch(() => {});
 </script>
 </body>
 </html>
