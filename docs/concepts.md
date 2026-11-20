@@ -177,6 +177,40 @@ Every detector outputs P(wrong) for every test question; the metrics in section 
 and the rest) are computed from those probabilities. The served probe also gets the live
 threshold: P(wrong) above 0.25 → abstain.
 
+### 2d. How the model "decides" to say "I don't know"
+
+**It doesn't really decide.** There is no separate "do I know this?" step. The model only ever
+does one thing: predict the next word. At every step it gives each possible next word a
+probability and (here, with greedy decoding) picks the most likely one.
+
+**Offered the option**, e.g. "Who is the Commander-in-Chief of Kenya's armed forces? … or reply
+I don't know if you are not sure", the *first word* of its reply might get (illustrative numbers):
+
+| First word | M0 (original) | M2 (fine-tuned) |
+|---|---|---|
+| "I" (as in "I don't know") | **0.40** | 0.15 |
+| "The" (as in "The President") | 0.30 | **0.55** |
+| others ("General", "Uhuru", …) | 0.30 | 0.30 |
+| **It says** | "I don't know" | "The …" |
+
+**Where those probabilities come from.** When a question is familiar, the model's inside points
+strongly to one answer, and that answer gets a high probability. When it is unfamiliar, the inside
+state is weak or mixed: many answers each get a little. During instruction training the model
+learned that in that weak, spread-out situation "I don't know" is the right reply, so "I" becomes
+the most likely first word.
+
+**This is the whole project in one picture:**
+
+- **Knowing** is that weak or mixed state *inside* the model. The probe reads it directly from the
+  1,536 hidden numbers.
+- **Saying** is whether that inside state is strong enough to push "I don't know" to the top of the
+  word choice.
+- **H1 (the gap):** the inside often signals doubt that isn't strong enough to win the word choice,
+  so the model bluffs, but the probe still sees the doubt.
+- **H3 (fine-tuning):** the fine-tuned model's word choice leans towards confident words ("The …"),
+  so the same inside doubt loses the word choice more often. The doubt is still there for the
+  probe; it just doesn't reach the words.
+
 ## 3. RAG, step by step (variant M1)
 
 **Retrieval-Augmented Generation:** look things up, then answer. M0 sits a closed-book exam; M1
@@ -326,17 +360,60 @@ QLoRA only changes how the frozen base is *stored*.
 | Setting | Meaning |
 |---|---|
 | Learning rate 2e-4 | How big each correction step is |
-| 3% warmup, then cosine | Ramp the step size up gently, then lower it smoothly towards zero |
-| Batch 4 × gradient accumulation 4 | Process 4 texts at a time, add up 4 rounds of corrections, update once: a batch of 16 without the memory cost |
-| 1 epoch | One pass over the Kenyan documents |
+| 3% warm-up steps, then cosine | Ramp the step size up gently, then lower it smoothly towards zero |
+| Batch 2 × gradient accumulation 4 | Process 2 texts at a time, add up 4 rounds of corrections, update once: 8 texts per update without the memory cost |
+| 3 epochs | Three passes over the Kenyan documents |
+| Documents cut into 1,024-token windows | Long Acts are split into windows, not truncated, so all of each document is used |
+| LoRA r = 16, alpha 32, on all 7 projection layers | 18.5 million trainable weights, 1.2% of the model |
 | Objective: next-token prediction | Read Kenyan text and learn to predict each next word. It absorbs facts and phrasing; it is **not** taught to answer questions or to say "I don't know". |
 
 That last row is why H3 is interesting: the model may gain knowledge *and* confidence, and lose
 its willingness to abstain. M2 loads the base model in 16-bit and attaches the adapter on top.
 
-**Status:** a template that has never run. Known problem: each document is **cut off at 1,024
-tokens**, which throws away most of a long Act; it must be split into 1,024-token windows before
-training (plan step B8).
+**As run (19–20 November, Kaggle T4):** 26 documents → 106 windows → **42 update steps**, about
+8 minutes. Training loss 2.47 → 2.26 (`reports/m2_qlora/training_log.json`). The adapter is
+saved to the Hugging Face dataset repo and reused by every later M2 or M3 run.
+
+### What fine-tuning did, and why (the H3 result)
+
+**The result.** After the fine-tune, the model says "I don't know" **about half as often**
+(Kenya 28% → 13%, trivia 35% → 20%; McNemar p < 10⁻⁸), yet it is **not more often right**
+(Kenya 73% → 75% wrong, not significant). On Kenya, what its words reveal about its errors falls
+(expressed detection −0.07), while what its inside reveals barely moves (internal −0.03, not
+significant). Saying broke; knowing held.
+
+**Quantisation is not the cause.** The "Q" in QLoRA only stores the frozen 1.5 billion weights in
+4 bits *during training*, so training fits in a free T4's memory, like saving a photo at lower
+quality. When M2 answers questions, the base model runs at normal 16-bit precision. What changes
+the behaviour is the **LoRA adapter**: 18.5 million new weights trained on top of the frozen model.
+
+**What the adapter learned.** Its only task was to predict the next word in Kenyan documents.
+Those documents never say "I don't know": every sentence is a confident statement of fact ("The
+President is the Commander-in-Chief of the Kenya Defence Forces"). So training pulls two ways:
+
+1. **Towards facts.** But 42 short steps over about 80,000 words is far too little to memorise
+   facts, so accuracy did not improve.
+2. **Towards a style:** confident, declarative sentences. A style is much easier to learn than
+   facts, so the model picked it up even in 42 steps.
+
+**What it partly forgot.** The original model learned to say "I don't know" during its
+**instruction training** (the stage that taught it to be a helpful, honest assistant). Training on
+plain documents wears some of those assistant habits away: a known side effect of fine-tuning,
+often called *forgetting*. Research on language models has reported the same pattern: fine-tuning
+on new material can make a model more confident without making it more correct.
+
+**RAG vs fine-tuning, side by side:**
+
+| | RAG (M1) | Fine-tuning (M2) |
+|---|---|---|
+| Where the facts are | In front of the model, in the prompt, at question time | Must be stored in its weights during training |
+| How it answers | Reads and copies from the passage | Recalls from memory, which barely changed |
+| Effect on "I don't know" | Unchanged on Kenya; more often when the passages are useless | Halved: it learned the confident style |
+| Effect on accuracy | Errors halved when the answer is in the passages | No improvement |
+
+In one line: **RAG hands the model the answer; fine-tuning gave it the confidence of someone who
+had studied, without the knowledge.** That makes the fine-tuned model riskier, and the probe,
+which still reads the inside doubt, more useful.
 
 ## 5. Labels: how "right" and "wrong" are decided
 
