@@ -23,14 +23,16 @@ TEMPLATE = ROOT / "notebooks" / "colab_run.ipynb"
 
 VERSIONS = {
     "m0_base": ("M0, the base model", "the model exactly as downloaded",
-                "H1, H2, H5", "~1 hour (new questions only, after a first run: minutes)"),
+                "H1, H2, H5", "~1 hour on a T4 (new questions only, after a first run: minutes)"),
     "m1_rag": ("M1, RAG", "the base model, with the 3 most relevant passages from the Kenyan "
-               "document collection pasted into every prompt", "H4 (vs M0)", "~1–1.5 hours"),
+               "document collection pasted into every prompt", "H4 (vs M0)",
+               "~6 hours on a T4 (the passages make every prompt about 2,000 tokens)"),
     "m2_qlora": ("M2, QLoRA fine-tuned", "the base model plus a small adapter trained on the "
                  "Kenyan fine-tuning documents", "H3 (vs M0)",
-                 "fine-tuning a few minutes + ~1 hour of questions"),
+                 "fine-tuning ~8 minutes + ~1.5 hours of questions"),
     "m3_rag_qlora": ("M3, QLoRA + RAG", "M2's adapter plus M1's retrieval",
-                     "how RAG and fine-tuning combine (cut from the 5-day plan)", "~1–1.5 hours"),
+                     "whether retrieval and fine-tuning help or interfere together (vs M1 and M2)",
+                     "~6 hours on a T4, like M1 (M2's adapter is reused, not trained again)"),
 }
 
 FINETUNE_MD = """## 4b. The fine-tuned adapter (M2 and M3)
@@ -54,6 +56,22 @@ else:
         print(stage, "done")
     save([ADAPTER])
     print("Adapter trained and saved to Hugging Face:", ADAPTER)'''
+
+
+CLEANUP_MD = """## 6b. Finish quickly on Kaggle
+
+After the last cell, Kaggle copies everything in `/kaggle/working` into the run's Output, which
+took over an hour after M2 while the GPU clock kept running. Everything is on Hugging Face by
+now (the cell above raises an error if an upload fails), so the working copy is removed first."""
+
+CLEANUP_CODE = '''if ON_KAGGLE:
+    import shutil
+
+    os.chdir("/kaggle/working")
+    shutil.rmtree(REPO_DIR, ignore_errors=True)
+    print("Working copy removed: the session can end as soon as Kaggle notices the run is done.")
+else:
+    print("Not on Kaggle: nothing to clean up.")'''
 
 
 def title_cell(variant: str) -> str:
@@ -94,6 +112,9 @@ def build(variant: str) -> nbformat.NotebookNode:
                        if c.cell_type == "code" and "snapshot_download(" in c.source)
         cells[restore + 1:restore + 1] = [nbformat.v4.new_markdown_cell(FINETUNE_MD),
                                          nbformat.v4.new_code_cell(FINETUNE_CODE)]
+    last_code = max(i for i, c in enumerate(cells) if c.cell_type == "code")
+    cells[last_code + 1:last_code + 1] = [nbformat.v4.new_markdown_cell(CLEANUP_MD),
+                                         nbformat.v4.new_code_cell(CLEANUP_CODE)]
     for c in cells:
         if c.cell_type == "code":
             c.outputs, c.execution_count = [], None
