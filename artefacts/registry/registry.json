@@ -141,6 +141,32 @@
       "aliases": {
         "champion": 1
       }
+    },
+    "bluff-detector-m3_rag_qlora": {
+      "versions": [
+        {
+          "version": 1,
+          "path": "artefacts/registry/bluff-detector-m3_rag_qlora/v1",
+          "registered_at": 1795158946.6523852,
+          "summary": {
+            "auroc": 0.8228723930018781,
+            "ece": 0.11722347002778102,
+            "pool_gap": 0.18620070625489016
+          },
+          "gates": {
+            "passed": true,
+            "checks": {
+              "pool_gap": true
+            }
+          },
+          "git_sha": "f606e45",
+          "data_sha256": "3f17c98dc72c63828999f0a1c1ba5f23342177fe759cfcbed3a50b6b51e50379",
+          "detector": "probe_linear"
+        }
+      ],
+      "aliases": {
+        "champion": 1
+      }
     }
   }
 }

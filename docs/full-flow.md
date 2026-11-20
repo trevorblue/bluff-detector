@@ -119,7 +119,7 @@ cloned from `colab_run.ipynb` (which stays as it is) by `scripts/make_run_notebo
 | `notebooks/run_m0_base.ipynb` | M0 (H1, H2, H5) | — |
 | `notebooks/run_m1_rag.ipynb` | M1, RAG (H4) | — |
 | `notebooks/run_m2_qlora.ipynb` | M2, QLoRA (H3) | Installs the fine-tuning libraries; trains the adapter **once** (after the leakage audit), saves it to Hugging Face, and reuses it on every later run |
-| `notebooks/run_m3_rag_qlora.ipynb` | M3 (cut) | Reuses M2's adapter; refuses to start if M2 hasn't been trained |
+| `notebooks/run_m3_rag_qlora.ipynb` | M3 | Reuses M2's adapter; refuses to start if M2 hasn't been trained |
 
 Each: open → **Select Kernel → Colab → New Colab Server → GPU → T4** → **Run All** → paste the
 two tokens. **Never edit the `run_*` files by hand:** a fix goes into `colab_run.ipynb`, then
@@ -540,8 +540,18 @@ relevant-material test is on the Kenya questions (the M1 + Kenya run).
     **As it happened:** both ran, M1 first. M1 (RAG) ran on Kaggle on 18–19 November (about six
     hours) and M2 (QLoRA) on 19–20 November (8 minutes of fine-tuning, 42 steps, then the full
     run). Results: H4 not supported (retrieval halves errors when the answer is in the passages and
-    does no harm otherwise), H3 supported ("I don't know" halved, accuracy unchanged). M3 was not
-    run. All in `notebooks/results.ipynb`.
+    does no harm otherwise), H3 supported ("I don't know" halved, accuracy unchanged). All in
+    `notebooks/results.ipynb`.
+
+    **M3 too, after all.** With time left on 20 November, M3 (the M2 adapter plus M1's passages)
+    ran on Kaggle (about 6 hours). `bluff compare` M2 vs M3 and M1 vs M3, and a new M3 section in
+    `results.ipynb`: retrieval still halves errors on the fine-tuned model when the answer is in
+    the passages (62% → 28%) and brings "I don't know" back on Kenya (13% → 27%, about M0's 28%);
+    fine-tuning adds nothing on top of retrieval (Kenya wrong 62% → 61%). The cost: the linear
+    probe travels worst on M3 (Kenya AUROC 0.64, M0 0.73), because it was trained on trivia, where
+    the passages never contain the answer. The stale `m0_base__vs__m1_rag.json` (left over from a
+    smoke run, Kenya n = 7) was regenerated; the H4 numbers in the notebook were computed directly
+    and did not change.
 
 ---
 
@@ -598,7 +608,7 @@ relevant-material test is on the Kenya questions (the M1 + Kenya run).
       trivia). Your questions stay in "This session"; click one to see it again.
     - **What we found:** H1, H2, H5, the made-up questions, H4 and H3, each with its verdict, the
       numbers in words and a paired-dot chart (hover a dot for its value; "Show the numbers" gives
-      the table); then M0–M3 side by side and what the guard would do on Kenya. The numbers come
+      the table), then M3; then M0–M3 side by side and what the guard would do on Kenya. The numbers come
       from `GET /v1/results`, which serves `reports/results_summary.json`, written by the last
       cell of `notebooks/results.ipynb`: re-run the notebook and the page follows.
     - **How it works:** the seven steps, M0–M3, and a glossary.
@@ -644,10 +654,10 @@ The plan above was written on 15 November; this is what was actually delivered o
 | **H1, H2, H5** | ✅ Supported (M0) |
 | **H3** | ✅ Supported (M0 vs M2) |
 | **H4** | ✅ Tested, **not supported** (M0 vs M1): retrieval helps, no false confidence |
-| **M0, M1, M2** | ✅ Run, trained, evaluated, registered |
-| **M3** | ❌ Not run (future work) |
-| **4 detectors** | ✅ For each of M0, M1, M2 |
-| **All metrics** | ✅ Per variant, plus the M0 vs M1 and M0 vs M2 comparisons |
+| **M0, M1, M2, M3** | ✅ Run, trained, evaluated, registered |
+| **M3 result** | ✅ Retrieval repairs what fine-tuning broke; the probe travels worst |
+| **4 detectors** | ✅ For each of M0 to M3 |
+| **All metrics** | ✅ Per variant, plus M0 vs M1, M0 vs M2, and M3 vs M0, M1 and M2 |
 | **Live guard, API, Docker, CI/CD, monitoring** | ✅ Built; demo page redesigned in step 15 |
 | **Report** | ✍️ Yours, in your own words |
 

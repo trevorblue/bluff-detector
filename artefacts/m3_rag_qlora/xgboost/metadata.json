@@ -1,0 +1,40 @@
+{
+  "variant": "m3_rag_qlora",
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": "artefacts/adapters/m2_qlora",
+  "backend": "hf",
+  "layers": [
+    -8,
+    -4
+  ],
+  "positions": [
+    "last_answer",
+    "mean_answer"
+  ],
+  "retrieval": true,
+  "t_abstain": 0.25,
+  "cost_matrix": {
+    "cost_confident_wrong": 3.0,
+    "cost_needless_abstain": 1.0
+  },
+  "git_sha": "f606e45",
+  "data_sha256": "3f17c98dc72c63828999f0a1c1ba5f23342177fe759cfcbed3a50b6b51e50379",
+  "config": "configs/variants/m3_rag_qlora.yaml",
+  "seed": 42,
+  "version": "0.1.0+f606e45",
+  "detector": "xgboost",
+  "input": "summary",
+  "probe_layer": null,
+  "probe_position": null,
+  "tau_flag": 0.8199627876281739,
+  "val": {
+    "auroc": 0.794015522875817,
+    "pr_auc": 0.8928981479224106,
+    "ece": 0.05220492439095602,
+    "aurc": 0.5050279037288057
+  },
+  "n_train": 1013,
+  "n_val": 217,
+  "fit_seconds": 0.15,
+  "trained_at": "2026-11-20T07:14:36"
+}

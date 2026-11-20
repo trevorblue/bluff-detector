@@ -114,8 +114,11 @@ def test_committed_results_summary_has_every_hypothesis():
     from pathlib import Path
 
     summary = json.loads(Path("reports/results_summary.json").read_text())
-    assert {"h1", "h2", "h3", "h4", "h5", "fakes", "guard", "variants"} <= set(summary)
-    assert [v["id"] for v in summary["variants"]][:3] == ["m0_base", "m1_rag", "m2_qlora"]
+    assert {"h1", "h2", "h3", "h4", "h5", "m3", "fakes", "guard", "variants"} <= set(summary)
+    assert [v["id"] for v in summary["variants"]] == ["m0_base", "m1_rag", "m2_qlora",
+                                                      "m3_rag_qlora"]
+    assert all(v["ran"] for v in summary["variants"])
+    assert {"m2_to_m3", "m1_to_m3", "groups"} <= set(summary["m3"])
 
 
 def test_model_card_says_what_is_running(client):

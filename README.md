@@ -35,10 +35,11 @@
 > [!NOTE]
 > **Status: results in (20 November 2026).** `Qwen/Qwen2.5-1.5B-Instruct` answered 1,448 TriviaQA
 > questions and 326 Kenya items (211 real Kenya questions written by four students and the author,
-> 82 questions about things that don't exist, 33 UK twins) as **M0** (base), **M1** (RAG) and
-> **M2** (QLoRA fine-tuned), on free Kaggle and Colab T4 GPUs. **H1, H2, H3 and H5 are supported;
+> 82 questions about things that don't exist, 33 UK twins) as **M0** (base), **M1** (RAG),
+> **M2** (QLoRA fine-tuned) and **M3** (both), on free Kaggle and Colab T4 GPUs. **H1, H2, H3 and H5 are supported;
 > H4 is not.** See [Results](#results) and [`notebooks/results.ipynb`](notebooks/results.ipynb), or
-> the demo page's "What we found" tab. M3 (RAG + fine-tuning) is future work. Every file of the
+> the demo page's "What we found" tab. M3 shows that retrieval repairs what fine-tuning broke, at
+> the cost of a weaker probe on Kenya. Every file of the
 > project, and whether it lives on GitHub or Hugging Face: [docs/where-things-are.md](docs/where-things-are.md).
 
 ## The question
@@ -96,6 +97,7 @@ real examples: **[`notebooks/results.ipynb`](notebooks/results.ipynb)** (runs on
 | **H4** | **Retrieval does not manufacture confidence** | With the answer in the 3 retrieved passages, errors fall **60% → 31%** (McNemar p = 1.5 × 10⁻⁵). Without it, accuracy and "I don't know" don't change significantly; on trivia (irrelevant passages) "I don't know" rises 35% → 88% | ❌ Not supported: RAG helps, without false confidence |
 | — | **Asked about things that don't exist, it invents an answer** | Asked normally it declines only **2%** of 82 fake questions; offered "I don't know", 57% | — |
 | **H3** | **Fine-tuning breaks saying, not knowing** | After a light QLoRA fine-tune (42 steps on 26 Kenyan documents) the model says "I don't know" **half as often** (Kenya 28% → 13%, trivia 35% → 20%; McNemar p < 10⁻⁸) and is **not more often right** (73% → 75% wrong, n.s.). On Kenya, expressed detection falls (−0.070 [−0.13, −0.02]) while internal detection holds (−0.030, CI includes 0); the gap grows (+0.04) but not significantly | ✅ Supported (gap growth not significant) |
+| **M3** | **Documents repair what fine-tuning broke** | Adding the 3 passages to the fine-tuned model (M2 → M3): with the answer in the passages, errors fall **62% → 28%** (McNemar p < 10⁻⁷); on Kenya "I don't know" comes back (**13% → 27%**, p = 0.0001; M0 28%) and expressed detection recovers (+0.16 [0.10, 0.22]). Fine-tuning adds nothing on top of retrieval (M1 → M3, Kenya wrong 62% → 61%). M3 is the most accurate version on Kenya (61% wrong vs M0's 73%), but its linear probe travels worst (Kenya AUROC **0.64** vs M0's 0.73; the words detector holds at 0.79) | — (combination, no hypothesis) |
 
 <p align="center">
   <img src="reports/results_figures/h1_knowing_vs_saying.png" width="49%" alt="H1: internal (probe) AUROC is higher than expressed (abstention) AUROC on both trivia and Kenya.">
@@ -103,6 +105,7 @@ real examples: **[`notebooks/results.ipynb`](notebooks/results.ipynb)** (runs on
   <img src="reports/results_figures/h2_worse_on_kenya.png" width="49%" alt="H2: wrong rate 73% on Kenya vs 64% on trivia; 64% vs 45% on 33 matched UK twins.">
   <img src="reports/results_figures/fakes_invented_answers.png" width="49%" alt="Fake questions: asked normally the model invents an answer 98% of the time; offered 'I don't know', 43%.">
   <img src="reports/results_figures/h3_finetuning.png" width="98%" alt="H3: after fine-tuning, 'I don't know' falls from 35% to 20% on trivia and 28% to 13% on Kenya; on Kenya, expressed detection falls while internal detection holds.">
+  <img src="reports/results_figures/m3_combined.png" width="98%" alt="M3: with the answer in the passages, M1 and M3 are wrong about 30% of the time against about 60% for M0 and M2; on Kenya, M2 says 'I don't know' 13% of the time and M0, M1 and M3 about 28%.">
 </p>
 
 **One question through the system.** *"What is the largest inland port city in Kenya?"* The model
@@ -241,13 +244,13 @@ and audits. Explained in [docs/kenya-questions.md](docs/kenya-questions.md).
 **5. The live guard on a laptop** (CPU, 7.7 GB RAM is enough):
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1   # M0, M1 and M2; then http://127.0.0.1:8000
+powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1   # M0 to M3; then http://127.0.0.1:8000
 ```
 
-It loads **M0, M1 and M2 together from one copy of the model** (M1 adds retrieval, M2 switches
-the fine-tuning adapter on), and the page lets you pick, for each question, **which version
+It loads **M0, M1, M2 and M3 together from one copy of the model** (M1 adds retrieval, M2
+switches the fine-tuning adapter on, M3 does both), and the page lets you pick, for each question, **which version
 answers** and **which of the four detectors decides**. On this laptop M0 and M2 take 15–40 s
-per answer; M1 takes about 8 minutes (measured: 461 s), because its three passages make the prompt about
+per answer; M1 and M3 take about 8 minutes (measured: 461 s), because its three passages make the prompt about
 2,000 tokens, processed twice on the CPU (on a GPU: about 1.5 s).
 
 The demo page has three tabs:
@@ -263,7 +266,7 @@ The demo page has three tabs:
   means for this answer and whether it looks more like a typical right or wrong answer. The side
   panel shows the four detectors' AUROC for the chosen version; click one to let it decide.
 - **What we found**: every hypothesis with its verdict, numbers and a chart, the guard's
-  trade-off, the versions side by side, and **every metric, by version** (M0/M1/M2 switch): each
+  trade-off, the versions side by side, and **every metric, by version** (M0–M3 switch): each
   detector's AUROC with confidence intervals, PR-AUC, ECE, wrong-at-80%-coverage and drop on Kenya;
   the model's behaviour on trivia, Kenya, made-up questions and UK twins; and the four cells as a
   2×2 grid. Served by `GET /v1/results` from `reports/results_summary.json`, which the last cell
@@ -425,8 +428,8 @@ data/kenya/         the Kenya question set (questions.jsonl), the student-file m
                     every change (cleaned/changes.csv); see docs/kenya-questions.md
 data/corpus/        retrieval and fine-tuning corpora (disjoint by document) and sources.yaml
 notebooks/          results.ipynb, analysis.ipynb (M0), analysis_m1_rag.ipynb, analysis_m2_qlora.ipynb,
-                    kenya_questions.ipynb, run_*.ipynb (GPU runners)
-artefacts/          the trained detectors (m0_base, m1_rag, m2_qlora), the registry and the M2
+                    analysis_m3_rag_qlora.ipynb, kenya_questions.ipynb, run_*.ipynb (GPU runners)
+artefacts/          the trained detectors (m0_base to m3_rag_qlora), the registry and the M2
                     adapter (adapters/m2_qlora, with its model card)
 reports/            metrics, per-question scores, summaries, comparisons, charts and
                     results_summary.json (what the demo page's results tab shows)
@@ -463,11 +466,12 @@ Dates, owners and scope cuts are in the [build plan](docs/plan.md).
 - [x] Retrieval corpus (Constitution + 63 Wikipedia articles) → M1 → `bluff compare` (H4)
 - [x] Live guard demo page, laptop serving, request log and drift report
 - [x] Demo page redesign: ask / what we found / how it works, results served from the notebook's summary
-- [x] M0, M1 and M2 served together from one model; any detector can decide; every reading explained; every metric by version
+- [x] M3 (retrieval + fine-tuning) → `bluff compare` M1 vs M3 and M2 vs M3
+- [x] M0 to M3 served together from one model; any detector can decide; every reading explained; every metric by version
 - [x] Fine-tuning corpus + audit → `bluff finetune_qlora` → M2 → `bluff compare` M0 vs M2 (H3)
 - [ ] A second-person human review of the Kenya set, and official sources for every question
 - [ ] LLM judge in `pipeline/label.py`; manual adjudication of `review_sample.jsonl` (label-noise rate)
-- [ ] M3; probe transfer across variants; LSTM over entropy; semantic entropy
+- [ ] Probe transfer across variants; LSTM over entropy; semantic entropy
 
 ## Known limitations
 
@@ -482,6 +486,9 @@ Dates, owners and scope cuts are in the [build plan](docs/plan.md).
   underpowered.
 - **The document collection** covers about half the Kenya questions (103 of 211 have their answer
   in the retrieved passages).
+- **Probes and retrieval:** each probe is trained on trivia, where the passages are irrelevant, so
+  with relevant passages (M1, M3) its Kenya AUROC falls (M3: 0.64). A retrieval system's detector
+  should be trained on questions its documents cover.
 - **Free GPUs:** runs moved between Colab and Kaggle (same T4 and float16; library versions differ
   slightly, recorded in `run_info.json`). On a laptop CPU the demo takes 20–40 s per question and
   computes hidden states in bfloat16, so its scores can differ slightly from the T4's.

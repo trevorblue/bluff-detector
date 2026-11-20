@@ -21,6 +21,7 @@ artefacts/*
 !artefacts/m0_base/
 !artefacts/m1_rag/
 !artefacts/m2_qlora/
+!artefacts/m3_rag_qlora/
 !artefacts/registry/
 !artefacts/adapters/
 artefacts/adapters/*
@@ -33,6 +34,7 @@ data/datasets/*
 !reports/m0_base/
 !reports/m1_rag/
 !reports/m2_qlora/
+!reports/m3_rag_qlora/
 !reports/compare/
 !reports/results_figures/
 !reports/results_summary.json

@@ -665,7 +665,7 @@ const VARIANTS = {
   m0_base: ["M0", "Base", "Base model", "The model as released, nothing added."],
   m1_rag: ["M1", "+ RAG", "Base + retrieval (RAG)", "Three passages from 441 Kenyan document extracts (the Constitution, Wikipedia) are pasted before each question. On this laptop an answer takes about 8 minutes (the passages make the prompt about 2,000 tokens); on a GPU, under 2 seconds."],
   m2_qlora: ["M2", "Fine-tuned", "Fine-tuned (QLoRA)", "A small add-on trained for 42 steps on 26 other Kenyan documents. It says \"I don't know\" about half as often (H3)."],
-  m3_rag_qlora: ["M3", "Both", "Fine-tuned + retrieval", "Both changes together."],
+  m3_rag_qlora: ["M3", "Both", "Fine-tuned + retrieval", "M2's fine-tuned add-on and M1's three passages together. The most accurate on Kenya questions, but the one where the inside reading is least reliable. Like M1, an answer takes about 8 minutes on this laptop."],
   dev_fake: ["Test", "Fake", "Fake test model", "A stand-in that needs no GPU, for tests. Its numbers mean nothing."],
 };
 const SIGNALS = {
@@ -808,12 +808,12 @@ $("demo-scale").innerHTML = readout({ words: 0.14, inside: 0.998, t: 0.25, words
 /* ======================= version and detector choice ======================= */
 function renderVersionControl() {
   const loaded = new Set(LOADED.map((v) => v.id));
-  const ids = ["m0_base", "m1_rag", "m2_qlora"].filter((id) => loaded.has(id) || !loaded.has("dev_fake"));
+  const ids = ["m0_base", "m1_rag", "m2_qlora", "m3_rag_qlora"].filter((id) => loaded.has(id) || !loaded.has("dev_fake"));
   if (loaded.has("dev_fake")) ids.unshift("dev_fake");
   $("vseg").innerHTML = ids.map((id) => {
     const on = loaded.has(id), [code, short] = VARIANTS[id] || [id, ""];
     return `<input type="radio" name="variant" id="v-${id}" value="${id}" ${on ? "" : "disabled"} ${id === CUR_V ? "checked" : ""}>
-      <label for="v-${id}" ${on ? "" : `data-tip="Not loaded on this server. Start it with scripts\\serve_laptop.ps1 to load M0, M1 and M2."`}><b>${code}</b>${esc(short)}</label>`;
+      <label for="v-${id}" ${on ? "" : `data-tip="Not loaded on this server. Start it with scripts\\serve_laptop.ps1 to load M0 to M3."`}><b>${code}</b>${esc(short)}</label>`;
   }).join("");
   $("vseg").querySelectorAll("input").forEach((r) => r.addEventListener("change", () => chooseVariant(r.value)));
 }
@@ -998,7 +998,8 @@ function meansHtml(r, R, card, blocked, bluff, said) {
     time (AUROC ${f2(k.auroc)}, ${auWords(k.auroc)}; trivia ${f2(tr?.auroc)}), and its chances are
     off by about ${pct(k.ece)} on average (ECE). So this is evidence, not proof.` : "";
   const ctx = r.variant === "m1_rag" ? " This version was shown 3 passages before answering; see them below."
-    : r.variant === "m2_qlora" ? " This is the fine-tuned version, which admits not knowing about half as often as M0 (H3)." : "";
+    : r.variant === "m2_qlora" ? " This is the fine-tuned version, which admits not knowing about half as often as M0 (H3)."
+    : r.variant === "m3_rag_qlora" ? " This is the fine-tuned version shown 3 passages (see them below). On Kenya questions its inside reading is the least reliable of the four versions, so lean on the words reading too." : "";
   return `<div class="means"><h4>What this means: ${head}</h4><p>${body}${probes}${ctx}</p>
     ${trust ? `<p class="trust">${trust}</p>` : ""}</div>`;
 }
@@ -1223,6 +1224,30 @@ function findingsHtml(d) {
         rows: [
           { label: "Trivia", sub: `n = ${d.about.n_trivia_test}`, plain: "Trivia,", a: h3.trivia.abstain_m0, b: h3.trivia.abstain_m2 },
           { label: "Kenya", sub: `n = ${d.about.n_kenya}`, plain: "Kenya,", a: h3.kenya.abstain_m0, b: h3.kenya.abstain_m2 },
+        ] }));
+  }
+  if (d.m3) {
+    const G = d.m3.groups, up = d.m3.m2_to_m3.kenya, add = d.m3.m1_to_m3.kenya;
+    const m3v = d.variants.find((v) => v.id === "m3_rag_qlora"), m0v = d.variants.find((v) => v.id === "m0_base");
+    html += finding("M3", "Documents repair what fine-tuning broke", null,
+      `<p>M3 is the fine-tuned model of M2 with the passages of M1. Retrieval still works on it:
+       when the answer was in the passages, wrong answers fell from ${P(G[2].wrong_m2)} (M2) to
+       ${P(G[2].wrong_m3)} (${pval(G[2].wrong_p_m2_m3)}). It also brings back "I don't know" on
+       Kenya, from ${P(up.abstain_a)} to ${P(up.abstain_b)} (${pval(up.abstain_p)}), about M0's level.
+       Fine-tuning adds nothing once the documents are there (Kenya wrong ${P(add.wrong_a)} with
+       M1, ${P(add.wrong_b)} with M3).</p>
+       <p>The cost: on Kenya the linear probe's AUROC falls to ${AU(m3v?.kenya.probe_auroc)}
+       (M0 ${AU(m0v?.kenya.probe_auroc)}). It was trained on trivia, where the passages never
+       contain the answer, so it never learned what the inside looks like when they do.</p>`,
+      "M2 vs M3 on the same questions, McNemar's test. The passages are the same as M1's.",
+      dumbbell({ title: "Share of answers that were wrong, fine-tuned without and with retrieval",
+        summary: "Retrieval halves the fine-tuned model's errors when the answer is in the passages",
+        domain: [0, 1], fmt: P, ticks: P_TICKS,
+        a: { name: "M2, fine-tuned", cls: "base" }, b: { name: "M3, fine-tuned + 3 passages", cls: "comp" },
+        rows: [
+          { label: "Answer in passages", sub: `Kenya, n = ${G[2].n}`, plain: "Kenya, answer in passages:", a: G[2].wrong_m2, b: G[2].wrong_m3 },
+          { label: "Answer not in passages", sub: `Kenya, n = ${G[3].n}`, plain: "Kenya, answer not in passages:", a: G[3].wrong_m2, b: G[3].wrong_m3 },
+          { label: "Trivia", sub: "documents irrelevant", plain: "Trivia:", a: G[0].wrong_m2, b: G[0].wrong_m3 },
         ] }));
   }
 

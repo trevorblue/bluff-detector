@@ -45,7 +45,7 @@ Last checked: 20 November 2026, after the M2 run.
 - `data/processed/leakage_audit.json`: proof that no fine-tuning document is used for retrieval
   or answers a test question (Hugging Face).
 
-### 3. Runs (one folder per variant: `m0_base`, `m1_rag`, `m2_qlora`)
+### 3. Runs (one folder per variant: `m0_base`, `m1_rag`, `m2_qlora`, `m3_rag_qlora`)
 | Folder | Contents | Where |
 |---|---|---|
 | `data/interim/<variant>/` | `generations.jsonl` (4 answers per question), `labels.jsonl` (right/wrong, abstained), `hidden.npz` (hidden states), `run_info.json` (GPU, versions), `review_sample.jsonl` | Hugging Face |
@@ -60,17 +60,17 @@ on Hugging Face and in the registry for the record but are not results.
 ### 4. Models
 - `artefacts/registry/registry.json` + `artefacts/registry/bluff-detector-<variant>/v<N>/`: every
   registered detector version, its metrics, the gates it passed and which version is
-  **@champion**. Now: M0 v2, M1 v1 (v2 is the @challenger), M2 v1.
-- `artefacts/adapters/m2_qlora/`: the M2 adapter, its settings and its training log. Its
+  **@champion**. Now: M0 v2, M1 v1 (v2 is the @challenger), M2 v1, M3 v1.
+- `artefacts/adapters/m2_qlora/`: the M2 adapter (M3 uses it too), its settings and its training log. Its
   [README](../artefacts/adapters/m2_qlora/README.md) is the model card.
 
 ### 5. Comparisons and final results
-- `reports/compare/m0_base__vs__m1_rag.json`, `m0_base__vs__m2_qlora.json`: the paired tests
-  (`bluff compare`).
-- `reports/results_figures/`: the five headline charts in the README.
+- `reports/compare/<a>__vs__<b>.json`: the paired tests (`bluff compare`): M0 vs M1 (H4), M0 vs
+  M2 (H3), and M3 against M0, M1 and M2.
+- `reports/results_figures/`: the headline charts in the README (H1–H5, made-up questions, M3).
 - `notebooks/results.ipynb`: every hypothesis, its numbers and its chart, the notebook to
   demo.
-- `notebooks/analysis.ipynb` (M0), `analysis_m1_rag.ipynb`, `analysis_m2_qlora.ipynb`: the
+- `notebooks/analysis.ipynb` (M0), `analysis_m1_rag.ipynb`, `analysis_m2_qlora.ipynb`, `analysis_m3_rag_qlora.ipynb`: the
   detailed look at one run each (data, detectors, curves, examples).
 
 ### 6. Live system

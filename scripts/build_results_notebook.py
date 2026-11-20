@@ -452,6 +452,133 @@ the drop in abstention more striking, not less.
 
 md("""
 ---
+## M3. Retrieval and fine-tuning together
+
+M3 is M2's fine-tuned model **and** M1's three retrieved passages. Two questions: does retrieval
+still help a fine-tuned model (M2 → M3), and does fine-tuning add anything once the documents
+are there (M1 → M3)? Each pair is compared on the same questions (`bluff compare`, McNemar's
+test with Holm correction, paired bootstrap on the AUROCs). The passages are identical to M1's
+(the same retriever on the same questions), so the H4 split by "answer in the passages" carries
+over.
+""")
+
+code('''
+m2, m3 = load("m2_qlora"), load("m3_rag_qlora")
+cmp_m2m3 = Path("reports/compare/m2_qlora__vs__m3_rag_qlora.json")
+cmp_m1m3 = Path("reports/compare/m1_rag__vs__m3_rag_qlora.json")
+if m3 is None or m1 is None or m2 is None or not cmp_m2m3.exists() or not cmp_m1m3.exists():
+    print("M3 results (or a comparison) not available yet.")
+else:
+    pct = lambda x: f"{100 * x:.0f}%"  # noqa: E731
+    fmt = lambda d: f"{d['point']:+.3f} [{d['lo']:+.2f}, {d['hi']:+.2f}]"  # noqa: E731
+    VERS = [("m0_base", "M0 base"), ("m1_rag", "M1 + RAG"), ("m2_qlora", "M2 + QLoRA"),
+            ("m3_rag_qlora", "M3 RAG + QLoRA")]
+    rows = []
+    for v, label in VERS:
+        mv = json.loads(Path(f"reports/{v}/metrics.json").read_text())
+        for key, name in [("kenya", "Kenya"), ("trivia_test", "Trivia")]:
+            a, dets = mv["abstention"][key], mv["detectors"]
+            rows.append({"version": label, "set": name,
+                         "wrong": pct(dets["probe_linear"]["sets"][key]["wrong_rate"]),
+                         "'I don't know'": pct(a["abstain_rate"]),
+                         "words AUROC (logreg)": round(dets["logreg"]["sets"][key]["auroc"], 3),
+                         "inside AUROC (linear probe)":
+                             round(dets["probe_linear"]["sets"][key]["auroc"], 3),
+                         "gap (H1)": round(a["verbalisation_gap"]["point"], 3)})
+    display(pd.DataFrame(rows).set_index(["set", "version"])
+            .sort_index(level=0, sort_remaining=False))
+
+    rows = []
+    for path, label in [(cmp_m2m3, "M2 -> M3 (add retrieval to the fine-tuned model)"),
+                        (cmp_m1m3, "M1 -> M3 (add fine-tuning to the retrieval model)")]:
+        cc = json.loads(path.read_text())["sets"]
+        for key, name in [("kenya", "Kenya"), ("trivia_test", "Trivia")]:
+            v = cc[key]
+            rows.append({"change": label, "set": name,
+                         "'I don't know'": f"{pct(v['abstain_rate']['a'])} -> "
+                                           f"{pct(v['abstain_rate']['b'])}",
+                         "abstain: p": float(f"{v['mcnemar_abstain']['p_value']:.2g}"),
+                         "wrong": f"{pct(v['wrong_rate']['a'])} -> {pct(v['wrong_rate']['b'])}",
+                         "change in internal (knowing)": fmt(v["delta_internal"]),
+                         "change in expressed (saying)": fmt(v["delta_expressed"]),
+                         "change in gap": fmt(v["delta_gap"])})
+    display(pd.DataFrame(rows).set_index(["change", "set"]))
+
+    # the H4 split again, now with the fine-tuned model: was the answer in the passages?
+    four = m0[["qid", "pool", "split", "y_wrong", "abstained"]]
+    for v, s in [(m1, "m1"), (m2, "m2"), (m3, "m3")]:
+        four = four.merge(v[["qid", "y_wrong", "abstained"]].rename(
+            columns={"y_wrong": f"wrong_{s}", "abstained": f"abstain_{s}"}), on="qid")
+    four = four.rename(columns={"y_wrong": "wrong_m0", "abstained": "abstain_m0"})
+    four["answer in passages"] = four.qid.map(in_passages("m3_rag_qlora"))
+    ken = four.pool == "kenya"
+    groups3 = [("Trivia (documents irrelevant)", (four.pool == "trivia") & (four.split == "test")),
+               ("Kenya, all", ken),
+               ("Kenya, answer IN the 3 passages", ken & four["answer in passages"]),
+               ("Kenya, answer NOT in the passages", ken & ~four["answer in passages"])]
+    rows = []
+    for label, mask in groups3:
+        d_ = four[mask]
+        row = {"set": label, "n": len(d_)}
+        row.update({f"wrong {s.upper()}": pct(d_[f"wrong_{s}"].mean())
+                    for s in ("m0", "m1", "m2", "m3")})
+        row["M2 -> M3 wrong: p"] = float(
+            f"{metrics.mcnemar(d_.wrong_m2.values, d_.wrong_m3.values)['p_value']:.2g}")
+        row.update({f"'I don't know' {s.upper()}": pct(d_[f"abstain_{s}"].mean())
+                    for s in ("m0", "m1", "m2", "m3")})
+        rows.append(row)
+    M3T = pd.DataFrame(rows).set_index("set")
+    display(M3T)
+
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 3.8))
+    x, w = np.arange(4), 0.2
+    cols = [C["trivia"], C["kenya"], C["bad"], C["uk"]]
+    names = ["M0 base", "M1 + RAG", "M2 + QLoRA", "M3 both"]
+    pick = [groups3[2][1], groups3[3][1]]
+    for i, s in enumerate(("m0", "m1", "m2", "m3")):
+        a1.bar(np.arange(2) + (i - 1.5) * w, [four[m][f"wrong_{s}"].mean() for m in pick], w,
+               color=cols[i], label=names[i])
+        a2.bar(i, four[ken][f"abstain_{s}"].mean(), 0.6, color=cols[i])
+    a1.set_xticks(np.arange(2), ["Kenya: answer\\nIN the passages",
+                              "Kenya: answer\\nNOT in the passages"])
+    a1.set_ylim(0, 1)
+    a1.set_ylabel("wrong rate")
+    a1.legend(fontsize=8, ncol=2)
+    a1.set_title("Wrong answers")
+    a2.set_xticks(x, names)
+    a2.set_ylim(0, 0.5)
+    a2.set_title("Kenya: says 'I don't know' (offered the option)")
+    fig.suptitle("M3: retrieval still halves errors and restores 'I don't know' after fine-tuning",
+                 y=1.04)
+    save(fig, "m3_combined")
+    plt.show()
+''')
+
+md("""
+**Reading it.**
+
+- **Retrieval still works on a fine-tuned model.** When the answer is in the passages, M3 is wrong
+  on 28% of those Kenya questions against M2's 62%, the same halving H4 found for M0 → M1. When
+  it isn't, nothing changes significantly.
+- **Retrieval undoes the damage fine-tuning did to "saying".** On Kenya, M2 said "I don't know"
+  13% of the time; with the passages (M3) it is back to 27%, about M0's 28% (p = 0.0001). What its
+  words reveal about its errors recovers too (expressed detection +0.16, CI above 0).
+- **Fine-tuning adds nothing once the documents are there.** M1 → M3 on Kenya: the same wrong rate
+  (62% → 61%) and the same "I don't know" rate (27% → 27%). Its only clear effect is on trivia,
+  where it lowers "I don't know" (88% → 63%), as it did in M2.
+- **The inside reading travels worst here.** With relevant Kenyan passages in the prompt, the
+  linear probe's Kenya AUROC falls to 0.64 (M0 0.73, M1 0.68), while the words detector holds at
+  0.79, and the H1 gap on Kenya disappears (−0.06, CI includes 0). A likely reason: each probe was
+  trained on trivia, where the passages are irrelevant, so it never saw what the hidden state looks
+  like when the passages contain the answer. For a retrieval system, the detector should be trained
+  on questions the documents actually cover.
+
+M3 is therefore the most accurate version on Kenya (61% wrong against M0's 73%), but the one where
+the inside reading is least reliable.
+""")
+
+md("""
+---
 ## 7. The same results without the AI-written or AI-edited items
 
 Because AI-written test items could bias a test of an AI model, the key Kenya numbers again,
@@ -523,6 +650,9 @@ rows = [
     ("H3 Fine-tuning", "'I don't know' halved (Kenya 28% -> 13%, p < 1e-8), accuracy unchanged; "
      "saying fell (expressed -0.07), knowing held (internal -0.03, n.s.)",
      "Supported (gap growth not significant)"),
+    ("M3 Both together", "retrieval on the fine-tuned model halves errors when the answer is in "
+     "the passages and restores 'I don't know' (Kenya 13% -> 27%); fine-tuning adds nothing on "
+     "top of retrieval; the probe travels worst (Kenya AUROC 0.64)", "—"),
 ]
 display(pd.DataFrame(rows, columns=["hypothesis", "result", "verdict"]).set_index("hypothesis"))
 ''')
@@ -630,6 +760,29 @@ if cmp2.exists():
                "delta_expressed": ci(C2[key]["delta_expressed"]),
                "delta_gap": ci(C2[key]["delta_gap"])}
         for key, name in [("trivia_test", "trivia"), ("kenya", "kenya")]}}
+if "M3T" in globals():
+    def change(path):
+        cc = json.loads(path.read_text())["sets"]
+        return {name: {"abstain_a": num(cc[key]["abstain_rate"]["a"]),
+                       "abstain_b": num(cc[key]["abstain_rate"]["b"]),
+                       "abstain_p": num(cc[key]["mcnemar_abstain"]["p_value"]),
+                       "wrong_a": num(cc[key]["wrong_rate"]["a"]),
+                       "wrong_b": num(cc[key]["wrong_rate"]["b"]),
+                       "delta_internal": ci(cc[key]["delta_internal"]),
+                       "delta_expressed": ci(cc[key]["delta_expressed"]),
+                       "delta_gap": ci(cc[key]["delta_gap"])}
+                for key, name in [("trivia_test", "trivia"), ("kenya", "kenya")]}
+    m3g = []
+    for label, mask in groups3:
+        d_ = four[mask]
+        m3g.append({"set": label, "n": int(len(d_)),
+                    **{f"wrong_{s}": num(d_[f"wrong_{s}"].mean())
+                       for s in ("m0", "m1", "m2", "m3")},
+                    **{f"abstain_{s}": num(d_[f"abstain_{s}"].mean())
+                       for s in ("m0", "m1", "m2", "m3")},
+                    "wrong_p_m2_m3": num(metrics.mcnemar(d_.wrong_m2.values,
+                                                         d_.wrong_m3.values)["p_value"])})
+    summary["m3"] = {"m2_to_m3": change(cmp_m2m3), "m1_to_m3": change(cmp_m1m3), "groups": m3g}
 Path("reports/results_summary.json").write_text(json.dumps(summary, indent=1))
 print("wrote reports/results_summary.json with", ", ".join(summary))
 ''')

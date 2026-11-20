@@ -93,7 +93,7 @@ models on the laptop (`qwen3:4b`, `llama3.2`) are also different models.
 | **M0** | Nothing | The model as downloaded |
 | **M1 + RAG** | It gets reading material | Retrieval-augmented generation (section 3) |
 | **M2 + QLoRA** | It is fine-tuned on Kenyan documents | Section 4 |
-| **M3** | Both | Cut from the three-week scope |
+| **M3** | Both | Retrieval and the adapter together (ran 20 November) |
 
 Every variant runs the same pipeline with the same detectors and metrics; only its config file
 differs. That is what makes the comparison fair.
