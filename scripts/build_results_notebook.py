@@ -31,7 +31,7 @@ the saved results (no GPU). Charts are saved to `reports/results_figures/`.
 | H5 | The detector travels | A detector trained on trivia still works on Kenya |
 | — | Fake questions | Does it admit it doesn't know, or invent an answer? |
 | H4 | Retrieval (RAG) | Do Kenyan documents help, or create false confidence? |
-| H3 | Fine-tuning | Does extra training make it bluff more? (not run: future work) |
+| H3 | Fine-tuning | Does extra training make it stop saying "I don't know" while still knowing? |
 """)
 
 code('''
@@ -377,6 +377,81 @@ document collection, a limitation of its size (the Constitution plus 63 Wikipedi
 
 md("""
 ---
+## H3. Does fine-tuning break "saying" but not "knowing"?
+
+M2 is the same model with a small **QLoRA adapter** trained on 26 Kenyan documents (Acts, Kenya
+articles; none of them in M1's collection). H3 predicts that after fine-tuning the model **says
+"I don't know" less** (expressed detection falls) while its **inside still registers its
+uncertainty** (internal detection holds), so the gap between knowing and saying grows.
+Compared pair by pair with M0 on the same questions (`bluff compare`).
+""")
+
+code('''
+cmp2 = Path("reports/compare/m0_base__vs__m2_qlora.json")
+if not cmp2.exists():
+    print("M2 results not available yet.")
+else:
+    C2 = json.loads(cmp2.read_text())["sets"]
+    pct = lambda x: f"{100 * x:.0f}%"  # noqa: E731
+    fmt = lambda d: f"{d['point']:+.3f} [{d['lo']:+.2f}, {d['hi']:+.2f}]"  # noqa: E731
+    rows = []
+    for key, label in [("trivia_test", "Trivia"), ("kenya", "Kenya")]:
+        v = C2[key]
+        rows.append({"set": label, "n": v["n"],
+                     "'I don't know' M0": pct(v["abstain_rate"]["a"]),
+                     "'I don't know' M2": pct(v["abstain_rate"]["b"]),
+                     "abstain: p": float(f"{v['mcnemar_abstain']['p_value']:.2g}"),
+                     "wrong M0": pct(v["wrong_rate"]["a"]), "wrong M2": pct(v["wrong_rate"]["b"]),
+                     "change in internal (knowing)": fmt(v["delta_internal"]),
+                     "change in expressed (saying)": fmt(v["delta_expressed"]),
+                     "change in gap": fmt(v["delta_gap"])})
+    display(pd.DataFrame(rows).set_index("set"))
+
+    M2 = json.loads(Path("reports/m2_qlora/metrics.json").read_text())["abstention"]
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 3.8))
+    x = np.arange(2)
+    a1.bar(x - 0.18, [C2[k]["abstain_rate"]["a"] for k in ("trivia_test", "kenya")], 0.36,
+           color=C["trivia"], label="M0: base")
+    a1.bar(x + 0.18, [C2[k]["abstain_rate"]["b"] for k in ("trivia_test", "kenya")], 0.36,
+           color=C["bad"], label="M2: fine-tuned")
+    a1.set_xticks(x, ["Trivia", "Kenya"])
+    a1.set_ylim(0, 0.5)
+    a1.set_title("Says 'I don't know' (offered the option)")
+    a1.legend()
+    labels = ["internal (knowing)", "expressed (saying)"]
+    keys = ["internal_detection", "expressed_detection"]
+    a2.bar(x - 0.18, [A["kenya"][k]["point"] for k in keys], 0.36, color=C["trivia"], label="M0")
+    a2.bar(x + 0.18, [M2["kenya"][k]["point"] for k in keys], 0.36, color=C["bad"], label="M2")
+    a2.axhline(0.5, ls="--", lw=0.8, color="grey")
+    a2.set_xticks(x, labels)
+    a2.set_ylim(0.4, 0.85)
+    a2.set_title("Kenya: AUROC of knowing vs saying")
+    a2.legend()
+    fig.suptitle("H3: fine-tuning halves 'I don't know'; the inside still knows")
+    save(fig, "h3_finetuning")
+    plt.show()
+
+    log_path = Path("reports/m2_qlora/training_log.json")
+    if log_path.exists():
+        t = json.loads(log_path.read_text())
+        print(f"Fine-tuning: {t['documents']} documents, {t['windows']} windows of 1,024 tokens, "
+              f"{t['epochs']} epochs, {t['steps']} steps; loss {t['loss_per_step'][0]:.2f} -> "
+              f"{t['loss_per_step'][-1]:.2f}")
+''')
+
+md("""
+**Reading it.** After fine-tuning, the model says "I don't know" **about half as often** (Kenya
+28% → 13%, trivia 35% → 20%; McNemar p < 10⁻⁸ after Holm correction), yet it is **not more often
+right** (no significant change in the wrong rate). On Kenya, what its **words** reveal about its
+errors falls significantly (expressed detection −0.07), while what its **inside** reveals does not
+change significantly (internal detection −0.03, CI includes 0): **saying broke, knowing held**,
+as H3 predicts. The gap grows in the predicted direction (+0.04 on Kenya, +0.05 on trivia), but
+those increases are not significant at 95%. The fine-tuning was light (42 steps), which makes
+the drop in abstention more striking, not less.
+""")
+
+md("""
+---
 ## 7. The same results without the AI-written or AI-edited items
 
 Because AI-written test items could bias a test of an AI model, the key Kenya numbers again,
@@ -445,7 +520,9 @@ rows = [
     ("H4 Retrieval",
      "answer in passages: errors halved; not in passages: no false confidence (see H4 table)",
      "Not supported (helps, no false confidence)"),
-    ("H3 Fine-tuning", "built, not run", "Future work"),
+    ("H3 Fine-tuning", "'I don't know' halved (Kenya 28% -> 13%, p < 1e-8), accuracy unchanged; "
+     "saying fell (expressed -0.07), knowing held (internal -0.03, n.s.)",
+     "Supported (gap growth not significant)"),
 ]
 display(pd.DataFrame(rows, columns=["hypothesis", "result", "verdict"]).set_index("hypothesis"))
 ''')

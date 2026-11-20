@@ -35,10 +35,10 @@
 > [!NOTE]
 > **Status: results in (20 November 2026).** `Qwen/Qwen2.5-1.5B-Instruct` answered 1,448 TriviaQA
 > questions and 326 Kenya items (211 real Kenya questions written by four students and the author,
-> 82 questions about things that don't exist, 33 UK twins) as **M0** (base) and **M1** (RAG), on
-> free Kaggle and Colab T4 GPUs. **H1, H2 and H5 are supported; H4 is not.** See
-> [Results](#results) and [`notebooks/results.ipynb`](notebooks/results.ipynb). M2 (fine-tuning,
-> H3) was trained and is being evaluated; M3 is future work.
+> 82 questions about things that don't exist, 33 UK twins) as **M0** (base), **M1** (RAG) and
+> **M2** (QLoRA fine-tuned), on free Kaggle and Colab T4 GPUs. **H1, H2, H3 and H5 are supported;
+> H4 is not.** See [Results](#results) and [`notebooks/results.ipynb`](notebooks/results.ipynb).
+> M3 (RAG + fine-tuning) is future work.
 
 ## The question
 
@@ -94,13 +94,14 @@ real examples: **[`notebooks/results.ipynb`](notebooks/results.ipynb)** (runs on
 | **H5** | **A detector trained on trivia still works on Kenya** | Served linear probe AUROC **0.773** → **0.731** (drop 0.04); all four detectors drop ≤ 0.07 | ✅ Supported (the predicted degradation is small) |
 | **H4** | **Retrieval does not manufacture confidence** | With the answer in the 3 retrieved passages, errors fall **60% → 31%** (McNemar p = 1.5 × 10⁻⁵). Without it, accuracy and "I don't know" don't change significantly; on trivia (irrelevant passages) "I don't know" rises 35% → 88% | ❌ Not supported: RAG helps, without false confidence |
 | — | **Asked about things that don't exist, it invents an answer** | Asked normally it declines only **2%** of 82 fake questions; offered "I don't know", 57% | — |
-| **H3** | Fine-tuning breaks saying, not knowing | M2's QLoRA adapter is trained (42 steps on 26 Kenyan documents); evaluation in progress | ⏳ |
+| **H3** | **Fine-tuning breaks saying, not knowing** | After a light QLoRA fine-tune (42 steps on 26 Kenyan documents) the model says "I don't know" **half as often** (Kenya 28% → 13%, trivia 35% → 20%; McNemar p < 10⁻⁸) and is **not more often right** (73% → 75% wrong, n.s.). On Kenya, expressed detection falls (−0.070 [−0.13, −0.02]) while internal detection holds (−0.030, CI includes 0); the gap grows (+0.04) but not significantly | ✅ Supported (gap growth not significant) |
 
 <p align="center">
   <img src="reports/results_figures/h1_knowing_vs_saying.png" width="49%" alt="H1: internal (probe) AUROC is higher than expressed (abstention) AUROC on both trivia and Kenya.">
   <img src="reports/results_figures/h4_retrieval.png" width="49%" alt="H4: with retrieval, the wrong rate halves on Kenya questions whose answer is in the passages, and barely moves otherwise.">
   <img src="reports/results_figures/h2_worse_on_kenya.png" width="49%" alt="H2: wrong rate 73% on Kenya vs 64% on trivia; 64% vs 45% on 33 matched UK twins.">
   <img src="reports/results_figures/fakes_invented_answers.png" width="49%" alt="Fake questions: asked normally the model invents an answer 98% of the time; offered 'I don't know', 43%.">
+  <img src="reports/results_figures/h3_finetuning.png" width="98%" alt="H3: after fine-tuning, 'I don't know' falls from 35% to 20% on trivia and 28% to 13% on Kenya; on Kenya, expressed detection falls while internal detection holds.">
 </p>
 
 **One question through the system.** *"What is the largest inland port city in Kenya?"* The model
@@ -392,7 +393,7 @@ data/kenya/         the Kenya question set (questions.jsonl), the student-file m
                     every change (cleaned/changes.csv); see docs/kenya-questions.md
 data/corpus/        retrieval and fine-tuning corpora (disjoint by document) and sources.yaml
 notebooks/          results.ipynb, analysis.ipynb, kenya_questions.ipynb, run_*.ipynb (GPU runners)
-artefacts/          the submitted run's trained detectors (m0_base, m1_rag) and the registry
+artefacts/          the submitted run's trained detectors (m0_base, m1_rag, m2_qlora) and the registry
 reports/            metrics, per-question scores, summaries, comparisons and charts
 scripts/            laptop serving, notebook generators
 src/bluff/
@@ -426,8 +427,7 @@ Dates, owners and scope cuts are in the [build plan](docs/plan.md).
 - [x] Both prompt conditions on M0; the four cells and the verbalisation gap (H1, H2, H5)
 - [x] Retrieval corpus (Constitution + 63 Wikipedia articles) → M1 → `bluff compare` (H4)
 - [x] Live guard demo page, laptop serving, request log and drift report
-- [x] Fine-tuning corpus + audit → `bluff finetune_qlora` (M2 adapter trained)
-- [ ] M2 evaluation → `bluff compare` M0 vs M2 (H3)
+- [x] Fine-tuning corpus + audit → `bluff finetune_qlora` → M2 → `bluff compare` M0 vs M2 (H3)
 - [ ] A second-person human review of the Kenya set, and official sources for every question
 - [ ] LLM judge in `pipeline/label.py`; manual adjudication of `review_sample.jsonl` (label-noise rate)
 - [ ] M3; probe transfer across variants; LSTM over entropy; semantic entropy

@@ -115,6 +115,32 @@
         "champion": 1,
         "challenger": 2
       }
+    },
+    "bluff-detector-m2_qlora": {
+      "versions": [
+        {
+          "version": 1,
+          "path": "artefacts/registry/bluff-detector-m2_qlora/v1",
+          "registered_at": 1795133351.118562,
+          "summary": {
+            "auroc": 0.8194871794871794,
+            "ece": 0.13217723478496396,
+            "pool_gap": 0.11774552491533619
+          },
+          "gates": {
+            "passed": true,
+            "checks": {
+              "pool_gap": true
+            }
+          },
+          "git_sha": "4412243",
+          "data_sha256": "3f17c98dc72c63828999f0a1c1ba5f23342177fe759cfcbed3a50b6b51e50379",
+          "detector": "probe_linear"
+        }
+      ],
+      "aliases": {
+        "champion": 1
+      }
     }
   }
 }
