@@ -20,6 +20,13 @@ class AskRequest(BaseModel):
         default=False,
         description="demo only: when the gate abstains, also return what the model would have said",
     )
+    variant: str | None = Field(
+        default=None, max_length=40,
+        description="which model version answers (see GET /v1/variants); default: the server's",
+    )
+    detector: Literal["logreg", "xgboost", "probe_linear", "probe_mlp"] | None = Field(
+        default=None, description="which detector decides; default: the variant's champion",
+    )
 
 
 class Token(BaseModel):

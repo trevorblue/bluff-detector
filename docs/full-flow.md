@@ -602,8 +602,28 @@ relevant-material test is on the Kenya questions (the M1 + Kenya run).
       from `GET /v1/results`, which serves `reports/results_summary.json`, written by the last
       cell of `notebooks/results.ipynb`: re-run the notebook and the page follows.
     - **How it works:** the seven steps, M0–M3, and a glossary.
-    - Light and dark mode, works on a phone. Run M1 or M2 instead of M0 with
-      `scripts\serve_laptop.ps1 -Variant m1_rag` or `-Variant m2_qlora`.
+    - Light and dark mode, works on a phone.
+
+    **Extended the same day**, after the first look:
+    - **M0, M1 and M2 in one demo.** `serve_laptop.ps1` now loads all three (`BLUFF_VARIANTS`).
+      They share ONE copy of the model in memory: M0 and M1 run with the adapter switched off
+      (M1 adds the three passages), M2 with it switched on (`use_adapter` in `backends.py`). The
+      "Model version" buttons pick which one answers each question. Checked: M0 gives identical
+      numbers before and after an M2 question, and M2's word probabilities differ from M0's.
+      **M1 is slow on the laptop** (461 s, about 8 minutes, for one answer: the passages make the prompt
+      about 2,000 tokens, processed twice on the CPU); M0 and M2 take about 15 s.
+    - **Any detector can decide.** The "Detector that decides" list (and the side panel, which
+      shows each detector's trivia and Kenya AUROC for the chosen version) sends `detector` with
+      the question; the guard then uses that detector's chance and line.
+    - **Every reading explained.** Under each answer, "What this means" puts the readings
+      together in plain words (a bluff, unsure inside and out, confident inside and out, or
+      sounds unsure but is confident inside), says whether the two probes agree and how far to
+      trust the deciding detector; "Every reading, explained" gives each detector's chance and
+      each confidence number one sentence about this answer, compared with typical right and
+      wrong answers.
+    - **Every metric, by version** at the bottom of "What we found": each detector's AUROC (with
+      confidence interval), PR-AUC, ECE, wrong-at-80%-coverage and drop on Kenya; the model's
+      behaviour per question set; the four cells as a 2×2 grid; each column explained.
 16. **Claude:** put the real results in the README. **Done**, and on 20 November everything was
     checked and stored: the M2 adapter added to git (with a model card), the M1 and M2 datasets
     exported and uploaded, the 13 analysis charts made for M1 and M2

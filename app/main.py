@@ -6,12 +6,15 @@
     GET  /health    liveness: the process is up
     GET  /ready     readiness: generator and detector are loaded (503 until then)
     GET  /metadata  provenance of the live detector: git SHA, data hash, thresholds
-    GET  /v1/model-card  the live detector's test metrics and typical confidence numbers
+    GET  /v1/variants    the model versions this server answers with (M0, M1, M2...)
+    GET  /v1/model-card  a variant's detectors: test metrics and typical confidence numbers
     GET  /v1/results     the project's headline results, hypothesis by hypothesis, as saved by
                          notebooks/results.ipynb (reports/results_summary.json)
 
 Environment
-    BLUFF_CONFIG        variant config (default configs/variants/dev_fake.yaml)
+    BLUFF_CONFIG        the default variant's config (default configs/variants/dev_fake.yaml)
+    BLUFF_VARIANTS      more variants to serve with the same model, e.g. "m1_rag,m2_qlora";
+                        a request picks one with "variant" (and a detector with "detector")
     BLUFF_ARTEFACT_DIR  detector artefact folder (default: the variant's serving folder)
     BLUFF_MODEL_DIR     optional local folder holding the pinned model's files (instead of
                         downloading it from Hugging Face)
@@ -104,30 +107,72 @@ def model_card(cfg: dict[str, Any], meta: dict[str, Any], art: Path) -> dict[str
     return card
 
 
-def _load_state() -> None:
-    cfg = load_config(os.environ.get("BLUFF_CONFIG", "configs/variants/dev_fake.yaml"))
+def _load_variant(config_path: str, artefact_dir: str | None = None) -> dict[str, Any] | None:
+    """One model version (M0, M1, M2...): its config, its four detectors and its retriever."""
+    cfg = load_config(config_path)
     if os.environ.get("BLUFF_MODEL_DIR"):  # a local copy of the pinned model, e.g. on a laptop
         cfg["model"]["name"], cfg["model"]["revision"] = os.environ["BLUFF_MODEL_DIR"], None
     if os.environ.get("BLUFF_DEVICE"):  # e.g. "cpu": keep the whole model in RAM, no disk offload
         cfg["model"]["device"] = os.environ["BLUFF_DEVICE"]
-    art = Path(os.environ.get("BLUFF_ARTEFACT_DIR") or paths(cfg).serving)
+    art = Path(artefact_dir or paths(cfg).serving)
     if not (art / "detector.joblib").exists():
-        log.error("no detector artefact at %s - run the pipeline first; /ready stays 503", art)
-        return
-    STATE["cfg"] = cfg
-    STATE["detector"] = load_detector(art)
-    STATE["meta"] = read_json(art / "metadata.json")
-    # Every trained detector of this variant, so each answer can be scored "inside vs outside".
-    # They sit next to the served one (artefacts/<variant>/<name>/), from the same training run.
-    STATE["all_detectors"] = {
-        name: load_detector(art.parent / name) for name in DETECTOR_NAMES
-        if (art.parent / name / "detector.joblib").exists()
+        log.error("no detector artefact at %s - run the pipeline first", art)
+        return None
+    meta = read_json(art / "metadata.json")
+    # Every trained detector of this variant, so each answer can be scored "inside vs outside"
+    # and any of them can be chosen to decide. They sit next to the served one
+    # (artefacts/<variant>/<name>/), from the same training run.
+    names = [n for n in DETECTOR_NAMES if (art.parent / n / "detector.joblib").exists()]
+    return {
+        "cfg": cfg, "meta": meta, "detector": load_detector(art),
+        "all_detectors": {n: load_detector(art.parent / n) for n in names},
+        "all_meta": {n: read_json(art.parent / n / "metadata.json") for n in names},
+        "card": model_card(cfg, meta, art),
+        "retriever": build_retriever(cfg),
     }
-    STATE["card"] = model_card(cfg, STATE["meta"], art)
-    STATE["backend"] = build_backend(cfg)  # load once, never per request
-    STATE["retriever"] = build_retriever(cfg)
+
+
+def _same_generator(a: dict[str, Any], b: dict[str, Any]) -> bool:
+    keys = ("backend", "name", "revision", "layers", "positions")
+    return all(a["model"].get(k) == b["model"].get(k) for k in keys)
+
+
+def _load_state() -> None:
+    """Load the default variant (BLUFF_CONFIG) and any others named in BLUFF_VARIANTS.
+
+    Every variant shares ONE copy of the language model: M0 and M1 are the base model (M1 adds
+    retrieval), M2 is the base model with its adapter switched on. So serving M0, M1 and M2
+    together costs one model in memory, not three."""
+    default = _load_variant(os.environ.get("BLUFF_CONFIG", "configs/variants/dev_fake.yaml"),
+                            os.environ.get("BLUFF_ARTEFACT_DIR"))
+    if default is None:
+        log.error("default variant not loaded; /ready stays 503")
+        return
+    variants = {default["cfg"]["variant"]["id"]: default}
+    for vid in [v.strip() for v in os.environ.get("BLUFF_VARIANTS", "").split(",") if v.strip()]:
+        if vid in variants:
+            continue
+        v = _load_variant(f"configs/variants/{vid}.yaml")
+        if v is None:
+            continue
+        if not _same_generator(v["cfg"], default["cfg"]):
+            log.error("variant %s uses a different base model or layers; not loaded", vid)
+            continue
+        variants[vid] = v
+    # The generator is built once, from the variant that needs the adapter if there is one.
+    with_adapter = [v for v in variants.values() if v["cfg"]["model"].get("adapter")]
+    if len({v["cfg"]["model"]["adapter"] for v in with_adapter}) > 1:
+        log.error("more than one adapter requested; only the first is loaded")
+    gen_cfg = (with_adapter[0] if with_adapter else default)["cfg"]
+    STATE["variants"] = variants
+    STATE["default"] = default["cfg"]["variant"]["id"]
+    # The default variant's pieces, under their old names (used by /metadata and the tests).
+    STATE.update(cfg=default["cfg"], detector=default["detector"], meta=default["meta"],
+                 all_detectors=default["all_detectors"], card=default["card"],
+                 retriever=default["retriever"])
+    STATE["backend"] = build_backend(gen_cfg)  # load once, never per request
     STATE["request_log"] = RequestLog(os.environ.get("BLUFF_REQUEST_LOG", "logs/requests.jsonl"))
-    log.info("ready: variant %s, detector %s", cfg["variant"]["id"], STATE["meta"]["detector"])
+    log.info("ready: variants %s (default %s)", ", ".join(variants), STATE["default"])
 
 
 @asynccontextmanager
@@ -167,12 +212,32 @@ def metadata() -> dict[str, Any]:
     return STATE["meta"]
 
 
-@app.get("/v1/model-card")
-def get_model_card() -> dict[str, Any]:
-    """Provenance, thresholds and test metrics of the live detector (for the demo page)."""
-    if "card" not in STATE:
+def _variant(vid: str | None) -> tuple[str, dict[str, Any]]:
+    if "variants" not in STATE:
         raise HTTPException(status_code=503, detail="not ready")
-    return STATE["card"]
+    vid = vid or STATE["default"]
+    if vid not in STATE["variants"]:
+        raise HTTPException(status_code=400, detail=f"variant {vid!r} is not loaded; loaded: "
+                            f"{', '.join(STATE['variants'])}")
+    return vid, STATE["variants"][vid]
+
+
+@app.get("/v1/variants")
+def get_variants() -> list[dict[str, Any]]:
+    """The model versions this server can answer with, and the detectors each one has."""
+    _variant(None)
+    return [{"id": vid, "default": vid == STATE["default"],
+             "description": v["cfg"]["variant"].get("description"),
+             "retrieval": v["retriever"] is not None,
+             "adapter": v["cfg"]["model"].get("adapter"),
+             "served_detector": v["meta"]["detector"], "detectors": list(v["all_detectors"])}
+            for vid, v in STATE["variants"].items()]
+
+
+@app.get("/v1/model-card")
+def get_model_card(variant: str | None = None) -> dict[str, Any]:
+    """Provenance, thresholds and test metrics of a variant's detectors (for the demo page)."""
+    return _variant(variant)[1]["card"]
 
 
 @app.get("/v1/results")
@@ -192,20 +257,25 @@ def get_results() -> dict[str, Any]:
 def ask(req: AskRequest) -> AskResponse:
     # A plain `def`: generation and scoring are CPU/GPU-bound, so FastAPI runs this in a
     # thread pool and the event loop stays free for /health and /ready.
-    if "detector" not in STATE:
-        raise HTTPException(status_code=503, detail="not ready")
+    vid, V = _variant(req.variant)
     start = time.perf_counter()
-    cfg, det, meta = STATE["cfg"], STATE["detector"], STATE["meta"]
+    cfg, meta = V["cfg"], V["meta"]
+    name = req.detector or meta["detector"]  # the served (champion) detector unless chosen
+    if name not in V["all_detectors"]:
+        raise HTTPException(status_code=400, detail=f"detector {name!r} not available for {vid}")
+    det = V["detector"] if name == meta["detector"] else V["all_detectors"][name]
+    det_meta = meta if name == meta["detector"] else V["all_meta"][name]
 
-    retriever = STATE["retriever"]
+    retriever = V["retriever"]
     passages = retriever.search(req.question, cfg["retrieval"]["top_k"]) if retriever else []
     prompt = build_prompt(req.question, "open", 0, [p.text for p in passages])
-    out = STATE["backend"].generate(prompt, question=req.question, condition="open")
+    out = STATE["backend"].generate(prompt, question=req.question, condition="open",
+                                    use_adapter=bool(cfg["model"].get("adapter")))
 
     feats = summary_features(out.token_probs, out.token_entropies, [p.score for p in passages])
     row, hidden = pd.DataFrame([feats]), out.hidden[None, ...]
     p_wrong = float(det.predict_proba_wrong(row, hidden)[0])
-    threshold = meta["t_abstain"]
+    threshold = det_meta.get("t_abstain", meta["t_abstain"])
     v = verdict(p_wrong, threshold, has_sources=bool(passages))
     shown = v != "abstain" or req.reveal  # word-level detail would reveal a blocked answer
     words = out.meta.get("tokens") or [""] * len(out.token_probs)
@@ -220,12 +290,12 @@ def ask(req: AskRequest) -> AskResponse:
         sources=[p.id for p in passages] if v != "abstain" else [],
         passages=[Passage(id=p.id, text=p.text[:600], score=p.score) for p in passages]
         if shown else [],
-        variant=meta["variant"],
-        detector=meta["detector"],
-        model_version=meta["version"],
+        variant=vid,
+        detector=name,
+        model_version=det_meta.get("version", meta["version"]),
         latency_ms=(time.perf_counter() - start) * 1000,
-        all_detectors={name: float(d.predict_proba_wrong(row, hidden)[0])
-                       for name, d in STATE["all_detectors"].items()},
+        all_detectors={n: float(d.predict_proba_wrong(row, hidden)[0])
+                       for n, d in V["all_detectors"].items()},
         signals=feats,
         tokens=[Token(text=w, prob=pr, entropy=e) for w, pr, e in
                 zip(words, out.token_probs, out.token_entropies, strict=False)] if shown else [],
@@ -233,7 +303,7 @@ def ask(req: AskRequest) -> AskResponse:
     STATE["request_log"].write({  # monitoring: `bluff monitor` reads this log
         "request_id": response.request_id, "question": req.question, "verdict": v,
         "answer": out.answer, "bluff_score": p_wrong, "threshold": threshold,
-        "latency_ms": response.latency_ms, "variant": meta["variant"],
-        "detector": meta["detector"], "model_version": meta["version"], "features": feats,
+        "latency_ms": response.latency_ms, "variant": vid,
+        "detector": name, "model_version": response.model_version, "features": feats,
     })
     return response

@@ -127,3 +127,26 @@ def test_model_card_says_what_is_running(client):
 def test_passages_empty_without_retrieval(client):
     body = client.post("/v1/ask", json={"question": "What is the capital of Kenya?"}).json()
     assert body["passages"] == [] and body["sources"] == []
+
+
+def test_variants_lists_the_default(client):
+    vs = client.get("/v1/variants").json()
+    assert [v["id"] for v in vs] == ["dev_fake"] and vs[0]["default"] is True
+    assert set(vs[0]["detectors"]) == {"logreg", "xgboost", "probe_linear", "probe_mlp"}
+    assert client.get("/v1/model-card", params={"variant": "dev_fake"}).json()["variant"]
+
+
+def test_any_detector_can_decide(client):
+    q = {"question": "What is the capital of Kenya?"}
+    for name in ["logreg", "xgboost", "probe_mlp"]:
+        body = client.post("/v1/ask", json={**q, "detector": name}).json()
+        assert body["detector"] == name
+        assert body["bluff_score"] == pytest.approx(body["all_detectors"][name])
+        assert (body["verdict"] == "abstain") == (body["bluff_score"] > body["threshold"])
+
+
+def test_unknown_variant_or_detector_is_refused(client):
+    q = {"question": "What is the capital of Kenya?"}
+    assert client.post("/v1/ask", json={**q, "variant": "m9_none"}).status_code == 400
+    assert client.post("/v1/ask", json={**q, "detector": "oracle"}).status_code == 422
+    assert client.get("/v1/model-card", params={"variant": "m9_none"}).status_code == 400

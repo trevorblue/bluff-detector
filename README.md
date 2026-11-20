@@ -216,7 +216,7 @@ jupyter lab notebooks/results.ipynb                  # or open it in VS Code: al
 synthetic questions with a fake language model. **Its numbers mean nothing scientifically.**
 
 ```bash
-make test                                            # 74 unit, data, integration and API tests
+make test                                            # 77 unit, data, integration and API tests
 bluff all --config configs/variants/dev_fake.yaml    # every pipeline stage
 cat reports/dev_fake/summary.md
 ```
@@ -238,25 +238,36 @@ in `run_info.json`. Step-by-step: [docs/full-flow.md](docs/full-flow.md).
 (mechanical fixes and the repairs, every change logged) and `bluff import-sheet`, then validates
 and audits. Explained in [docs/kenya-questions.md](docs/kenya-questions.md).
 
-**5. The live guard on a laptop** (CPU, 7.7 GB RAM is enough; about 20–40 s per question):
+**5. The live guard on a laptop** (CPU, 7.7 GB RAM is enough):
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1                     # M0, then http://127.0.0.1:8000
-powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1 -Variant m1_rag     # M1 (shows the passages)
-powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1 -Variant m2_qlora   # M2 (loads the adapter)
+powershell -ExecutionPolicy Bypass -File scripts\serve_laptop.ps1   # M0, M1 and M2; then http://127.0.0.1:8000
 ```
+
+It loads **M0, M1 and M2 together from one copy of the model** (M1 adds retrieval, M2 switches
+the fine-tuning adapter on), and the page lets you pick, for each question, **which version
+answers** and **which of the four detectors decides**. On this laptop M0 and M2 take 15–40 s
+per answer; M1 takes about 8 minutes (measured: 461 s), because its three passages make the prompt about
+2,000 tokens, processed twice on the CPU (on a GPU: about 1.5 s).
 
 The demo page has three tabs:
 
 - **Ask the model**: the answer, then two readings of the same answer on one "chance it's
   wrong" scale, what its *words* suggest (the outside detectors) and what its *inside* suggests
-  (the probe), with the guard's line. When the words sound sure but the inside does not, it says
-  "Blocked: bluff caught". Below: the answer word by word, the retrieved passages (M1), all four
-  detectors, the confidence numbers and the audit record. Example questions come from the test set.
-- **What we found**: every hypothesis with its verdict, numbers and a chart, the four model
-  versions side by side, and what the guard would do on the Kenya questions. Served by
-  `GET /v1/results` from `reports/results_summary.json`, which the last cell of
-  `notebooks/results.ipynb` writes, so the page and the notebook show the same numbers.
+  (the probes), with the guard's line. When the words sound sure but the inside does not, it says
+  "Blocked: bluff caught". Then **"What this means"**: one paragraph that puts every reading
+  together (bluff, unsure inside and out, confident inside and out, or sounds unsure but is
+  confident inside), whether the two probes agree, and how far to trust the deciding detector
+  (its Kenya AUROC and calibration error). Then the answer word by word, and **"Every reading,
+  explained"**: each detector's chance and each confidence number, with one sentence on what it
+  means for this answer and whether it looks more like a typical right or wrong answer. The side
+  panel shows the four detectors' AUROC for the chosen version; click one to let it decide.
+- **What we found**: every hypothesis with its verdict, numbers and a chart, the guard's
+  trade-off, the versions side by side, and **every metric, by version** (M0/M1/M2 switch): each
+  detector's AUROC with confidence intervals, PR-AUC, ECE, wrong-at-80%-coverage and drop on Kenya;
+  the model's behaviour on trivia, Kenya, made-up questions and UK twins; and the four cells as a
+  2×2 grid. Served by `GET /v1/results` from `reports/results_summary.json`, which the last cell
+  of `notebooks/results.ipynb` writes, so the page and the notebook show the same numbers.
 - **How it works**: the pipeline, M0–M3 and a glossary.
 
 <p align="center">
@@ -303,8 +314,9 @@ answer text is a placeholder:
 | Endpoint | Purpose |
 |---|---|
 | `GET /` | The demo page: ask the model, what we found, how it works |
-| `POST /v1/ask` | Question in → the model answers → the detector scores it from the model's own internals → `answer`, `answer_with_citation` or `abstain`; also returns every detector's P(wrong), the confidence signals and the answer token by token |
-| `GET /v1/model-card` | The live detector's test metrics, which variant is running (retrieval, adapter, device) and the typical signals of right and wrong training answers |
+| `POST /v1/ask` | Question in → the model answers → the detector scores it from the model's own internals → `answer`, `answer_with_citation` or `abstain`; also returns every detector's P(wrong), the confidence signals, the answer token by token and the retrieved passages. Optional `variant` (which loaded version answers) and `detector` (which detector decides) |
+| `GET /v1/variants` | The model versions this server answers with (`BLUFF_VARIANTS`), sharing one copy of the model |
+| `GET /v1/model-card?variant=` | A version's detectors: test metrics of all four, retrieval, adapter, device, and the typical signals of right and wrong training answers |
 | `GET /v1/results` | The project's headline results, hypothesis by hypothesis (`reports/results_summary.json`) |
 | `GET /health` | Liveness: the process is up |
 | `GET /ready` | Readiness: `503` until the generator and detector are loaded |
@@ -451,6 +463,7 @@ Dates, owners and scope cuts are in the [build plan](docs/plan.md).
 - [x] Retrieval corpus (Constitution + 63 Wikipedia articles) → M1 → `bluff compare` (H4)
 - [x] Live guard demo page, laptop serving, request log and drift report
 - [x] Demo page redesign: ask / what we found / how it works, results served from the notebook's summary
+- [x] M0, M1 and M2 served together from one model; any detector can decide; every reading explained; every metric by version
 - [x] Fine-tuning corpus + audit → `bluff finetune_qlora` → M2 → `bluff compare` M0 vs M2 (H3)
 - [ ] A second-person human review of the Kenya set, and official sources for every question
 - [ ] LLM judge in `pipeline/label.py`; manual adjudication of `review_sample.jsonl` (label-noise rate)

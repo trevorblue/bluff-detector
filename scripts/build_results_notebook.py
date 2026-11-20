@@ -549,6 +549,27 @@ def variant_row(v, label):
         return {"id": v, "label": label, "ran": False}
     mv = json.loads(path.read_text())
     out = {"id": v, "label": label, "ran": True}
+    # every metric of every detector, and the model's behaviour on every question set
+    sets = ["trivia_test", "kenya", "kenya_unanswerable", "western"]
+    out["detectors"] = {
+        det: {"ood_drop": num(dm.get("ood_auroc_drop")), **{
+            st: {"n": x["n"], "wrong": num(x["wrong_rate"]), "auroc": num(x["auroc"]),
+                 "auroc_lo": num(x["auroc_ci"]["lo"]), "auroc_hi": num(x["auroc_ci"]["hi"]),
+                 "pr_auc": num(x["pr_auc"]), "ece": num(x["ece"]), "aurc": num(x["aurc"]),
+                 "risk80": num(x["risk@0.8"])}
+            for st, x in dm["sets"].items() if st in ("trivia_test", "kenya")}}
+        for det, dm in mv["detectors"].items()}
+    out["behaviour"] = {
+        st: {"n": a["n"], "abstain": num(a["abstain_rate"]),
+             "hallucination": num(a["hallucination_rate"]),
+             "inflation": num(a["inflation_rate"]),
+             "silent_knowing": num((a.get("silent_knowing_rate") or {}).get("point")),
+             "internal": num((a.get("internal_detection") or {}).get("point")),
+             "expressed": num((a.get("expressed_detection") or {}).get("point")),
+             "gap": num((a.get("verbalisation_gap") or {}).get("point")),
+             "cells": {k: c["n"] for k, c in a["cells"].items()}}
+        for st, a in mv["abstention"].items() if st in sets}
+    out["latency_ms"] = {k: num(x) for k, x in mv.get("generation_latency_ms", {}).items()}
     for key, name in [("trivia_test", "trivia"), ("kenya", "kenya")]:
         a, d = mv["abstention"][key], mv["detectors"]["probe_linear"]["sets"][key]
         out[name] = {"n": a["n"], "wrong": num(d["wrong_rate"]),

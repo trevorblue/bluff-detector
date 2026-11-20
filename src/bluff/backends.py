@@ -40,7 +40,8 @@ class Backend(Protocol):
     run_info: dict[str, Any]  # model, revision, dtype, device and library versions
 
     def generate(
-        self, prompt: str, *, question: str, condition: str, reference: str | None = None
+        self, prompt: str, *, question: str, condition: str, reference: str | None = None,
+        use_adapter: bool = True,
     ) -> GenerationOutput: ...
 
 
@@ -91,7 +92,8 @@ class FakeBackend:
         return stable_hash(question, 10_000) / 10_000 < rate
 
     def generate(
-        self, prompt: str, *, question: str, condition: str, reference: str | None = None
+        self, prompt: str, *, question: str, condition: str, reference: str | None = None,
+        use_adapter: bool = True,
     ) -> GenerationOutput:
         start = time.perf_counter()
         rng = np.random.default_rng(stable_hash(prompt + condition, 2**32))
@@ -182,6 +184,7 @@ class HFBackend:
             "torch": torch.__version__,
             "transformers": transformers.__version__,
         }
+        self.has_adapter = bool(adapter)
         if adapter:
             from peft import PeftModel
 
@@ -190,8 +193,17 @@ class HFBackend:
         self.model.eval()
 
     def generate(
-        self, prompt: str, *, question: str, condition: str, reference: str | None = None
+        self, prompt: str, *, question: str, condition: str, reference: str | None = None,
+        use_adapter: bool = True,
     ) -> GenerationOutput:
+        """`use_adapter=False` answers with the base model even when an adapter is loaded, so
+        one process can serve M0/M1 (adapter off) and M2 (adapter on) from one copy in memory."""
+        if not use_adapter and self.has_adapter:
+            with self.model.disable_adapter():
+                return self._generate(prompt)
+        return self._generate(prompt)
+
+    def _generate(self, prompt: str) -> GenerationOutput:
         torch = self.torch
         start = time.perf_counter()
         messages = [{"role": "user", "content": prompt}]
