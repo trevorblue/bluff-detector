@@ -17,7 +17,8 @@ Required by the DSA 8401 capstone brief. Edit this as the project evolves.
 | 20 Nov 2026 | Claude Code | The redesigned demo page (three tabs, the "words vs inside" readout, the results tab and `GET /v1/results`); storing every artefact (the M2 adapter in git, M1/M2 dataset exports, M1/M2 analysis notebooks and charts, `docs/where-things-are.md`) | Asked for the redesign and for everything to be stored; reviewed the page |
 | 20 Nov 2026 | Claude Code | Serving M0, M1 and M2 from one model with any detector deciding (`BLUFF_VARIANTS`, `GET /v1/variants`, the adapter switch); plain-language explanations of every reading on each answer; every metric by version on the results tab | Asked for the version and detector choice, the explanations and all the metrics on the page |
 | 20 Nov 2026 | Claude Code | The M3 analysis: the comparisons with M1 and M2, the M3 section of `notebooks/results.ipynb`, `analysis_m3_rag_qlora.ipynb`, M3 on the demo page | Ran M3 on Kaggle; I interpret the results in the report |
-| 20 Nov 2026 | Claude Code | A study guide explaining every result and measurement (`docs/results-explained.md`) | Asked for it to learn from; the report itself, and its interpretation, are in my own words |
+| 20 Nov 2026 | Claude Code | A study guide explaining every result and measurement (`docs/results-explained.md`) | Asked for it to learn from |
+| 21 Nov 2026 | Claude Code | **Drafting the final report** (`docs/report.md` and its PDF) from the saved results, the study guide and the proposal; a fix to the H4 chart's labels | Asked for the report to be written; ran every experiment it reports; I am responsible for its content |
 
 ## The Kenya question set: what is human-written and what is not
 
@@ -39,4 +40,4 @@ results should be reported **with and without** the AI-written items (`author` =
 
 Not AI-generated:
 
-- Experimental results, their interpretation, and the technique justifications in the final report.
+- Experimental results: every number was computed by the pipeline from the model's answers on runs I did; none was written or edited by AI.

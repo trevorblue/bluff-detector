@@ -349,8 +349,8 @@ else:
     print(f"Kenya questions whose answer was in M1's passages: "
           f"{int(both[ken]['answer in passages'].sum())} of {int(ken.sum())}")
     fig, ax = plt.subplots(figsize=(8, 3.6))
-    labels = ["Kenya: answer IN passages", "Kenya: answer NOT in passages",
-              "Trivia (irrelevant)"]
+    labels = ["Kenya: answer\\nIN the passages", "Kenya: answer\\nNOT in the passages",
+              "Trivia\\n(documents irrelevant)"]
     pick = [groups[2][1], groups[3][1], groups[0][1]]
     x = np.arange(3)
     ax.bar(x - 0.18, [both[m].y_wrong.mean() for m in pick], 0.36, color=C["trivia"],
